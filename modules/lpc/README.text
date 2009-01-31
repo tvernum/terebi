@@ -1,0 +1,16 @@
+This is the LPC parser/compiler component of Terebi.
+
+- The parser is generated with JavaCC (http://javacc.dev.java.net)
+- The AST is automatically created by the JJTree component of JavaCC
+
+- The preprocessor is derived from JCPP (http://www.anarres.org/) by Shevek
+  Most of the preprocessor is unchanged from JCPP 1.2.3. 
+  The changes made are: 
+    + Support for newlines embedded within strings (MudOS allows this, but C does not)
+    + Support for MudOS style text blocks (aka heredocs) such as @ENDTEXT ... ENDTEXT
+    + Changes to the ChrootFilesystem to make it work in a way that the LPC parser can use
+  Additional changes may be made in the future.
+
+- Depedencies are managed with Ivy (http://ant.apache.org/ivy)
+  The build file will automatically install ivy into ${HOME}/.ant/ if you don't already have it
+

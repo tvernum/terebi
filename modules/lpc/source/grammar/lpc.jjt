@@ -1,0 +1,706 @@
+/**
+ * An LPC parser targeted at the MudOS / FluffOS dialect
+ * Status: Mostly complete
+ *
+ * Missing: 
+ *          	
+ * 
+ * Differences from FluffOS : 
+ *          Does not parse assignment within logical expression - e.g. "a == 1 && b = atoi(s)"  [ Found 27 occurrences in Dead Souls 2.8.4 ]
+ */
+ 
+options 
+{
+    MULTI=true;
+    NODE_PACKAGE="us.terebi.lang.lpc.parser.ast";
+    NODE_SCOPE_HOOK=true;
+    STATIC=false;
+    TRACK_TOKENS=true;
+    JAVA_UNICODE_ESCAPE=true;
+}
+
+PARSER_BEGIN(Parser)
+
+package us.terebi.lang.lpc.parser.jj ;
+
+import java.util.*;
+import java.io.*;
+import us.terebi.lang.lpc.parser.*;
+
+public class Parser 
+{
+	private boolean _debug = false;
+	private String _printPrefix = "";
+	
+	public void setDebug(boolean debug)
+	{
+		this._debug = debug;
+	}
+	
+    /** DEBUG **/
+    void jjtreeOpenNodeScope(Node n)
+    {
+        if( !_debug )
+        {
+        	return;
+        }
+        if( (n instanceof ASTStatementBlock) )
+        {
+            System.out.println(_printPrefix.replace(' ', '-'));
+        } 
+        System.out.print(_printPrefix);
+        System.out.println("+ OPEN SCOPE: " + n ) ;
+        // + " [This Token:" + getToken(0) + "; Next Token:" + getToken(1) + "]"); 
+        _printPrefix += ((_printPrefix.length() % 6) == 0 ? "| " : "  ");
+
+    }
+
+    void jjtreeCloseNodeScope(Node n)
+    {
+        if( !_debug ) 
+        {
+        	return ;
+        }
+
+        _printPrefix = _printPrefix.substring(0, _printPrefix.length()-2) ;
+        System.out.print(_printPrefix);
+        System.out.print("+CLOSE SCOPE: " + n + " [");
+        Token t = ((SimpleNode)n).jjtGetFirstToken();
+        while( t != null && t != getToken(1) )
+        {
+        	System.out.print(' ');
+        	System.out.print(t.image);
+        	t = t.next;
+        }
+        	System.out.println(" ]");
+        
+        if( (n instanceof ASTDeclaration) || (n instanceof ASTStatement) )
+        {
+            System.out.println(_printPrefix.replace(' ', '-'));
+        } 
+    }
+}
+
+PARSER_END(Parser)
+
+SKIP : { " " | "\t" | "\n" | "\r" 
+     |  <"//" (~["\n","\r"])* ("\n" | "\r" | "\r\n")>
+     |  <"/*" (~["*"])* "*" ("*" | ~["*","/"] (~["*"])* "*")* "/">
+     |  <"#" ([" ","\t"])* "line"> : LINE_DIRECTIVE
+     }
+
+<LINE_DIRECTIVE> SPECIAL_TOKEN: {
+    <LINE_NUMBER : (["0"-"9"])+> 
+    {
+    	ParserState.getState().getLineMapping().mapLine( matchedToken.beginLine, Integer.parseInt(image.toString().trim())-1);
+    }
+ |  <FILE_NAME : <STRING_LITERAL> >
+    {
+    	ParserState.getState().getLineMapping().mapFile( matchedToken.beginLine, image.toString().trim() );
+    }
+}
+<LINE_DIRECTIVE> SKIP: { "\n" : DEFAULT }
+<LINE_DIRECTIVE> MORE: {  "\\\n" | "\\\r\n" | < ~[] > }
+
+TOKEN : {
+    <INTEGER_LITERAL      : <DECIMAL_LITERAL> | <HEXADECIMAL_LITERAL> | <OCTAL_LITERAL> | <BINARY_LITERAL>  >
+ |  <#DECIMAL_LITERAL      : ["0"-"9"] (["0"-"9"])* >
+ |  <#HEXADECIMAL_LITERAL  : "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+ |  <#OCTAL_LITERAL        : "0" (["0"-"7"])+ >
+ |  <#BINARY_LITERAL       : "0b" (["0","1"])+ >
+ |  <FLOAT_LITERAL        : <DECIMAL_LITERAL> "." <DECIMAL_LITERAL> (<EXPONENT>)? | <DECIMAL_LITERAL> <EXPONENT> >
+ |  <#EXPONENT             : "e" (["+","-"])? <DECIMAL_LITERAL> >
+ |  <CHAR_LITERAL         : "'" ( <SINGLE_CHARACTER> | <ESCAPED_CHARACTER> | "\"" ) "'" >
+ |  <STRING_LITERAL       : "\"" ( <SINGLE_CHARACTER> | <ESCAPED_CHARACTER> | "'" )* "\"" >
+ |  <#SINGLE_CHARACTER     : (~["\"","\\","\r","\f"]) >
+ |  <#ESCAPED_CHARACTER    : "\\" ( ~["0"-"7"] | ["0"-"7"] (["0"-"7"])? | ["0"-"3"] ["0"-"7"] ["0"-"7"] ) >
+}
+
+TOKEN : {
+    <IF: "if"> 
+ |  <ELSE: "else"> 
+ |  <WHILE: "while"> 
+ |  <DO: "do"> 
+ |  <FOR: "for"> 
+ |  <FOREACH: "foreach"> 
+ |  <IN: "in"> 
+ |  <CONTINUE: "continue"> 
+ |  <BREAK: "break"> 
+ |  <SWITCH: "switch"> 
+ |  <CASE: "case">
+ |  <DEFLT: "default"> 
+ |  <RETURN: "return"> 
+ |  <CATCH: "catch"> 
+ |  <STATIC: "static"> 
+ |  <PUBLIC: "public"> 
+ |  <PROTECTED: "protected"> 
+ |  <PRIVATE: "private"> 
+ |  <NOSAVE: "nosave"> 
+ |  <NOMASK: "nomask"> 
+ |  <VARARGS: "varargs"> 
+ |  <INT: "int" > 
+ |  <FLOAT: "float"> 
+ |  <STRING: "string"> 
+ |  <OBJECT: "object"> 
+ |  <MAPPING: "mapping"> 
+ |  <ARRAY: "array"> 
+ |  <FUNCTION: "function"> 
+ |  <BUFFER: "buffer"> 
+ |  <MIXED: "mixed"> 
+ |  <VOID: "void"> 
+ |  <REF: "ref"> 
+ |  <INHERIT: "inherit"> 
+ |  <CLASS: "class"> 
+ |  <EFUN: "efun"> 
+}
+
+TOKEN : {
+    <SEMI : ";"> 
+ |  <COLON : ":"> 
+ |  <COMMA : ","> 
+ |  <SCOPE : "::"> 
+ |  <LEFT_BRACKET : "("> 
+ |  <RIGHT_BRACKET : ")"> 
+ |  <LEFT_BRACE : "{"> 
+ |  <RIGHT_BRACE : "}"> 
+ |  <LEFT_INDEX : "["> 
+ |  <RIGHT_INDEX : "]"> 
+ |  <ASSIGN: "=" > 
+ |  <RANGE: ".." > 
+ |  <EXPANDO: "..." > 
+ |  <CALL_OTHER: "->" > 
+ |  <HOOK: "?" > 
+ |  <NOT: "!" > 
+ |  <EQUAL: "==" > 
+ |  <NOT_EQUAL: "!=" > 
+ |  <LESS_OR_EQUAL: "<=" > 
+ |  <GREATER_OR_EQUAL: ">=" > 
+ |  <LESS_THAN: "<" > 
+ |  <GREATER_THAN: ">" > 
+ |  <LOGICAL_AND: "&&" > 
+ |  <LOGICAL_OR: "||" > 
+ |  <BINARY_AND: "&" > 
+ |  <BINARY_OR: "|" > 
+ |  <XOR: "^" > 
+ |  <BINARY_NOT: "~" > 
+ |  <AND_ASSIGN: "&=" > 
+ |  <OR_ASSIGN: "|=" > 
+ |  <INCREMENT: "++" > 
+ |  <DECREMENT: "--" > 
+ |  <PLUS: "+" > 
+ |  <MINUS: "-" > 
+ |  <STAR: "*" > 
+ |  <SLASH: "/" > 
+ |  <MODULUS: "%" > 
+ |  <PLUS_ASSIGN: "+=" > 
+ |  <MINUS_ASSIGN: "-=" > 
+ |  <MULTIPLY_ASSIGN: "*=" > 
+ |  <DIVIDE_ASSIGN: "/=" > 
+ |  <XOR_ASSIGN: "^=" > 
+ |  <MODULUS_ASSIGN: "%=" > 
+ |  <LEFT_SHIFT: "<<" > 
+ |  <RIGHT_SHIFT: ">>" > 
+ |  <LEFT_SHIFT_ASSIGN: "<<=" > 
+ |  <RIGHT_SHIFT_ASSIGN: ">>=" >
+}
+
+TOKEN : {
+    <DOLLAR: "$">
+ |  <IDENTIFIER: <STD_IDENTIFIER> | <POSN_IDENTIFIER> >
+ |  <STD_IDENTIFIER: <LETTER> (<LETTER> | <DIGIT>)*>
+ |  <POSN_IDENTIFIER: <DOLLAR> ( <DIGIT> )+ >
+ |  <#LETTER: ["A"-"Z","_","a"-"z"]>
+ |  <#DIGIT: ["0"-"9"]>
+}
+
+ASTFile File(): { }
+{
+    ( Inherit() | Declaration() | <SEMI> /* Unnecessary semi-colon! */ ) *
+    <EOF> { return jjtThis; }
+}
+
+void Inherit(): { }
+{
+    <INHERIT> SimpleExpression() <SEMI> 
+}
+
+void Declaration(): { }
+{
+    Modifiers()
+    (
+    	Type()
+	    (
+    	    LOOKAHEAD(3)
+        	Fields()
+	    |   
+	        [ <STAR> ] Method()
+	    |   
+	        ClassBody()
+	    )
+	|
+		Method()	    
+	)
+	
+}
+
+void Fields(): { }
+{
+    Variable() 
+    (
+        <COMMA>
+        Variable()
+    )*
+    <SEMI>
+}
+
+void Variable(): { }
+{
+    [ <STAR> ] Identifier() 
+    (
+        <ASSIGN>
+        TernaryExpression()
+    )*
+}
+
+void Method(): { }
+{
+    Identifier()
+    FunctionSignature()
+    (
+        StatementBlock()
+    |
+        <SEMI>
+    )
+}
+
+void FunctionSignature() : {}
+{
+    <LEFT_BRACKET>
+    ParameterDeclarations()
+    <RIGHT_BRACKET>
+}
+
+void Modifiers(): { }
+{
+    ( <PUBLIC> | <PROTECTED> | <PRIVATE> | <STATIC> | <NOSAVE> | <NOMASK> | <VARARGS> )*
+}
+
+void Type() : { }
+{
+    ( 
+        ( StandardTypeName() | ClassType() )
+        [ <ARRAY> ]
+    )
+    | <VOID>
+    | <ARRAY>
+}
+
+void StandardTypeName() : {}
+{
+	( <INT> | <FLOAT> | <STRING> | <MIXED> | <MAPPING> | <OBJECT> | <FUNCTION> | <BUFFER> )
+}
+
+void ClassType() : {}
+{
+	<CLASS> Identifier()
+}
+
+void Identifier() : { }
+{
+    <IDENTIFIER>
+}
+
+void ParameterDeclarations() : {}
+{
+    [ ParameterDeclaration() ( "," ParameterDeclaration() )* ]
+}
+
+void ParameterDeclaration() : {}
+{
+    FullType() [ <REF> ] [ Identifier() [ <EXPANDO> ] ]
+}
+
+void FullType() : {}
+{
+	 Type() [ <STAR> ]
+}
+
+void MethodBody() #void : {}
+{
+    StatementBlock()
+}
+
+void ClassBody() : {}
+{
+	<LEFT_BRACE> ( VariableDeclaration() <SEMI> )* <RIGHT_BRACE>
+}
+
+void StatementBlock() : {}
+{
+    <LEFT_BRACE>
+    ( Statement() )*
+    <RIGHT_BRACE>
+}
+
+void Statement() : {}
+{
+        LOOKAHEAD(2) Label() 
+    |
+    	LOOKAHEAD(2)
+        VariableOrExpression() <SEMI>
+    |
+        StatementBlock()
+    |
+        ConditionStatement()
+    |
+        LoopStatement()
+    |
+        ControlStatement()
+    |
+        <SEMI>
+}
+
+void VariableOrExpression() #void : {}
+{
+  	LOOKAHEAD(2)
+  		Expression()
+  	|
+  	LOOKAHEAD(2)
+  		VariableDeclaration()
+}
+
+void Label() : {}
+{
+        Identifier() <COLON>
+    |
+        <CASE> SimpleExpression() [ <RANGE> SimpleExpression() ] <COLON>
+    |
+        <DEFLT> <COLON>
+}
+
+void ConditionStatement() : {}
+{
+        <IF> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> Statement() [ LOOKAHEAD(2) <ELSE> Statement() ]
+    |
+	    <SWITCH> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> Statement()
+}
+
+void LoopStatement() : {}
+{
+        <FOR> <LEFT_BRACKET> [ VariableOrExpression() ] <SEMI> [ Expression() ] <SEMI> [ Expression() ] <RIGHT_BRACKET> Statement() 
+    |
+        <FOREACH> <LEFT_BRACKET> [ FullType() ] Identifier() [ <COMMA> [ FullType() ] Identifier() ] <IN> Expression() <RIGHT_BRACKET> Statement() 
+    |
+        <WHILE> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> Statement()
+    |
+         <DO> Statement() <WHILE> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <SEMI> 
+}
+
+void ControlStatement() : {}
+{
+        <RETURN> [ Expression() ] <SEMI>
+    |
+        <CONTINUE> <SEMI>
+    |
+        <BREAK> <SEMI>
+}
+
+void VariableDeclaration() : {}
+{
+    Type()
+    Variable() 
+    (
+        <COMMA>
+        Variable()
+    )*
+}
+
+void Expression() #void : {}
+{
+	SimpleExpression() ( <COMMA> SimpleExpression() )* #CompoundExpression(>1)
+}
+
+void SimpleExpression() #void : {}
+{
+    LOOKAHEAD(UnaryExpression() AssignmentOperator())
+        AssignmentExpression()
+    |
+    LOOKAHEAD(3) 
+        TernaryExpression()
+}
+
+void AssignmentExpression() : {}
+{
+    UnaryExpression() AssignmentOperator() SimpleExpression() 
+}
+
+void AssignmentOperator() : {}
+{
+	( <ASSIGN> | <PLUS_ASSIGN> | <MINUS_ASSIGN> | <MULTIPLY_ASSIGN> | <DIVIDE_ASSIGN> | <MODULUS_ASSIGN> 
+    | <XOR_ASSIGN> | <AND_ASSIGN> | <OR_ASSIGN> | <LEFT_SHIFT_ASSIGN> | <RIGHT_SHIFT_ASSIGN> )
+}
+
+void TernaryExpression() #void : {}
+{
+	( OrExpression() [ Hook() SimpleExpression() Colon() SimpleExpression() ] ) #TernaryExpression(>1)
+}
+
+void Hook() : {}
+{
+	<HOOK>
+}
+
+void Colon() : {}
+{
+	<COLON>
+}
+
+void OrExpression() #void : {}
+{
+	( AndExpression() ( <LOGICAL_OR> AndExpression() )* ) #LogicalOrExpression(>1)
+}
+
+void AndExpression() #void : {}
+{
+	( BinaryOrExpression() ( <LOGICAL_AND> BinaryOrExpression()
+	    [ LOOKAHEAD(1) <ASSIGN>
+	    {
+	    	Token t = getToken(0);
+	    	ParseException e = new ParseException("Illegal assignment expression in logical condition at line " + t.beginLine + ", column " + t.beginColumn + "." ); 
+	    	e.currentToken = t;
+	    	throw e;
+	   	}
+	   	]
+	 )* ) #LogicalAndExpression(>1)
+}
+
+void BinaryOrExpression() #void : {}
+{
+	( ExclusiveOrExpression() ( <BINARY_OR> ExclusiveOrExpression() )* ) #BinaryOrExpression(>1)
+}
+
+void ExclusiveOrExpression() #void : {}
+{
+	( BinaryAndExpression() ( <XOR> BinaryAndExpression() )* ) #ExclusiveOrExpression(>1)
+}
+
+void BinaryAndExpression() #void : {}
+{
+	EqualityExpression() ( <BINARY_AND> EqualityExpression() )* #BinaryAndExpression(>1)
+}
+
+void EqualityExpression() #void : {}
+{
+	ComparisonExpression() ( EqualityOperator() ComparisonExpression() )* #ComparisonExpression(>1)
+}
+
+void EqualityOperator() #ComparisonOperator : {}
+{
+     <EQUAL> | <NOT_EQUAL>
+}
+
+void ComparisonExpression() #void : {}
+{
+	ShiftExpression() ( ComparisonOperator() ShiftExpression() )* #ComparisonExpression(>1)
+}
+
+void ComparisonOperator() #ComparisonOperator : {}
+{
+    <LESS_THAN> | <LESS_OR_EQUAL> | <GREATER_THAN> | <GREATER_OR_EQUAL>
+}
+
+void ShiftExpression() #void : {}
+{
+  ( AdditiveExpression() ( ShiftOperator() AdditiveExpression() )* ) #ArithmeticExpression(>1)
+}
+
+void ShiftOperator() #ArithmeticOperator : {}
+{
+    <LEFT_SHIFT> | <RIGHT_SHIFT>
+}
+
+void AdditiveExpression() #void : {}
+{
+  ( MultiplicativeExpression() ( AdditiveOperator() MultiplicativeExpression() )* ) #ArithmeticExpression(>1)
+}
+
+void AdditiveOperator() #ArithmeticOperator : {}
+{
+    <PLUS> | <MINUS>
+}
+
+void MultiplicativeExpression() #void : {}
+{
+	CastExpression() ( MultiplicativeOperator() CastExpression() )* #ArithmeticExpression(>1)
+}
+
+void MultiplicativeOperator() #ArithmeticOperator : {}
+{
+    <STAR> | <SLASH> | <MODULUS>
+}
+
+void CastExpression() #void: {}
+{
+    LOOKAHEAD(<LEFT_BRACKET> FullType() <RIGHT_BRACKET> ) 
+        <LEFT_BRACKET> FullType() <RIGHT_BRACKET> UnaryExpression() #CastExpression(true)
+    |
+    UnaryExpression()
+}
+
+void UnaryExpression() #void : {}
+{
+    LOOKAHEAD(3) 
+        PostfixExpression() 
+    |
+    (
+        <INCREMENT> UnaryExpression() 
+    |
+        <DECREMENT> UnaryExpression()
+    |
+        UnaryOperator() CastExpression()
+    ) #UnaryExpression(true)
+}
+
+void UnaryOperator() : {}
+{
+	<NOT> | <PLUS> | <MINUS> | <BINARY_NOT> 
+}
+
+void PostfixExpression() #void : {}
+{
+    (
+        [ LOOKAHEAD(2) ScopeResolution() ]
+        PrimaryExpression() 
+        ( 
+            IndexPostfix()
+        |
+            FunctionArguments()
+        |
+            <CALL_OTHER> Identifier() [ LOOKAHEAD(2) FunctionArguments() ]
+        |
+           <INCREMENT>
+        |
+           <DECREMENT>
+        )*
+    ) #PostfixExpression(>1) 
+}
+
+void ScopeResolution() : {}
+{
+    [ Identifier() | <EFUN> | StandardTypeName() ] <SCOPE> 
+}
+
+void PrimaryExpression() #void : {}
+{
+	Identifier() 
+    |
+    LOOKAHEAD(2)
+    Literal() 
+    |
+	<LEFT_BRACKET> 
+		(
+			<STAR> Identifier() 
+		|
+		 	Expression()
+		)
+ 	<RIGHT_BRACKET>
+	|
+	<CATCH> 
+	(
+		<LEFT_BRACKET> Expression() <RIGHT_BRACKET>
+		|
+		StatementBlock()
+	)
+}
+
+void IndexPostfix(): {}
+{
+    <LEFT_INDEX> IndexExpression() [ <RANGE> [ IndexExpression() ] ] <RIGHT_INDEX>
+}
+
+void IndexExpression(): {}
+{
+	[ <LESS_THAN> ] Expression()
+}
+
+void FunctionArguments() : {}
+{
+    <LEFT_BRACKET> 
+    (
+        <RIGHT_BRACKET>
+        |
+        ArgumentExpressionList() [ <COMMA> ] <RIGHT_BRACKET> 
+    )
+}
+
+void ArgumentExpressionList() : {}
+{
+	ArgumentExpression() ( LOOKAHEAD(2) <COMMA> ArgumentExpression() )*
+}
+
+void ArgumentExpression() : {}
+{
+	SimpleExpression() [ <EXPANDO> ]
+	|
+	<REF> Identifier()
+	|
+	ClassType()
+}
+
+void Literal() #void : {}
+{
+        Constant()
+    |
+    	<DOLLAR> <LEFT_BRACKET> Identifier() <RIGHT_BRACKET>
+    |
+    	(   LOOKAHEAD(2)
+	        ArrayLiteral()
+    	|
+      	    LOOKAHEAD(2)
+        	MappingLiteral()
+	    |
+	        LOOKAHEAD(2)
+    	    FunctionLiteral()
+    	)
+}
+
+void Constant() : {}
+{
+    	<INTEGER_LITERAL>
+    |
+    	<FLOAT_LITERAL>
+    |
+    	<CHAR_LITERAL>
+    |
+    	( <STRING_LITERAL> )+
+}
+
+void ArrayLiteral() : {}
+{
+    <LEFT_BRACKET> <LEFT_BRACE> [ ArrayElement() ( LOOKAHEAD(2) <COMMA> ArrayElement() )* ] [ <COMMA> ] <RIGHT_BRACE> <RIGHT_BRACKET>
+}
+
+void ArrayElement() : {}
+{
+	SimpleExpression() [ <EXPANDO> ]
+}
+
+void MappingLiteral() : {}
+{
+    <LEFT_BRACKET> <LEFT_INDEX> [ MappingElement() ( LOOKAHEAD(2) <COMMA> MappingElement() )* ] [ <COMMA> ] <RIGHT_INDEX> <RIGHT_BRACKET>
+}
+
+void MappingElement() : {}
+{
+    SimpleExpression() <COLON> SimpleExpression()
+}
+
+void FunctionLiteral() : {}
+{
+    <LEFT_BRACKET> <COLON> Expression() <COLON> <RIGHT_BRACKET>
+    |
+    LOOKAHEAD(2)
+    <FUNCTION> FunctionSignature() StatementBlock()
+}
+
+

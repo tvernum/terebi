@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="source/java/parser"/>
+	<classpathentry kind="src" path="source/java/test"/>
+	<classpathentry kind="src" path="output/ant/java"/>
+	<classpathentry kind="lib" path="lib/anarres-cpp.jar" sourcepath="/Users/tim/Development/Libraries/jcpp/anarres-cpp-src-1.2.3-patch/build/java"/>
+	<classpathentry kind="lib" path="lib/log4j-1.2.13.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="lib/commons-io-1.3.1.jar"/>
+	<classpathentry kind="output" path="output/eclipse"/>
+</classpath>

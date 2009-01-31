@@ -1,0 +1,13 @@
+
+inherit "/path/to/super" ;
+
+private int var;
+
+public void method();
+
+mapping method2( int array foo , string bar )
+{
+        return foo + bar;
+}
+
+// vim:set ft=lpc:

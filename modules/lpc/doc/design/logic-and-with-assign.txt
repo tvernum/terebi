@@ -1,0 +1,96 @@
+For Starting State:
+    t = true (1)
+    f = false (0)
+    x = "initial"
+    n = nil
+    s = "S"
+
+  Expression: ( t && x = s )
+Evaluates to: true ("S")
+   End State: x = "S"
+  Legal in C: No
+
+  Expression: ( t && x = n )
+Evaluates to: false (nil)
+   End State: x = nil
+  Legal in C: No
+
+  Expression: ( f && x = s )
+Evaluates to: false (0)
+   End State: x = "initial"
+  Legal in C: No
+
+  Expression: ( f && x = n )
+Evaluates to: false (0)
+   End State: x = "initial"
+  Legal in C: No
+
+  Expression: ( t && !x = s )
+Evaluates to: false (0)
+   End State: x = "S"
+  Legal in C: No
+
+  Expression: ( t && !x = n )
+Evaluates to: true (1)
+   End State: x = nil
+  Legal in C: No
+
+  Expression: ( f && !x = s )
+Evaluates to: false (0)
+   End State: x = "initial"
+  Legal in C: No
+
+  Expression: ( f && !x = n )
+Evaluates to: false (0)
+   End State: x = "initial"
+  Legal in C: No
+
+  Expression: ( x = s && t )
+Evaluates to: true (1)
+End State: x = true (1)
+  Legal in C: Yes
+
+  Expression: ( x = n && t )
+Evaluates to: false (nil)
+End State: x = nil
+  Legal in C: Yes
+
+  Expression: ( x = s && f )
+Evaluates to: false (0)
+End State: x = 0
+  Legal in C: Yes
+
+  Expression: ( x = n && f )
+Evaluates to: false (nil)
+End State: x = nil
+  Legal in C: Yes
+
+  Expression: ( !x = s && t )
+Evaluates to: false (0)
+End State: x = 1
+  Legal in C: No
+
+  Expression: ( !x = n && t )
+Evaluates to: true (1)
+End State: x = nil
+  Legal in C: No
+
+  Expression: ( !x = s && f )
+Evaluates to: true (1)
+End State: x = 0
+  Legal in C: No
+
+  Expression: ( !x = n && f )
+Evaluates to: true (1)
+End State: x = nil
+  Legal in C: No
+
+#####
+#
+#  eval int t = 1, f = 0; mixed x = "i" , n , s = "s" ; int e = ( t && x = s ); return ({ e, x })
+#
+#  eval int t = 1, f = 0; mixed x = "i" , n , s = "s" ; int e = %%EXPR%% ; return ({ e, x })
+#
+#####
+    
+

@@ -1,0 +1,14 @@
+syntax: regexp
+^modules/[^/]*/lib/
+^.*/tmp/
+^modules/[^/]*/output/
+^modules/[^/]*/errors/
+^modules/[^/]*/samples/
+/\.DS_Store
+^\.DS_Store
+\.swp
+\.swo
+\.jar
+\.zip
+\.gz
+\.bz2

@@ -1,0 +1,20 @@
+
+evaluate(   (: 1 , 2 , 3 :)   ) == 3
+
+evaluate(   (: $1 + $2 :),  4 , 5 ) == 9 
+
+evaluate(   (:  (: $1 + $2 :)  , 3 , 5 :)   )  == 5
+
+
+evaluate(   (: write("Hello") , 3 :) == 3 , with output of "Hello"
+
+evaluate(   (: write :) , "Hello" ) == 0, with output of "Hello" 
+
+evaluate(   (: write, "Hello" :) == 0 [write has no return value], with output of "Hello"
+
+evaluate(   (: (: write :) , "Hello" :) ) == "Hello",  with no output 
+
+evaluate(   (: global_var , "Hello" :) )  == "Hello",  with no output 
+
+evaluate(   (: "write", "Hello" :) ) == "Hello", with no output
+
