@@ -22,19 +22,22 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringReader;
 
-import us.terebi.lang.lpc.parser.ast.ASTFile;
+import org.apache.commons.io.IOUtils;
+
+import us.terebi.lang.lpc.io.FileFinder;
+import us.terebi.lang.lpc.io.Resource;
+import us.terebi.lang.lpc.io.ResourceLexerSource;
+import us.terebi.lang.lpc.io.ResourceFinder;
+import us.terebi.lang.lpc.io.SourceFinderFileSystem;
+import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.jj.ParseException;
 import us.terebi.lang.lpc.parser.jj.Parser;
-
-import us.terebi.lang.lpc.preprocessor.ChrootFileSystem;
 import us.terebi.lang.lpc.preprocessor.CppReader;
 import us.terebi.lang.lpc.preprocessor.Feature;
-import us.terebi.lang.lpc.preprocessor.FileLexerSource;
 import us.terebi.lang.lpc.preprocessor.LexerException;
 import us.terebi.lang.lpc.preprocessor.Preprocessor;
 import us.terebi.lang.lpc.preprocessor.PreprocessorListener;
 import us.terebi.lang.lpc.preprocessor.Source;
-import org.apache.commons.io.IOUtils;
 
 /*
  * @TODO
@@ -45,7 +48,7 @@ public class LpcParser
 {
     public class Listener extends PreprocessorListener
     {
-        public void handleWarning(Source source, int line, int column, String msg) throws LexerException
+        public void handleWarning(Source source, int line, int column, String msg)
         {
             System.out.println("Preprocessor warning: " + source.toString() + ":" + line + ":" + column + " - " + msg);
         }
@@ -53,12 +56,13 @@ public class LpcParser
 
     private boolean _debug;
     private Preprocessor _preprocessor;
-    private File _root;
+    private ResourceFinder _sourceFinder;
 
     public LpcParser()
     {
         _preprocessor = new Preprocessor();
         _preprocessor.addFeature(Feature.LINEMARKERS);
+        _sourceFinder = new FileFinder(new File("/"));
     }
 
     public void setDebug(boolean debug)
@@ -78,27 +82,70 @@ public class LpcParser
 
     public void addAutoIncludeFile(String filename) throws IOException
     {
-        FileLexerSource source = getSource(filename);
+        ResourceLexerSource source = getSource(filename);
         _preprocessor.addInput(source);
     }
 
     public void setFileSystemRoot(File root)
     {
-        _root = root;
+        _sourceFinder = new FileFinder(root);
     }
 
-    public ASTFile parse(String filename) throws IOException, LexerException
+    public void setSourceFinder(ResourceFinder sourceFinder)
     {
-        LineMapping mapping = new LineMapping(filename);
+        _sourceFinder = sourceFinder;
+    }
+
+    /**
+     * @deprecated Use {@link #parse(Resource)} instead
+     */
+    public ASTObjectDefinition parse(String filename) throws IOException, LexerException
+    {
+        Resource resource = _sourceFinder.getResource(filename);
+        return parse(resource);
+    }
+
+    public String preprocess(Resource resource) throws IOException, LexerException
+    {
+        if (_sourceFinder != null)
+        {
+            _preprocessor.setFileSystem(new SourceFinderFileSystem(_sourceFinder));
+        }
+
+        String dirname = resource.getParent().getPath();
+
+        _preprocessor.addMacro("__SAVE_EXTENSION__", "\".o\"");
+        _preprocessor.addMacro("__DIR__", "\"" + dirname + "\"");
+        _preprocessor.addInput(getSource(resource));
+
+        _preprocessor.setListener(new Listener());
+        CppReader reader = new CppReader(_preprocessor);
+        String content = IOUtils.toString(reader);
+        return content;
+    }
+
+    private ResourceLexerSource getSource(String filename) throws IOException
+    {
+        return getSource(_sourceFinder.getResource(filename));
+    }
+
+    private ResourceLexerSource getSource(Resource resource) throws IOException
+    {
+        return new ResourceLexerSource(resource);
+    }
+
+    public ASTObjectDefinition parse(Resource resource) throws IOException, LexerException
+    {
+        LineMapping mapping = new LineMapping(resource.getPath());
         new ParserState(this, mapping);
 
-        String content = preprocess(filename);
+        String content = preprocess(resource);
 
         Parser parser = new Parser(new StringReader(content));
         parser.setDebug(_debug);
         try
         {
-            return parser.File();
+            return parser.ObjectDefinition();
         }
         catch (ParseException pe)
         {
@@ -123,60 +170,12 @@ public class LpcParser
             pe.printStackTrace(System.err);
             return null;
         }
+
     }
 
-    public String preprocess(String filename) throws IOException, LexerException
+    public void addDefine(String name, String value) throws LexerException
     {
-        if (_root != null)
-        {
-            _preprocessor.setFileSystem(new ChrootFileSystem(_root));
-        }
-
-        String dirname = dirname(filename);
-
-        _preprocessor.addMacro("__SAVE_EXTENSION__", "\".o\"");
-        _preprocessor.addMacro("__DIR__", "\"" + dirname + "\"");
-        _preprocessor.addInput(getSource(filename));
-
-        _preprocessor.setListener(new Listener());
-        CppReader reader = new CppReader(_preprocessor);
-        String content = IOUtils.toString(reader);
-        return content;
-    }
-
-    private FileLexerSource getSource(String filename) throws IOException
-    {
-        File file = getFileInRoot(filename);
-        return new FileLexerSource(file, filename);
-    }
-
-    private File getFileInRoot(String filename)
-    {
-        File file;
-        if (_root != null)
-        {
-            file = new File(_root, filename);
-        }
-        else
-        {
-            file = new File(filename);
-        }
-        return file;
-    }
-
-    private String dirname(String filename)
-    {
-        int idx = filename.lastIndexOf('/');
-        if (idx == -1)
-        {
-            return "/";
-        }
-        String dirname = filename.substring(0, idx + 1);
-        if (dirname.charAt(0) != '/')
-        {
-            dirname = "/" + dirname;
-        }
-        return dirname;
+        _preprocessor.addMacro(name, value);
     }
 
 }

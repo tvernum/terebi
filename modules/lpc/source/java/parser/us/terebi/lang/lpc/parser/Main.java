@@ -21,7 +21,11 @@ package us.terebi.lang.lpc.parser;
 import java.io.File;
 import java.io.IOException;
 
-import us.terebi.lang.lpc.parser.ast.ASTFile;
+import us.terebi.lang.lpc.io.FileFinder;
+import us.terebi.lang.lpc.io.Resource;
+import us.terebi.lang.lpc.io.ResourceFinder;
+import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
+import us.terebi.lang.lpc.parser.ast.ASTUtil;
 
 /**
  */
@@ -37,10 +41,12 @@ public class Main
 
     private LpcParser _parser = new LpcParser();
     private boolean _preprocessOnly;
+    private ResourceFinder _sourceFinder;
 
     private int processArguments(String[] args) throws Exception
     {
         int count = 0;
+        _sourceFinder = new FileFinder(new File("/"));
         for (int i = 0; i < args.length; i++)
         {
             if (args[i].length() > 1 && args[i].charAt(0) == '-')
@@ -85,7 +91,8 @@ public class Main
                     break;
 
                 case 'r':
-                    _parser.setFileSystemRoot(new File(file));
+                    _sourceFinder = new FileFinder(new File(file));
+                    _parser.setSourceFinder(_sourceFinder);
                     break;
 
                 case 'a':
@@ -105,13 +112,14 @@ public class Main
 
     public void processFile(String filename) throws Exception
     {
+        Resource resource = _sourceFinder.getResource(filename);
         if (_preprocessOnly)
         {
-            System.out.println(_parser.preprocess(filename));
+            System.out.println(_parser.preprocess(resource));
         }
         else
         {
-            ASTFile file = _parser.parse(filename);
+            ASTObjectDefinition file = _parser.parse(resource);
             if (file != null)
             {
                 ASTUtil.printTree(file);

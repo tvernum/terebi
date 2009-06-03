@@ -1,4 +1,4 @@
-<project name="lpc"  default="all" basedir="." >
+<project name="install-ivy"  default="all" basedir="." >
 
     <property environment="env." />
 

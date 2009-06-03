@@ -17,6 +17,7 @@ options
     STATIC=false;
     TRACK_TOKENS=true;
     JAVA_UNICODE_ESCAPE=true;
+    VISITOR=true;
 }
 
 PARSER_BEGIN(Parser)
@@ -26,6 +27,7 @@ package us.terebi.lang.lpc.parser.jj ;
 import java.util.*;
 import java.io.*;
 import us.terebi.lang.lpc.parser.*;
+import us.terebi.lang.lpc.parser.ast.ASTUtil;
 
 public class Parser 
 {
@@ -74,10 +76,14 @@ public class Parser
         }
         	System.out.println(" ]");
         
-        if( (n instanceof ASTDeclaration) || (n instanceof ASTStatement) )
+        if ((n instanceof ASTDeclaration) || (ASTUtil.hasTokenKind((SimpleNode) n, SEMI)))
         {
             System.out.println(_printPrefix.replace(' ', '-'));
         } 
+    }
+    
+    public Node getRootNodeForTesting() {
+    	return jjtree.rootNode();
     }
 }
 
@@ -103,11 +109,10 @@ SKIP : { " " | "\t" | "\n" | "\r"
 <LINE_DIRECTIVE> MORE: {  "\\\n" | "\\\r\n" | < ~[] > }
 
 TOKEN : {
-    <INTEGER_LITERAL      : <DECIMAL_LITERAL> | <HEXADECIMAL_LITERAL> | <OCTAL_LITERAL> | <BINARY_LITERAL>  >
- |  <#DECIMAL_LITERAL      : ["0"-"9"] (["0"-"9"])* >
- |  <#HEXADECIMAL_LITERAL  : "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
- |  <#OCTAL_LITERAL        : "0" (["0"-"7"])+ >
- |  <#BINARY_LITERAL       : "0b" (["0","1"])+ >
+    <DECIMAL_LITERAL      : ["0"-"9"] (["0"-"9"])* >
+ |  <HEXADECIMAL_LITERAL  : "0" ["x","X"] (["0"-"9","a"-"f","A"-"F"])+ >
+ |  <OCTAL_LITERAL        : "0o" (["0"-"7"])+ >
+ |  <BINARY_LITERAL       : "0b" (["0","1"])+ >
  |  <FLOAT_LITERAL        : <DECIMAL_LITERAL> "." <DECIMAL_LITERAL> (<EXPONENT>)? | <DECIMAL_LITERAL> <EXPONENT> >
  |  <#EXPONENT             : "e" (["+","-"])? <DECIMAL_LITERAL> >
  |  <CHAR_LITERAL         : "'" ( <SINGLE_CHARACTER> | <ESCAPED_CHARACTER> | "\"" ) "'" >
@@ -151,7 +156,6 @@ TOKEN : {
  |  <REF: "ref"> 
  |  <INHERIT: "inherit"> 
  |  <CLASS: "class"> 
- |  <EFUN: "efun"> 
 }
 
 TOKEN : {
@@ -213,7 +217,7 @@ TOKEN : {
  |  <#DIGIT: ["0"-"9"]>
 }
 
-ASTFile File(): { }
+ASTObjectDefinition ObjectDefinition(): { }
 {
     ( Inherit() | Declaration() | <SEMI> /* Unnecessary semi-colon! */ ) *
     <EOF> { return jjtThis; }
@@ -224,7 +228,7 @@ void Inherit(): { }
     <INHERIT> SimpleExpression() <SEMI> 
 }
 
-void Declaration(): { }
+void Declaration() : { }
 {
     Modifiers()
     (
@@ -233,7 +237,7 @@ void Declaration(): { }
     	    LOOKAHEAD(3)
         	Fields()
 	    |   
-	        [ <STAR> ] Method()
+	        [ ArrayStar() ] Method()
 	    |   
 	        ClassBody()
 	    )
@@ -241,6 +245,11 @@ void Declaration(): { }
 		Method()	    
 	)
 	
+}
+
+void ArrayStar() : { }
+{
+	<STAR>
 }
 
 void Fields(): { }
@@ -255,11 +264,16 @@ void Fields(): { }
 
 void Variable(): { }
 {
-    [ <STAR> ] Identifier() 
-    (
-        <ASSIGN>
-        TernaryExpression()
-    )*
+    [ ArrayStar() ] Identifier() 
+    [
+	    VariableAssignment()
+    ]
+}
+
+void VariableAssignment(): { }
+{
+    <ASSIGN>
+    TernaryExpression()
 }
 
 void Method(): { }
@@ -273,7 +287,7 @@ void Method(): { }
     )
 }
 
-void FunctionSignature() : {}
+void FunctionSignature() #void : {}
 {
     <LEFT_BRACKET>
     ParameterDeclarations()
@@ -295,12 +309,12 @@ void Type() : { }
     | <ARRAY>
 }
 
-void StandardTypeName() : {}
+void StandardTypeName() #void : {}
 {
 	( <INT> | <FLOAT> | <STRING> | <MIXED> | <MAPPING> | <OBJECT> | <FUNCTION> | <BUFFER> )
 }
 
-void ClassType() : {}
+void ClassType() #void : {}
 {
 	<CLASS> Identifier()
 }
@@ -317,17 +331,17 @@ void ParameterDeclarations() : {}
 
 void ParameterDeclaration() : {}
 {
-    FullType() [ <REF> ] [ Identifier() [ <EXPANDO> ] ]
+    FullType() [ Ref() ] [ Identifier() [ ElementExpander() ] ]
+}
+
+void Ref() : {}
+{
+	<REF>
 }
 
 void FullType() : {}
 {
-	 Type() [ <STAR> ]
-}
-
-void MethodBody() #void : {}
-{
-    StatementBlock()
+	 Type() [ ArrayStar() ]
 }
 
 void ClassBody() : {}
@@ -342,7 +356,7 @@ void StatementBlock() : {}
     <RIGHT_BRACE>
 }
 
-void Statement() : {}
+void Statement() #void : {}
 {
         LOOKAHEAD(2) Label() 
     |
@@ -351,19 +365,24 @@ void Statement() : {}
     |
         StatementBlock()
     |
-        ConditionStatement()
+        ConditionalStatement()
     |
         LoopStatement()
     |
         ControlStatement()
     |
-        <SEMI>
+        NoOpStatement()
+}
+
+void NoOpStatement() : {}
+{
+	<SEMI>
 }
 
 void VariableOrExpression() #void : {}
 {
   	LOOKAHEAD(2)
-  		Expression()
+  		Expression() #ExpressionStatement(true)
   	|
   	LOOKAHEAD(2)
   		VariableDeclaration()
@@ -378,22 +397,32 @@ void Label() : {}
         <DEFLT> <COLON>
 }
 
-void ConditionStatement() : {}
+void ConditionalStatement() : {}
 {
         <IF> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> Statement() [ LOOKAHEAD(2) <ELSE> Statement() ]
     |
-	    <SWITCH> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> Statement()
+	    <SWITCH> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> StatementBlock()
 }
 
 void LoopStatement() : {}
 {
-        <FOR> <LEFT_BRACKET> [ VariableOrExpression() ] <SEMI> [ Expression() ] <SEMI> [ Expression() ] <RIGHT_BRACKET> Statement() 
+        <FOR> <LEFT_BRACKET> OptVariableOrExpression() <SEMI> OptExpression() <SEMI> OptExpression() <RIGHT_BRACKET> Statement() 
     |
         <FOREACH> <LEFT_BRACKET> [ FullType() ] Identifier() [ <COMMA> [ FullType() ] Identifier() ] <IN> Expression() <RIGHT_BRACKET> Statement() 
     |
         <WHILE> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> Statement()
     |
          <DO> Statement() <WHILE> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <SEMI> 
+}
+
+void OptVariableOrExpression() : {}
+{
+	[ VariableOrExpression() ]
+}
+
+void OptExpression() : {}
+{
+	[Expression() ]
 }
 
 void ControlStatement() : {}
@@ -417,7 +446,7 @@ void VariableDeclaration() : {}
 
 void Expression() #void : {}
 {
-	SimpleExpression() ( <COMMA> SimpleExpression() )* #CompoundExpression(>1)
+	( SimpleExpression() ( <COMMA> SimpleExpression() )* ) #CompoundExpression(>1)
 }
 
 void SimpleExpression() #void : {}
@@ -442,17 +471,7 @@ void AssignmentOperator() : {}
 
 void TernaryExpression() #void : {}
 {
-	( OrExpression() [ Hook() SimpleExpression() Colon() SimpleExpression() ] ) #TernaryExpression(>1)
-}
-
-void Hook() : {}
-{
-	<HOOK>
-}
-
-void Colon() : {}
-{
-	<COLON>
+	( OrExpression() [ <HOOK> SimpleExpression() <COLON> SimpleExpression() ] ) #TernaryExpression(>1)
 }
 
 void OrExpression() #void : {}
@@ -466,7 +485,11 @@ void AndExpression() #void : {}
 	    [ LOOKAHEAD(1) <ASSIGN>
 	    {
 	    	Token t = getToken(0);
-	    	ParseException e = new ParseException("Illegal assignment expression in logical condition at line " + t.beginLine + ", column " + t.beginColumn + "." ); 
+	    	Node prev = jjtree.peekNode();
+	    	String after = prev.toString();
+	    	if(prev instanceof SimpleNode) { after = after + "[" + ((SimpleNode)prev).jjtGetFirstToken().image + "]"; }
+	    	ParseException e = new ParseException("Illegal assignment expression in logical condition (after " + after
+	    	                 + ") at line " + t.beginLine + ", column " + t.beginColumn + "." ); 
 	    	e.currentToken = t;
 	    	throw e;
 	   	}
@@ -486,12 +509,12 @@ void ExclusiveOrExpression() #void : {}
 
 void BinaryAndExpression() #void : {}
 {
-	EqualityExpression() ( <BINARY_AND> EqualityExpression() )* #BinaryAndExpression(>1)
+	( EqualityExpression() ( <BINARY_AND> EqualityExpression() )* ) #BinaryAndExpression(>1)
 }
 
 void EqualityExpression() #void : {}
 {
-	ComparisonExpression() ( EqualityOperator() ComparisonExpression() )* #ComparisonExpression(>1)
+	( ComparisonExpression() ( EqualityOperator() ComparisonExpression() )* ) #ComparisonExpression(>1)
 }
 
 void EqualityOperator() #ComparisonOperator : {}
@@ -501,7 +524,7 @@ void EqualityOperator() #ComparisonOperator : {}
 
 void ComparisonExpression() #void : {}
 {
-	ShiftExpression() ( ComparisonOperator() ShiftExpression() )* #ComparisonExpression(>1)
+	( ShiftExpression() ( ComparisonOperator() ShiftExpression() )*) #ComparisonExpression(>1)
 }
 
 void ComparisonOperator() #ComparisonOperator : {}
@@ -531,7 +554,7 @@ void AdditiveOperator() #ArithmeticOperator : {}
 
 void MultiplicativeExpression() #void : {}
 {
-	CastExpression() ( MultiplicativeOperator() CastExpression() )* #ArithmeticExpression(>1)
+	( CastExpression() ( MultiplicativeOperator() CastExpression() )* ) #ArithmeticExpression(>1)
 }
 
 void MultiplicativeOperator() #ArithmeticOperator : {}
@@ -541,8 +564,8 @@ void MultiplicativeOperator() #ArithmeticOperator : {}
 
 void CastExpression() #void: {}
 {
-    LOOKAHEAD(<LEFT_BRACKET> FullType() <RIGHT_BRACKET> ) 
-        <LEFT_BRACKET> FullType() <RIGHT_BRACKET> UnaryExpression() #CastExpression(true)
+     LOOKAHEAD(<LEFT_BRACKET> FullType() <RIGHT_BRACKET> ) 
+    ( <LEFT_BRACKET> FullType() <RIGHT_BRACKET> UnaryExpression() ) #CastExpression(true)
     |
     UnaryExpression()
 }
@@ -553,9 +576,7 @@ void UnaryExpression() #void : {}
         PostfixExpression() 
     |
     (
-        <INCREMENT> UnaryExpression() 
-    |
-        <DECREMENT> UnaryExpression()
+        PrefixIncrementOperator() UnaryExpression() 
     |
         UnaryOperator() CastExpression()
     ) #UnaryExpression(true)
@@ -566,45 +587,82 @@ void UnaryOperator() : {}
 	<NOT> | <PLUS> | <MINUS> | <BINARY_NOT> 
 }
 
+void PrefixIncrementOperator() : {}
+{
+	<INCREMENT> | <DECREMENT>
+}
+
+void PostfixIncrementOperator() : {}
+{
+    <INCREMENT> | <DECREMENT>
+}
+
 void PostfixExpression() #void : {}
 {
     (
-        [ LOOKAHEAD(2) ScopeResolution() ]
         PrimaryExpression() 
         ( 
             IndexPostfix()
         |
-            FunctionArguments()
+            CallOther()
         |
-            <CALL_OTHER> Identifier() [ LOOKAHEAD(2) FunctionArguments() ]
-        |
-           <INCREMENT>
-        |
-           <DECREMENT>
+            PostfixIncrementOperator() 
         )*
     ) #PostfixExpression(>1) 
 }
 
-void ScopeResolution() : {}
+void CallOther() : {}
 {
-    [ Identifier() | <EFUN> | StandardTypeName() ] <SCOPE> 
+	<CALL_OTHER> Identifier() [ LOOKAHEAD(2) FunctionArguments() ]
 }
 
 void PrimaryExpression() #void : {}
 {
-	Identifier() 
+    LOOKAHEAD(2)
+ 	(
+ 		/* @TODO - This is a mess, there must be an easier way to say { if(x) #thisNodeType else #thatNodeType } */
+ 		(
+ 			ScopedIdentifier() [ FunctionArguments() ]
+ 		)
+		#FunctionCall( jjtree.peekNode() instanceof ASTFunctionArguments )
+ 	) #VariableReference( jjtree.peekNode() instanceof ASTScopedIdentifier )
     |
     LOOKAHEAD(2)
     Literal() 
     |
-	<LEFT_BRACKET> 
-		(
-			<STAR> Identifier() 
-		|
-		 	Expression()
-		)
- 	<RIGHT_BRACKET>
+    LOOKAHEAD(2)
+    ExpressionCall()
+    |
+	<LEFT_BRACKET> Expression() <RIGHT_BRACKET>
 	|
+	ImmediateExpression()	
+	|
+	Catch()
+}
+
+void ImmediateExpression() : {}
+{
+	<DOLLAR> <LEFT_BRACKET> Expression() <RIGHT_BRACKET>
+}
+
+void ScopedIdentifier() : {}
+{
+    [ LOOKAHEAD(2) ScopeResolution() ]
+    Identifier() 
+}
+
+void ScopeResolution() : {}
+{
+    [ Identifier() | StandardTypeName() ] <SCOPE> 
+}
+
+void ExpressionCall() :{}
+{
+	<LEFT_BRACKET> <STAR> SimpleExpression() <RIGHT_BRACKET> FunctionArguments()
+}
+
+void Catch() :{}
+{
 	<CATCH> 
 	(
 		<LEFT_BRACKET> Expression() <RIGHT_BRACKET>
@@ -620,7 +678,12 @@ void IndexPostfix(): {}
 
 void IndexExpression(): {}
 {
-	[ <LESS_THAN> ] Expression()
+	[ ReverseIndex() ] Expression()
+}
+
+void ReverseIndex() : {}
+{
+	<LESS_THAN>
 }
 
 void FunctionArguments() : {}
@@ -633,14 +696,14 @@ void FunctionArguments() : {}
     )
 }
 
-void ArgumentExpressionList() : {}
+void ArgumentExpressionList() #void : {}
 {
 	ArgumentExpression() ( LOOKAHEAD(2) <COMMA> ArgumentExpression() )*
 }
 
 void ArgumentExpression() : {}
 {
-	SimpleExpression() [ <EXPANDO> ]
+	SimpleExpression() [ ElementExpander() ]
 	|
 	<REF> Identifier()
 	|
@@ -650,8 +713,6 @@ void ArgumentExpression() : {}
 void Literal() #void : {}
 {
         Constant()
-    |
-    	<DOLLAR> <LEFT_BRACKET> Identifier() <RIGHT_BRACKET>
     |
     	(   LOOKAHEAD(2)
 	        ArrayLiteral()
@@ -666,7 +727,13 @@ void Literal() #void : {}
 
 void Constant() : {}
 {
-    	<INTEGER_LITERAL>
+    	<DECIMAL_LITERAL>
+    |
+    	<HEXADECIMAL_LITERAL>
+    |
+    	<OCTAL_LITERAL>
+    |
+    	<BINARY_LITERAL>
     |
     	<FLOAT_LITERAL>
     |
@@ -682,7 +749,12 @@ void ArrayLiteral() : {}
 
 void ArrayElement() : {}
 {
-	SimpleExpression() [ <EXPANDO> ]
+	SimpleExpression() [ ElementExpander() ]
+}
+
+void ElementExpander() : {}
+{
+	<EXPANDO>
 }
 
 void MappingLiteral() : {}

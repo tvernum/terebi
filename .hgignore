@@ -4,6 +4,7 @@ syntax: regexp
 ^modules/[^/]*/output/
 ^modules/[^/]*/errors/
 ^modules/[^/]*/samples/
+^modules/[^/]*/.settings/
 /\.DS_Store
 ^\.DS_Store
 \.swp

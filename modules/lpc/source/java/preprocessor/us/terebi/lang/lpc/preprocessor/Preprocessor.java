@@ -962,7 +962,6 @@ public class Preprocessor {
 	private boolean include(VirtualFile file)
 						throws IOException,
 								LexerException {
-		// System.out.println("Try to include " + file);
 		if (!file.isFile())
 			return false;
 		push_source(file.getSource(), true);
@@ -1709,7 +1708,7 @@ public class Preprocessor {
 							// break;
 
 						case PP_IFNDEF:
-							push_state();
+						    push_state();
 							if (!isActive()) {
 								return source_skipline(false);
 							}

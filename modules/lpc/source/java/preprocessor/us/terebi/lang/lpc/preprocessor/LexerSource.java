@@ -163,9 +163,15 @@ public class LexerSource extends Source {
 		switch (ucount) {
 			case 2:
 				ucount = 1;
+				if(isLineSeparator(u1)) {
+				    line++;
+				}
 				return u1;
 			case 1:
 				ucount = 0;
+                if(isLineSeparator(u0)) {
+                    line++;
+                }
 				return u0;
 		}
 
@@ -650,7 +656,7 @@ public class LexerSource extends Source {
 	public Token token()
 						throws IOException,
 								LexerException {
-		Token	tok = null;
+	    Token	tok = null;
 
 		int		_l = line;
 		int		_c = column;

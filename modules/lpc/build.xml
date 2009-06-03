@@ -50,6 +50,9 @@
         <src path="${output.java}" /> 
         <src path="source/java/parser" /> 
         <src path="source/java/preprocessor" /> 
+        <src path="source/java/runtime" /> 
+        <src path="source/java/compiler" /> 
+        <src path="source/java/test" /> 
 
         <classpath>
             <fileset dir="lib" />
