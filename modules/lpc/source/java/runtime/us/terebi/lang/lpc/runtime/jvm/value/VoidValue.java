@@ -39,6 +39,11 @@ public class VoidValue extends AbstractValue
         return Types.VOID;
     }
 
+    public boolean asBoolean()
+    {
+        throw this.isNot("a value");
+    }
+
     protected boolean valueEquals(LpcValue other)
     {
         return true;

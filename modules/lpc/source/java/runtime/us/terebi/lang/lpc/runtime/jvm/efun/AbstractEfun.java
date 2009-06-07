@@ -21,10 +21,14 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.Arrays;
 import java.util.List;
 
+import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
@@ -33,7 +37,7 @@ import us.terebi.util.Range;
 /**
  * 
  */
-public abstract class AbstractEfun implements FunctionSignature, Callable
+public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
 {
     public LpcValue execute(LpcValue... arguments)
     {
@@ -55,18 +59,62 @@ public abstract class AbstractEfun implements FunctionSignature, Callable
         return false;
     }
 
-    protected void checkArguments(List< ? extends LpcValue> arguments)
+    protected void checkArguments(List< ? extends LpcValue> argumentValues)
     {
         Range<Integer> argumentRange = FunctionUtil.getAllowedNumberOfArgument(this);
-        if (!argumentRange.inRange(arguments.size()))
+        if (!argumentRange.inRange(argumentValues.size()))
         {
             throw new LpcRuntimeException(getName()
                     + " requires "
                     + argumentRange
                     + " argument(s) but "
-                    + arguments.size()
+                    + argumentValues.size()
                     + " were provided");
         }
+        List< ? extends ArgumentDefinition> argumentDefinitions = getSignature().getArguments();
+        for (int i = 0; i < argumentDefinitions.size() && i < argumentValues.size(); i++)
+        {
+            ArgumentDefinition def = argumentDefinitions.get(i);
+            LpcValue val = argumentValues.get(i);
+            LpcType valType = (val instanceof LpcReference) ? ((LpcReference) val).getType() : val.getActualType();
+            checkType(i, def.getType(), valType);
+            checkSemantics(i, def.getSemantics(), val);
+        }
+    }
+
+    protected void checkSemantics(int index, ArgumentSemantics semantics, LpcValue value)
+    {
+        if (semantics == ArgumentSemantics.IMPLICIT_REFERENCE)
+        {
+            if (!(value instanceof LpcReference))
+            {
+                throw new LpcRuntimeException("Internal Error - expected argument "
+                        + index
+                        + " to "
+                        + getName()
+                        + " to be a reference value");
+            }
+        }
+    }
+
+    private void checkType(int index, LpcType expectedType, LpcType actualType)
+    {
+        if (expectedType.equals(actualType))
+        {
+            return;
+        }
+        if (expectedType.getKind() == LpcType.Kind.MIXED && expectedType.getArrayDepth() <= actualType.getArrayDepth())
+        {
+            return;
+        }
+        throw new LpcRuntimeException("Bad argument "
+                + index
+                + " to "
+                + getName()
+                + " expected "
+                + expectedType
+                + " got "
+                + actualType);
     }
 
     protected CharSequence getName()

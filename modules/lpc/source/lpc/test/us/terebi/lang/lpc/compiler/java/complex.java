@@ -62,7 +62,7 @@ public class complex extends LpcObject
 
     public @LpcMethod(name="target_killed", modifiers={us.terebi.lang.lpc.runtime.MemberDefinition.Modifier.PROTECTED}) 
     @LpcReturn(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.VOID, depth=0) LpcValue 
-    target_killed_( @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, depth=0, name="target") LpcValue _p_target_v )
+    target_killed_( @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, depth=0, name="target", semantics=us.terebi.lang.lpc.runtime.ArgumentSemantics.BY_VALUE) LpcValue _p_target_v )
     {
         final LpcVariable _p_target = new LpcVariable( "target", withType( us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, 0) , _p_target_v);
         final LpcValue _lpc_v25 = makeValue("get_race");

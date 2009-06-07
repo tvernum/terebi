@@ -19,6 +19,7 @@
 package us.terebi.lang.lpc.runtime.jvm.support;
 
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 
 /**
  * 
@@ -27,8 +28,14 @@ public class LogicSupport
 {
     public static LpcValue not(LpcValue lpcValue)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        if (lpcValue.asBoolean())
+        {
+            return LpcConstants.INT.FALSE;
+        }
+        else
+        {
+            return LpcConstants.INT.TRUE;
+        }
     }
 
 }

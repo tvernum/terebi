@@ -24,6 +24,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static us.terebi.lang.lpc.compiler.java.TypeWriter.fullyQualifiedName;
+
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.FunctionCallWriter.FunctionArgument;
 import us.terebi.lang.lpc.compiler.java.context.CompileContext;
@@ -488,7 +490,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         for (int i = 0; i < vars.length; i++)
         {
             InternalVariable var = evaluate(list.jjtGetChild(i + 1));
-            vars[i] = new FunctionArgument(var, false);
+            vars[i] = new FunctionArgument(var, false, false);
         }
         return fcw.writeFunction(func, vars);
     }
@@ -538,7 +540,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
             writer.print("\",");
             new TypeWriter(_context).printType(arg.getType());
             writer.print(",");
-            writer.print(arg.isRef());
+            writer.print(fullyQualifiedName(arg.getSemantics()));
             writer.print(",");
             writer.print(arg.isVarArgs());
             writer.print(")");

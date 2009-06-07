@@ -18,11 +18,8 @@
 
 package us.terebi.lang.lpc.runtime.jvm;
 
-import java.util.Set;
-
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 
 /**
  * 

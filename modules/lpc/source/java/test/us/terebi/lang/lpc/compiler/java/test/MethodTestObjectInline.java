@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.compiler.java.test;
 
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcMethod;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
@@ -29,8 +30,8 @@ public class MethodTestObjectInline extends LpcObject
 {
     @LpcMethod(name="hoozit", modifiers = { us.terebi.lang.lpc.runtime.MemberDefinition.Modifier.PUBLIC })
     @LpcReturn(kind = us.terebi.lang.lpc.runtime.LpcType.Kind.MIXED, depth = 1)
-    protected LpcValue hoozit(@LpcParameter(kind = us.terebi.lang.lpc.runtime.LpcType.Kind.STRING, depth = 0, name = "s")
-    LpcValue s, @LpcParameter(kind = us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, depth = 0, name = "o")
+    protected LpcValue hoozit(@LpcParameter(kind = us.terebi.lang.lpc.runtime.LpcType.Kind.STRING, depth = 0, name = "s", semantics=ArgumentSemantics.BY_VALUE)
+    LpcValue s, @LpcParameter(kind = us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, depth = 0, name = "o", semantics=ArgumentSemantics.BY_VALUE)
     LpcValue o)
     {
         return efun("implode").execute(s, efun("call_other").execute(o, makeValue("getName")));

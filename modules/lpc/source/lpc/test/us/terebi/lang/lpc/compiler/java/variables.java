@@ -17,9 +17,9 @@ public class variables extends LpcObject
     public @LpcMethod(name="func", modifiers={us.terebi.lang.lpc.runtime.MemberDefinition.Modifier.PUBLIC}) 
     @LpcReturn(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.VOID, depth=0) LpcValue 
     func_( 
-        @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.INT, depth=0, name="param_int") LpcValue _p_param_int_v ,
-        @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, depth=0, name="param_object") LpcValue _p_param_object_v ,
-        @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.STRING, depth=0, name="param_string") LpcValue _p_param_string_v )
+        @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.INT, depth=0, name="param_int", semantics=us.terebi.lang.lpc.runtime.ArgumentSemantics.BY_VALUE) LpcValue _p_param_int_v ,
+        @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, depth=0, name="param_object", semantics=us.terebi.lang.lpc.runtime.ArgumentSemantics.BY_VALUE) LpcValue _p_param_object_v ,
+        @LpcParameter(kind=us.terebi.lang.lpc.runtime.LpcType.Kind.STRING, depth=0, name="param_string", semantics=us.terebi.lang.lpc.runtime.ArgumentSemantics.BY_VALUE) LpcValue _p_param_string_v )
     {
         final LpcVariable _p_param_int = new LpcVariable( "param_int", withType( us.terebi.lang.lpc.runtime.LpcType.Kind.INT, 0) , _p_param_int_v);
         final LpcVariable _p_param_object = new LpcVariable( "param_object", withType( us.terebi.lang.lpc.runtime.LpcType.Kind.OBJECT, 0) , _p_param_object_v);

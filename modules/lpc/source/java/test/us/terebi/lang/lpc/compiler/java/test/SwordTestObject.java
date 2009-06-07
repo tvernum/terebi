@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.compiler.java.test;
 
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.LpcType.Kind;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
@@ -46,7 +47,7 @@ public class SwordTestObject extends LpcObject
 
     @LpcMethod(name = "set_wc", modifiers = { Modifier.PUBLIC })
     @LpcReturn(kind = Kind.VOID, depth = 0)
-    public LpcValue set_wc(@LpcParameter(name = "wc", kind = Kind.INT, depth = 0)
+    public LpcValue set_wc(@LpcParameter(name = "wc", kind = Kind.INT, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue wc_)
     {
         return VoidValue.INSTANCE;
@@ -54,7 +55,7 @@ public class SwordTestObject extends LpcObject
 
     @LpcMethod(name = "add_wc_bonus", modifiers = { Modifier.PUBLIC })
     @LpcReturn(kind = Kind.VOID, depth = 0)
-    public LpcValue add_wc_bonus(@LpcParameter(name = "func", kind = Kind.FUNCTION, depth = 0)
+    public LpcValue add_wc_bonus(@LpcParameter(name = "func", kind = Kind.FUNCTION, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue func_)
     {
         return VoidValue.INSTANCE;

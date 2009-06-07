@@ -185,7 +185,7 @@ public class JavaCompilerTest implements Callable<Object>
 
     private String compileToJava(Source source, String className) throws IOException
     {
-        FunctionMap efuns = StandardEfuns.get();
+        FunctionMap efuns = StandardEfuns.getSignatures();
         ObjectManager manager = new CompilerObjectManager();
         JavaCompiler compiler = new JavaCompiler(efuns, manager);
         manager.registerObject(new CompiledObject(manager, new BasicScopeLookup(manager), "/std/lib/object",

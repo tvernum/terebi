@@ -40,7 +40,7 @@ public class StringValue extends AbstractValue implements LpcValue
 
     public boolean asBoolean()
     {
-        return "".equals(_value) || _value == null;
+        return _value != null;
     }
 
     public ByteSequence asBuffer()
@@ -85,6 +85,11 @@ public class StringValue extends AbstractValue implements LpcValue
     protected int valueHashCode()
     {
         return _value.hashCode();
+    }
+
+    public String toString()
+    {
+        return _value;
     }
 
 }

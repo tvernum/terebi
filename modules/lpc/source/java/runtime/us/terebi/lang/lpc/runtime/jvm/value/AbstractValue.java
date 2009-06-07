@@ -40,16 +40,16 @@ public abstract class AbstractValue implements LpcValue
 
     protected abstract CharSequence getDescription();
 
-    private LpcRuntimeException isNot(String kind)
+    protected LpcRuntimeException isNot(String kind)
     {
         return new LpcRuntimeException(getDescription() + " is not " + kind);
     }
 
     public boolean asBoolean()
     {
-        return asLong() != 0;
+        return true;
     }
-
+    
     public ByteSequence asBuffer()
     {
         throw isNot("a buffer");
@@ -123,4 +123,9 @@ public abstract class AbstractValue implements LpcValue
 
     protected abstract boolean valueEquals(LpcValue other);
     protected abstract int valueHashCode();
+    
+    public String toString()
+    {
+        return getDescription().toString();
+    }
 }

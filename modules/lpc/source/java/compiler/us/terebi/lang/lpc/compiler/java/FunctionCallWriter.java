@@ -37,9 +37,11 @@ import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.ParserConstants;
 import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.Callable.Kind;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ReferenceValue;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
 import us.terebi.util.Range;
 import us.terebi.util.ToString;
@@ -79,10 +81,12 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
     {
         public final InternalVariable variable;
         public final boolean expand;
+        public final boolean reference;
 
-        public FunctionArgument(InternalVariable var, boolean expander)
+        public FunctionArgument(InternalVariable var, boolean ref, boolean expander)
         {
             this.variable = var;
+            this.reference = ref;
             this.expand = expander;
         }
     }
@@ -205,6 +209,17 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
                     writer.print(")");
                 }
             }
+            else if (argVar.reference)
+            {
+                if (argVar.variable.reference)
+                {
+                    writer.print(argVar.variable.name);
+                }
+                else
+                {
+                    throw new CompileException((Token) null, "Internal error - expected reference but got " + argVar.variable);
+                }
+            }
             else
             {
                 argVar.variable.value(writer);
@@ -230,13 +245,15 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
 
     public FunctionArgument[] processArguments(FunctionReference function, InternalVariable[] prelim, ASTFunctionArguments args)
     {
+        List< ? extends ArgumentDefinition> signatureArguments = function.signature.getArguments();
+
         FunctionArgument[] argVars = new FunctionArgument[prelim.length + args.jjtGetNumChildren()];
         for (int i = 0; i < prelim.length; i++)
         {
-            argVars[i] = new FunctionArgument(prelim[i], false);
+            boolean ref = (signatureArguments.size() > i && signatureArguments.get(i).getSemantics() == ArgumentSemantics.IMPLICIT_REFERENCE);
+            argVars[i] = new FunctionArgument(prelim[i], ref, false);
         }
 
-        List< ? extends ArgumentDefinition> signatureArguments = function.signature.getArguments();
         // @ TODO vargs
         // @ TODO expandos
         Range<Integer> allowedArgCount = FunctionUtil.getAllowedNumberOfArgument(function.signature);
@@ -283,13 +300,13 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
         if (head.kind == ParserConstants.REF)
         {
             // <REF> Identifier()
-            return new FunctionArgument(printRef(node, data), false);
+            return new FunctionArgument(printRef(node, data), true, false);
         }
         else if (head.kind == ParserConstants.CLASS)
         {
             // ClassType()
             // <CLASS> Identifier()
-            return new FunctionArgument(printClass(node), false);
+            return new FunctionArgument(printClass(node), false, false);
         }
         else
         {
@@ -297,7 +314,29 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
             boolean expand = node.jjtGetNumChildren() == 2;
             SimpleNode expr = (SimpleNode) node.jjtGetChild(0);
             InternalVariable var = new ExpressionWriter(_context).evaluate(expr);
-            return new FunctionArgument(var, expand);
+            if (data.definition.getSemantics() == ArgumentSemantics.IMPLICIT_REFERENCE)
+            {
+                if (expand)
+                {
+                    throw new CompileException(node, "Cannot apply expansion (...) to implicit reference argument "
+                            + data.definition.getName()
+                            + " to "
+                            + data.function.name);
+                }
+                if (!var.reference)
+                {
+                    throw new CompileException(node, "Argument "
+                            + data.definition.getName()
+                            + " to "
+                            + data.function.name
+                            + " requires a reference value");
+                }
+                return new FunctionArgument(printRef(var.name), true, false);
+            }
+            else
+            {
+                return new FunctionArgument(var, false, expand);
+            }
         }
     }
 
@@ -320,7 +359,7 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
 
     private InternalVariable printRef(ASTArgumentExpression node, ArgumentData data)
     {
-        if (!data.definition.isRef())
+        if (data.definition.getSemantics() == ArgumentSemantics.BY_VALUE)
         {
             throw new CompileException(node, "Argument "
                     + data.definition.getName()
@@ -329,14 +368,20 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
                     + " does not accept references");
         }
         SimpleNode identifier = (SimpleNode) node.jjtGetChild(0);
-        String name = _context.variables().allocateInternalVariableName();
-        _context.writer().print("LpcReference ");
-        _context.writer().print(name);
-        _context.writer().print("= new LpcReference(");
-        _context.writer().print(ASTUtil.getImage(identifier));
-        _context.writer().print(")");
-
+        String init = ASTUtil.getImage(identifier);
         // @TODO check the symbol table for the type (and to check whether it's been declared, etc)
+        return printRef(init);
+    }
+
+    private InternalVariable printRef(String initFrom)
+    {
+        String name = _context.variables().allocateInternalVariableName();
+        _context.writer().print("final LpcReferenceValue ");
+        _context.writer().print(name);
+        _context.writer().print("= new " + ReferenceValue.class.getName() + "(");
+        _context.writer().print(initFrom);
+        _context.writer().print(");");
+
         return new InternalVariable(name, true, Types.MIXED);
     }
 

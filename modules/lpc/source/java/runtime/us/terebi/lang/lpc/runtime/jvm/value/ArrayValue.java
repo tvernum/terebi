@@ -33,7 +33,7 @@ public class ArrayValue extends AbstractValue implements LpcValue
     private final List<LpcValue> _list;
     private final LpcType _type;
 
-    public ArrayValue(LpcType type, Collection<LpcValue> collection)
+    public ArrayValue(LpcType type, Collection<? extends LpcValue> collection)
     {
         this(type, new ArrayList<LpcValue>(collection));
     }
@@ -53,7 +53,7 @@ public class ArrayValue extends AbstractValue implements LpcValue
     {
         return _list;
     }
-
+    
     protected CharSequence getDescription()
     {
         return _type.toString();

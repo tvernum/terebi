@@ -19,25 +19,35 @@
 package us.terebi.lang.lpc.runtime.util;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.LpcType;
 
 public class ArgumentSpec implements ArgumentDefinition
 {
     private final String _name;
     private final LpcType _type;
-    private final boolean _ref;
+    private final ArgumentSemantics _semantics;
     private final boolean _varargs;
 
     public ArgumentSpec(String name, LpcType type)
     {
-        this(name, type, false, false);
+        this(name, type, ArgumentSemantics.BY_VALUE, false);
     }
 
+    /**
+     * @deprecated Use {@link #ArgumentSpec(String, LpcType, ArgumentSemantics, boolean)} instead
+     */
+    @Deprecated
     public ArgumentSpec(String name, LpcType type, boolean ref, boolean varargs)
+    {
+        this(name, type, ref ? ArgumentSemantics.EXPLICIT_REFERENCE : ArgumentSemantics.BY_VALUE, varargs);
+    }
+
+    public ArgumentSpec(String name, LpcType type, ArgumentSemantics semantics, boolean varargs)
     {
         _name = name;
         _type = type;
-        _ref = ref;
+        _semantics = semantics;
         _varargs = varargs;
     }
 
@@ -51,9 +61,9 @@ public class ArgumentSpec implements ArgumentDefinition
         return _type;
     }
 
-    public boolean isRef()
+    public ArgumentSemantics getSemantics()
     {
-        return _ref;
+        return _semantics;
     }
 
     public boolean isVarArgs()
@@ -65,11 +75,18 @@ public class ArgumentSpec implements ArgumentDefinition
     {
         StringBuilder builder = new StringBuilder();
         builder.append(_type);
-        if (_ref)
+        switch (_semantics)
         {
-            builder.append(" ref");
+            case EXPLICIT_REFERENCE:
+                builder.append(" ref ");
+                break;
+            case IMPLICIT_REFERENCE:
+                builder.append(" ~");
+                break;
+            default:
+                builder.append(" ");
+                break;
         }
-        builder.append(" ");
         builder.append(_name);
         if (_varargs)
         {

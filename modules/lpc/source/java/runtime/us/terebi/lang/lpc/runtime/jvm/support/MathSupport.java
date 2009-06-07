@@ -18,12 +18,17 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
+import org.hamcrest.core.IsSame;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
+
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
  * 
@@ -67,8 +72,11 @@ public class MathSupport
 
     public static LpcValue add(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        if (isString(left))
+        {
+            return new StringValue(left.asString() + right.asString());
+        }
+        throw new UnsupportedOperationException("add - Not implemented");
     }
 
     public static LpcValue add(int left, LpcValue right)

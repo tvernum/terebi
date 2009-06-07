@@ -19,6 +19,7 @@
 package us.terebi.lang.lpc.runtime.jvm;
 
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
  * 
@@ -34,6 +35,11 @@ public class LpcConstants
 
         public static final IntValue TRUE = ONE;
         public static final IntValue FALSE = ZERO;
+    }
+
+    public static final class STRING
+    {
+        public static final StringValue BLANK = new StringValue("");
     }
 
 }

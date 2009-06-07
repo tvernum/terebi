@@ -20,9 +20,12 @@ package us.terebi.lang.lpc.runtime.jvm;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.HashMap;
+import java.util.Map;
 
 import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
-import us.terebi.lang.lpc.runtime.FunctionSignature;
+import us.terebi.lang.lpc.runtime.jvm.context.Functions;
+import us.terebi.lang.lpc.runtime.jvm.context.MappedFunctions;
 import us.terebi.lang.lpc.runtime.jvm.efun.AllocateEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.AllocateMappingEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.ArraypEfun;
@@ -43,6 +46,7 @@ import us.terebi.lang.lpc.runtime.jvm.efun.CtimeEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.DebugInfoEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.DebugMessageEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.DestructEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
 import us.terebi.lang.lpc.runtime.jvm.efun.EnvironmentEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.ErrorEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.EvaluateEfun;
@@ -126,194 +130,212 @@ public class StandardEfuns
 {
     public static class MISC
     {
-        public static final FunctionSignature nullp = new NullpEfun();
-        public static final FunctionSignature undefinedp = nullp;
-        public static final FunctionSignature typeof = new TypeofEfun();
+        public static final Efun nullp = new NullpEfun();
+        public static final Efun undefinedp = nullp;
+        public static final Efun typeof = new TypeofEfun();
     }
 
     public static class STRING
     {
-        public static final FunctionSignature stringp = new StringpEfun();
-        public static final FunctionSignature implode = new ImplodeEfun();
-        public static final FunctionSignature explode = new ExplodeEfun();
-        public static final FunctionSignature strlen = new StrlenEfun();
-        public static final FunctionSignature sscanf = new SscanfEfun();
-        public static final FunctionSignature sprintf = new SprinfEfun();
-        public static final FunctionSignature strsrch = new StrsrchEfun();
-        public static final FunctionSignature replace_string = new ReplaceStringEfun();
-        public static final FunctionSignature regexp = new RegexpEfun();
-        public static final FunctionSignature lower_case = new LowerCaseEfun();
-        public static final FunctionSignature upper_case = new UpperCaseEfun();
-        public static final FunctionSignature capitalize = new CapitalizeEfun();
-        public static final FunctionSignature pluralize = new PluralizeEfun();
+        public static final Efun stringp = new StringpEfun();
+        public static final Efun implode = new ImplodeEfun();
+        public static final Efun explode = new ExplodeEfun();
+        public static final Efun strlen = new StrlenEfun();
+        public static final Efun sscanf = new SscanfEfun();
+        public static final Efun sprintf = new SprinfEfun();
+        public static final Efun strsrch = new StrsrchEfun();
+        public static final Efun replace_string = new ReplaceStringEfun();
+        public static final Efun regexp = new RegexpEfun();
+        public static final Efun lower_case = new LowerCaseEfun();
+        public static final Efun upper_case = new UpperCaseEfun();
+        public static final Efun capitalize = new CapitalizeEfun();
+        public static final Efun pluralize = new PluralizeEfun();
     }
 
     public static class COLLECTION
     {
-        public static final FunctionSignature sizeof = new SizeofEfun();
-        public static final FunctionSignature allocate = new AllocateEfun();
-        public static final FunctionSignature allocate_mapping = new AllocateMappingEfun();
-        public static final FunctionSignature keys = new KeysEfun();
-        public static final FunctionSignature filter = new FilterEfun();
-        public static final FunctionSignature map = new MapEfun();
-        public static final FunctionSignature sort_array = new SortArrayEfun();
-        public static final FunctionSignature member_array = new MemberArrayEfun();
-        public static final FunctionSignature arrayp = new ArraypEfun();
-        public static final FunctionSignature pointerp = arrayp;
-        public static final FunctionSignature mapp = new MappEfun();
+        public static final Efun sizeof = new SizeofEfun();
+        public static final Efun allocate = new AllocateEfun();
+        public static final Efun allocate_mapping = new AllocateMappingEfun();
+        public static final Efun keys = new KeysEfun();
+        public static final Efun filter = new FilterEfun();
+        public static final Efun map = new MapEfun();
+        public static final Efun sort_array = new SortArrayEfun();
+        public static final Efun member_array = new MemberArrayEfun();
+        public static final Efun arrayp = new ArraypEfun();
+        public static final Efun pointerp = arrayp;
+        public static final Efun mapp = new MappEfun();
     }
 
     public static class OBJECT
     {
-        public static final FunctionSignature this_object = new ThisObjectEfun();
-        public static final FunctionSignature master = new MasterEfun();
-        public static final FunctionSignature inherits = new InheritsEfun();
-        public static final FunctionSignature deep_inherit_list = new InheritListEfun(true);
-        public static final FunctionSignature shallow_inherit_list = new InheritListEfun(false);
-        public static final FunctionSignature inherit_list = shallow_inherit_list;
-        public static final FunctionSignature file_name = new FileNameEfun();
-        public static final FunctionSignature find_object = new FindObjectEfun();
-        public static final FunctionSignature objects = new ObjectsEfun();
-        public static final FunctionSignature objectp = new ObjectpEfun();
-        public static final FunctionSignature load_object = new LoadObjectEfun();
-        public static final FunctionSignature clone_object = new CloneObjectEfun();
-        public static final FunctionSignature _new = clone_object;
-        public static final FunctionSignature destruct = new DestructEfun();
-        public static final FunctionSignature clonep = new ClonepEfun();
+        public static final Efun this_object = new ThisObjectEfun();
+        public static final Efun master = new MasterEfun();
+        public static final Efun inherits = new InheritsEfun();
+        public static final Efun deep_inherit_list = new InheritListEfun(true);
+        public static final Efun shallow_inherit_list = new InheritListEfun(false);
+        public static final Efun inherit_list = shallow_inherit_list;
+        public static final Efun file_name = new FileNameEfun();
+        public static final Efun find_object = new FindObjectEfun();
+        public static final Efun objects = new ObjectsEfun();
+        public static final Efun objectp = new ObjectpEfun();
+        public static final Efun load_object = new LoadObjectEfun();
+        public static final Efun clone_object = new CloneObjectEfun();
+        public static final Efun _new = clone_object;
+        public static final Efun destruct = new DestructEfun();
+        public static final Efun clonep = new ClonepEfun();
     }
 
     public static class CLASS
     {
-        public static final FunctionSignature classp = new ClasspEfun();
+        public static final Efun classp = new ClasspEfun();
     }
 
     public static class BUFFER
     {
-        public static final FunctionSignature bufferp = new BufferpEfun();
+        public static final Efun bufferp = new BufferpEfun();
     }
 
     public static class ENVIRONMENT
     {
-        public static final FunctionSignature environment = new EnvironmentEfun();
-        public static final FunctionSignature present = new PresentEfun();
-        public static final FunctionSignature all_inventory = new InventoryEfun(false);
-        public static final FunctionSignature deep_inventory = new InventoryEfun(true);
+        public static final Efun environment = new EnvironmentEfun();
+        public static final Efun present = new PresentEfun();
+        public static final Efun all_inventory = new InventoryEfun(false);
+        public static final Efun deep_inventory = new InventoryEfun(true);
     }
 
     public static class INTERACTIVE
     {
-        public static final FunctionSignature users = new UsersEfun();
-        public static final FunctionSignature userp = new UserpEfun();
-        public static final FunctionSignature interactive = new InteractiveEfun();
-        public static final FunctionSignature exec = new ExecEfun();
-        public static final FunctionSignature this_player = new ThisPlayerEfun();
-        public static final FunctionSignature find_player = new FindPlayerEfun();
-        public static final FunctionSignature find_living = new FindLivingEfun();
-        public static final FunctionSignature living = new LivingEfun();
-        public static final FunctionSignature livings = new LivingsEfun();
-        public static final FunctionSignature write = new WriteEfun();
-        public static final FunctionSignature message = new MessageEfun();
-        public static final FunctionSignature flush_messages = new FlushMessagesEfun();
-        public static final FunctionSignature terminal_colour = new TerminalColourEfun();
-        public static final FunctionSignature snoop = new SnoopEfun();
-        public static final FunctionSignature query_snoop = new QuerySnoopEfun();
-        public static final FunctionSignature query_snooping = new QuerySnoopingEfun();
+        public static final Efun users = new UsersEfun();
+        public static final Efun userp = new UserpEfun();
+        public static final Efun interactive = new InteractiveEfun();
+        public static final Efun exec = new ExecEfun();
+        public static final Efun this_player = new ThisPlayerEfun();
+        public static final Efun find_player = new FindPlayerEfun();
+        public static final Efun find_living = new FindLivingEfun();
+        public static final Efun living = new LivingEfun();
+        public static final Efun livings = new LivingsEfun();
+        public static final Efun write = new WriteEfun();
+        public static final Efun message = new MessageEfun();
+        public static final Efun flush_messages = new FlushMessagesEfun();
+        public static final Efun terminal_colour = new TerminalColourEfun();
+        public static final Efun snoop = new SnoopEfun();
+        public static final Efun query_snoop = new QuerySnoopEfun();
+        public static final Efun query_snooping = new QuerySnoopingEfun();
     }
 
     public static class MATH
     {
-        public static final FunctionSignature to_int = new ToIntEfun();
-        public static final FunctionSignature to_float = new ToFloatEfun();
-        public static final FunctionSignature intp = new IntpEfun();
-        public static final FunctionSignature floatp = new IntpEfun();
-        public static final FunctionSignature random = new RandomEfun();
+        public static final Efun to_int = new ToIntEfun();
+        public static final Efun to_float = new ToFloatEfun();
+        public static final Efun intp = new IntpEfun();
+        public static final Efun floatp = new IntpEfun();
+        public static final Efun random = new RandomEfun();
     }
 
     public static class CALLS
     {
-        public static final FunctionSignature call_out = new CallOutEfun();
-        public static final FunctionSignature call_out_info = new CallOutInfoEfun();
-        public static final FunctionSignature call_other = new CallOtherEfun();
-        public static final FunctionSignature functions = new FunctionsEfun();
-        public static final FunctionSignature function_exists = new FunctionExistsEfun();
-        public static final FunctionSignature previous_object = new PreviousObjectEfun();
-        public static final FunctionSignature functionp = new FunctionpEfun();
-        public static final FunctionSignature evaluate = new EvaluateEfun();
-        public static final FunctionSignature bind = new BindEfun();
-        public static final FunctionSignature call_stack = new CallStackEfun();
+        public static final Efun call_out = new CallOutEfun();
+        public static final Efun call_out_info = new CallOutInfoEfun();
+        public static final Efun call_other = new CallOtherEfun();
+        public static final Efun functions = new FunctionsEfun();
+        public static final Efun function_exists = new FunctionExistsEfun();
+        public static final Efun previous_object = new PreviousObjectEfun();
+        public static final Efun functionp = new FunctionpEfun();
+        public static final Efun evaluate = new EvaluateEfun();
+        public static final Efun bind = new BindEfun();
+        public static final Efun call_stack = new CallStackEfun();
     }
 
     public static class FILE
     {
-        public static final FunctionSignature file_size = new FileSizeEfun();
-        public static final FunctionSignature read_file = new ReadFileEfun();
-        public static final FunctionSignature read_bytes = new ReadBytesEfun();
-        public static final FunctionSignature write_file = new WriteFileEfun();
-        public static final FunctionSignature cp = new CopyFileEfun();
-        public static final FunctionSignature rm = new RemoveFileEfun();
-        public static final FunctionSignature mkdir = new CreateDirectoryEfun();
-        public static final FunctionSignature get_dir = new GetDirectoryInfoEfun();
+        public static final Efun file_size = new FileSizeEfun();
+        public static final Efun read_file = new ReadFileEfun();
+        public static final Efun read_bytes = new ReadBytesEfun();
+        public static final Efun write_file = new WriteFileEfun();
+        public static final Efun cp = new CopyFileEfun();
+        public static final Efun rm = new RemoveFileEfun();
+        public static final Efun mkdir = new CreateDirectoryEfun();
+        public static final Efun get_dir = new GetDirectoryInfoEfun();
     }
 
     public static class SYSTEM
     {
-        public static final FunctionSignature shutdown = new ShutdownEfun();
-        public static final FunctionSignature error = new ErrorEfun();
-        public static final FunctionSignature debug_message = new DebugMessageEfun();
-        public static final FunctionSignature debug_info = new DebugInfoEfun();
-        public static final FunctionSignature time = new TimeEfun();
-        public static final FunctionSignature ctime = new CtimeEfun();
-        public static final FunctionSignature localtime = new LocaltimeEfun();
-        public static final FunctionSignature crypt = new CryptEfun();
-        public static final FunctionSignature query_privs = new QueryPrivsEfun();
-        public static final FunctionSignature reset_eval_cost = new ResetEvalCostEfun();
-        public static final FunctionSignature set_eval_limit = new SetEvalLimitEfun();
-        public static final FunctionSignature dump_file_descriptors = new NoOpEfun(new StringValue(""));
+        public static final Efun shutdown = new ShutdownEfun();
+        public static final Efun error = new ErrorEfun();
+        public static final Efun debug_message = new DebugMessageEfun();
+        public static final Efun debug_info = new DebugInfoEfun();
+        public static final Efun time = new TimeEfun();
+        public static final Efun ctime = new CtimeEfun();
+        public static final Efun localtime = new LocaltimeEfun();
+        public static final Efun crypt = new CryptEfun();
+        public static final Efun query_privs = new QueryPrivsEfun();
+        public static final Efun reset_eval_cost = new ResetEvalCostEfun();
+        public static final Efun set_eval_limit = new SetEvalLimitEfun();
+        public static final Efun dump_file_descriptors = new NoOpEfun(new StringValue(""));
     }
 
     public static class NET
     {
-        public static final FunctionSignature query_ip_number = new QueryIpNumberEfun();
-        public static final FunctionSignature query_ip_name = new QueryIpNameEfun();
+        public static final Efun query_ip_number = new QueryIpNumberEfun();
+        public static final Efun query_ip_name = new QueryIpNameEfun();
     }
 
-    public static FunctionMap get()
+    private static final Map<String, Efun> _efuns = new HashMap<String, Efun>();
+
+    public static FunctionMap getSignatures()
     {
-        FunctionMap efuns = new FunctionMap();
-        populate(efuns, MISC.class);
-        populate(efuns, STRING.class);
-        populate(efuns, OBJECT.class);
-        populate(efuns, CLASS.class);
-        populate(efuns, BUFFER.class);
-        populate(efuns, ENVIRONMENT.class);
-        populate(efuns, COLLECTION.class);
-        populate(efuns, INTERACTIVE.class);
-        populate(efuns, MATH.class);
-        populate(efuns, CALLS.class);
-        populate(efuns, FILE.class);
-        populate(efuns, SYSTEM.class);
-        populate(efuns, NET.class);
-        return efuns;
+        checkPopulated();
+        return new FunctionMap(_efuns);
     }
 
-    private static void populate(FunctionMap efuns, Class< ? > container)
+    public static Functions getImplementation()
+    {
+        checkPopulated();
+        return new MappedFunctions(_efuns);
+    }
+
+    private static void checkPopulated()
+    {
+        synchronized (_efuns)
+        {
+            if (_efuns.isEmpty())
+            {
+                populate(_efuns, MISC.class);
+                populate(_efuns, STRING.class);
+                populate(_efuns, OBJECT.class);
+                populate(_efuns, CLASS.class);
+                populate(_efuns, BUFFER.class);
+                populate(_efuns, ENVIRONMENT.class);
+                populate(_efuns, COLLECTION.class);
+                populate(_efuns, INTERACTIVE.class);
+                populate(_efuns, MATH.class);
+                populate(_efuns, CALLS.class);
+                populate(_efuns, FILE.class);
+                populate(_efuns, SYSTEM.class);
+                populate(_efuns, NET.class);
+            }
+        }
+    }
+
+    private static void populate(Map<String, Efun> efuns, Class< ? > container)
     {
         Field[] fields = container.getFields();
         for (Field field : fields)
         {
             boolean isStatic = Modifier.isStatic(field.getModifiers());
-            boolean isSignature = FunctionSignature.class.isAssignableFrom(field.getType());
+            boolean isSignature = Efun.class.isAssignableFrom(field.getType());
             if (isSignature && isStatic)
             {
                 try
                 {
-                    FunctionSignature signature = (FunctionSignature) field.get(null);
+                    Efun efun = (Efun) field.get(null);
                     String name = field.getName();
                     if (name.charAt(0) == '_')
                     {
                         name = name.substring(1);
                     }
-                    efuns.put(name, signature);
+                    efuns.put(name, efun);
                 }
                 catch (IllegalAccessException e)
                 {

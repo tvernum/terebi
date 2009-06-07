@@ -18,25 +18,12 @@
 
 package us.terebi.lang.lpc.runtime.jvm;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import us.terebi.lang.lpc.runtime.ArgumentSemantics;
-import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.LpcValue;
 
 /**
  * 
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface LpcParameter
+public interface LpcReferenceValue extends LpcReference, LpcValue
 {
-    LpcType.Kind kind();
-    int depth();
-    String name() ;
-    String className() default "";
-    ArgumentSemantics semantics();
-    boolean varargs() default false;
+    // Mixin
 }

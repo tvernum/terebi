@@ -16,27 +16,39 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm;
+package us.terebi.lang.lpc.runtime.jvm.context;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.HashMap;
+import java.util.Map;
 
-import us.terebi.lang.lpc.runtime.ArgumentSemantics;
-import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.Callable;
 
 /**
  * 
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface LpcParameter
+public class MappedFunctions implements Functions
 {
-    LpcType.Kind kind();
-    int depth();
-    String name() ;
-    String className() default "";
-    ArgumentSemantics semantics();
-    boolean varargs() default false;
+    private final Map<String, Callable> _efuns;
+
+    public MappedFunctions()
+    {
+        _efuns = new HashMap<String, Callable>();
+    }
+
+    public MappedFunctions(Map<String, ? extends Callable> efuns)
+    {
+        this();
+        _efuns.putAll(efuns);
+    }
+
+    public void defineEfun(String name, Callable efun)
+    {
+        _efuns.put(name, efun);
+    }
+
+    public Callable efun(String name)
+    {
+        return _efuns.get(name);
+    }
+
 }

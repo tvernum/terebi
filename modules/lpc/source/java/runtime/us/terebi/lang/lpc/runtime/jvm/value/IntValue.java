@@ -53,6 +53,11 @@ public class IntValue extends AbstractValue
     {
         return _value;
     }
+    
+    public boolean asBoolean()
+    {
+        return _value != 0;
+    }
 
     protected boolean valueEquals(LpcValue other)
     {

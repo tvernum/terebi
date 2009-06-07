@@ -22,6 +22,8 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.terebi.lang.lpc.compiler.java.TypeWriter.fullyQualifiedName;
+
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.StatementWriter.StatementResult;
 import us.terebi.lang.lpc.compiler.java.context.CompileContext;
@@ -73,7 +75,7 @@ public class MethodWriter extends MemberWriter implements ParserVisitor
         List< ? extends ArgumentDefinition> args = getArgumentDefinitions(parameterDeclarations);
 
         String name = identifier.jjtGetFirstToken().image;
-        String internalName=  name + "_";
+        String internalName = name + "_";
         FunctionSignature signature = getFunctionSignature(type, args);
         getContext().functions().defineLocalMethod(name, internalName, signature);
         //        System.err.println("Signature of " + name + " is " + signature);
@@ -201,10 +203,8 @@ public class MethodWriter extends MemberWriter implements ParserVisitor
         print(", name=\"");
         print(arg.getName());
         print("\"");
-        if (arg.isRef())
-        {
-            print(", ref=true");
-        }
+        print(", semantics=");
+        print(fullyQualifiedName(arg.getSemantics()));
         if (arg.isVarArgs())
         {
             print(", varargs=true");

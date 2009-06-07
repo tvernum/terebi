@@ -18,8 +18,11 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
+
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
+import us.terebi.lang.lpc.runtime.jvm.value.StringIndex;
 
 /**
  * 
@@ -28,8 +31,12 @@ public class IndexSupport
 {
     public static LpcReference index(LpcReference element, LpcValue index, boolean reverse)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        LpcValue value = element.get();
+        if (isString(value))
+        {
+            return new StringIndex(element, index, reverse);
+        }
+        throw new UnsupportedOperationException("index - Not implemented");
     }
 
     public static LpcValue index(LpcValue element, LpcValue index, boolean reverse)
@@ -38,12 +45,15 @@ public class IndexSupport
         return null;
     }
 
-    public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endElement, boolean endReverse)
+    public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endElement,
+            boolean endReverse)
     {
         // @TODO Auto-generated method stub
         return null;
     }
-    public static LpcValue index(LpcValue element, LpcValue startIndex, boolean startReverse, LpcValue endElement, boolean endReverse)
+
+    public static LpcValue index(LpcValue element, LpcValue startIndex, boolean startReverse, LpcValue endElement,
+            boolean endReverse)
     {
         // @TODO Auto-generated method stub
         return null;

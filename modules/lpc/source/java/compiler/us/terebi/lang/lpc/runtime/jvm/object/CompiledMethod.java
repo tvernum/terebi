@@ -92,7 +92,7 @@ public class CompiledMethod implements CompiledMethodDefinition
             LpcParameter parameterAnnotation = AnnotationUtil.findAnnotation(LpcParameter.class,
                     method.getParameterAnnotations()[i]);
             LpcType type = getType(parameterAnnotation.kind(), parameterAnnotation.className(), parameterAnnotation.depth());
-            arguments[i] = new ArgumentSpec(parameterAnnotation.name(), type, parameterAnnotation.ref(),
+            arguments[i] = new ArgumentSpec(parameterAnnotation.name(), type, parameterAnnotation.semantics(),
                     parameterAnnotation.varargs());
         }
 

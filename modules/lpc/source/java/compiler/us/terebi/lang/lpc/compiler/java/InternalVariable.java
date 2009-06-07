@@ -60,6 +60,8 @@ class InternalVariable
 
     public void declare(PrintWriter writer, boolean declareAsFinal)
     {
+        // @TODO Handle cases when this is outside a methos (i.e. we're declaring a field...)
+        // Either make the variables private, or use an initialiser block...
         if (declareAsFinal)
         {
             writer.print("final ");

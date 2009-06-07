@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.compiler.java.test;
 
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.LpcType.Kind;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
@@ -34,7 +35,7 @@ public class ObjectTestObject extends LpcObject
 {
     @LpcMethod(name="set_name", modifiers = { Modifier.PUBLIC })
     @LpcReturn(kind = Kind.VOID, depth = 0)
-    public LpcValue set_name(@LpcParameter(name = "name", kind = Kind.STRING, depth = 0)
+    public LpcValue set_name(@LpcParameter(name = "name", kind = Kind.STRING, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue name)
     {
         return VoidValue.INSTANCE;
@@ -42,7 +43,7 @@ public class ObjectTestObject extends LpcObject
 
     @LpcMethod(name="add_alias", modifiers = { Modifier.PUBLIC })
     @LpcReturn(kind = Kind.VOID, depth = 0)
-    public LpcValue add_alias(@LpcParameter(name = "alias", kind = Kind.STRING, depth = 0)
+    public LpcValue add_alias(@LpcParameter(name = "alias", kind = Kind.STRING, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue alias)
     {
         return VoidValue.INSTANCE;
@@ -50,7 +51,7 @@ public class ObjectTestObject extends LpcObject
 
     @LpcMethod(name="set_short", modifiers = { Modifier.PUBLIC })
     @LpcReturn(kind = Kind.VOID, depth = 0)
-    public LpcValue set_short(@LpcParameter(name = "short", kind = Kind.STRING, depth = 0)
+    public LpcValue set_short(@LpcParameter(name = "short", kind = Kind.STRING, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue short_)
     {
         return VoidValue.INSTANCE;
@@ -58,7 +59,7 @@ public class ObjectTestObject extends LpcObject
 
     @LpcMethod(name="set_long", modifiers = { Modifier.PUBLIC })
     @LpcReturn(kind = Kind.VOID, depth = 0)
-    public LpcValue set_long(@LpcParameter(name = "long", kind = Kind.STRING, depth = 0)
+    public LpcValue set_long(@LpcParameter(name = "long", kind = Kind.STRING, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue long_)
     {
         return VoidValue.INSTANCE;
@@ -66,7 +67,7 @@ public class ObjectTestObject extends LpcObject
     
     @LpcMethod(name="set_weight", modifiers = { Modifier.PUBLIC })
     @LpcReturn(kind = Kind.VOID, depth = 0)
-    public LpcValue set_weight(@LpcParameter(name = "weight", kind = Kind.INT, depth = 0)
+    public LpcValue set_weight(@LpcParameter(name = "weight", kind = Kind.INT, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
             LpcValue weight_)
     {
         return VoidValue.INSTANCE;

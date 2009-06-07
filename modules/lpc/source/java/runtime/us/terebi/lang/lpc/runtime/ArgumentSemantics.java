@@ -16,27 +16,9 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm;
+package us.terebi.lang.lpc.runtime;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import us.terebi.lang.lpc.runtime.ArgumentSemantics;
-import us.terebi.lang.lpc.runtime.LpcType;
-
-/**
- * 
- */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.PARAMETER)
-public @interface LpcParameter
+public enum ArgumentSemantics
 {
-    LpcType.Kind kind();
-    int depth();
-    String name() ;
-    String className() default "";
-    ArgumentSemantics semantics();
-    boolean varargs() default false;
+    BY_VALUE, EXPLICIT_REFERENCE, IMPLICIT_REFERENCE,
 }

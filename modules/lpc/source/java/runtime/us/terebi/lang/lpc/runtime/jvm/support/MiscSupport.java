@@ -16,64 +16,31 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.value;
+package us.terebi.lang.lpc.runtime.jvm.support;
 
-import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 /**
  * 
  */
-public class NilValue extends AbstractValue implements LpcValue
+public class MiscSupport
 {
-    public static final NilValue INSTANCE = new NilValue(Types.MIXED);
-
-    private final LpcType _expectedType;
-
-    public NilValue(LpcType expectedType)
+    public static boolean isString(LpcValue value)
     {
-        _expectedType = expectedType;
+        return Types.STRING.equals(value.getActualType());
     }
 
-    public LpcType getExpectedType()
+    public static LpcValue getValue(boolean bool)
     {
-        return _expectedType;
+        if (bool)
+        {
+            return LpcConstants.INT.TRUE;
+        }
+        else
+        {
+            return LpcConstants.INT.FALSE;
+        }
     }
-
-    protected CharSequence getDescription()
-    {
-        return "(nil:" + _expectedType + ")";
-    }
-
-    public LpcType getActualType()
-    {
-        return Types.NIL;
-    }
-    
-    public boolean asBoolean()
-    {
-        return false;
-    }
-    
-    public long asLong()
-    {
-        return 0;
-    }
-    
-    public double asDouble()
-    {
-        return 0;
-    }
-
-    protected boolean valueEquals(LpcValue other)
-    {
-        return true;
-    }
-
-    protected int valueHashCode()
-    {
-        return 0x79c;
-    }
-
 }

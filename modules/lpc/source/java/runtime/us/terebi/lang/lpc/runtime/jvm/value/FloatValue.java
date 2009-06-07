@@ -44,6 +44,11 @@ public class FloatValue extends AbstractValue implements LpcValue
         return Types.FLOAT;
     }
 
+    public boolean asBoolean()
+    {
+        return _value != 0.0;
+    }
+    
     public double asDouble()
     {
         return _value;

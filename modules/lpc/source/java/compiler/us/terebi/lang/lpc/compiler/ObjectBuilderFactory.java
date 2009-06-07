@@ -46,7 +46,7 @@ public class ObjectBuilderFactory
 
     public ObjectBuilderFactory() throws IOException
     {
-        _efuns = StandardEfuns.get();
+        _efuns = StandardEfuns.getSignatures();
         _manager = new CompilerObjectManager();
         _parser = new LpcParser();
 

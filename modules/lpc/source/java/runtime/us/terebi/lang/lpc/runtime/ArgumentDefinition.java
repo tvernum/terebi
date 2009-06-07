@@ -25,6 +25,6 @@ public interface ArgumentDefinition
 {
     public String getName();
     public LpcType getType();
-    public boolean isRef();
+    public ArgumentSemantics getSemantics();
     public boolean isVarArgs();
 }

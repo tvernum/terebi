@@ -16,14 +16,14 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.type;
+package us.terebi.lang.lpc.runtime.jvm.value;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.value.AbstractValue;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 /**
  * 

@@ -37,6 +37,12 @@ public class FunctionMap implements Map<String, FunctionSignature>
         _map = new HashMap<String, FunctionSignature>();
     }
 
+    public FunctionMap(Map<String, ? extends FunctionSignature> signatures)
+    {
+        this();
+        putAll(signatures);
+    }
+
     public void clear()
     {
         _map.clear();

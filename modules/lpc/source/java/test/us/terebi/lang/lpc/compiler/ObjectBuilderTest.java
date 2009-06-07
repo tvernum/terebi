@@ -53,7 +53,7 @@ public class ObjectBuilderTest
     public void tryCompilingSimpleLpcObject() throws Exception
     {
         ObjectManager manager = new CompilerObjectManager();
-        FunctionMap efuns = StandardEfuns.get();
+        FunctionMap efuns = StandardEfuns.getSignatures();
 
         ResourceFinder finder = new ResourceFinder()
         {
