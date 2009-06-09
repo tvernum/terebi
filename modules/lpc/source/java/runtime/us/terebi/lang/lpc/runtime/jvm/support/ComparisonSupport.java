@@ -69,6 +69,11 @@ public class ComparisonSupport
 
     private static int compare(LpcValue left, LpcValue right)
     {
+        if (left == null || right == null)
+        {
+            throw new NullPointerException("Internal Error - null value passed to " + ComparisonSupport.class.getSimpleName());
+        }
+        
         if (left.equals(right))
         {
             return 0;

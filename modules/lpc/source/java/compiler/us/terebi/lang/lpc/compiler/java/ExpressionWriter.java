@@ -72,10 +72,10 @@ import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.ParserConstants;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
-import us.terebi.lang.lpc.runtime.ExtensionType;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.util.Pair;
@@ -1092,57 +1092,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         writer.println(" = makeValue(0);");
         writer.println("} while(false);");
 
-        return new InternalVariable(result.name, false, commonType(types));
-    }
-
-    private LpcType commonType(LpcType[] types)
-    {
-        if (types.length == 0)
-        {
-            return Types.MIXED;
-        }
-        if (types.length == 1)
-        {
-            return types[0];
-        }
-
-        LpcType.Kind kind = types[0].getKind();
-        int depth = types[0].getArrayDepth();
-        ClassDefinition cls = types[0].getClassDefinition();
-        ExtensionType ext = types[0].getExtensionType();
-
-        for (int i = 1; i < types.length; i++)
-        {
-            LpcType type = types[i];
-            if (type.getArrayDepth() < depth)
-            {
-                depth = type.getArrayDepth();
-                kind = LpcType.Kind.MIXED;
-                continue;
-            }
-            if (type.getKind() != kind)
-            {
-                kind = LpcType.Kind.MIXED;
-            }
-            else if (kind == LpcType.Kind.CLASS && type.getClassDefinition() != cls)
-            {
-                kind = LpcType.Kind.MIXED;
-            }
-            else if (kind == LpcType.Kind.EXTENSION && type.getExtensionType() != ext)
-            {
-                kind = LpcType.Kind.MIXED;
-            }
-        }
-
-        switch (kind)
-        {
-            case CLASS:
-                return Types.classType(cls, depth);
-            case EXTENSION:
-                return Types.extensionType(ext, depth);
-            default:
-                return Types.getType(kind, null, depth);
-        }
+        return new InternalVariable(result.name, false, MiscSupport.commonType(types));
     }
 
     public Object visit(ASTCastExpression node, Object data)

@@ -18,25 +18,47 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
-
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
-import us.terebi.lang.lpc.runtime.jvm.value.StringIndex;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayElement;
+import us.terebi.lang.lpc.runtime.jvm.value.Index;
+import us.terebi.lang.lpc.runtime.jvm.value.MappingElement;
+import us.terebi.lang.lpc.runtime.jvm.value.StringChar;
+import us.terebi.lang.lpc.runtime.jvm.value.StringSubstring;
+import us.terebi.lang.lpc.runtime.jvm.value.SubArray;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 
 /**
  * 
  */
 public class IndexSupport
 {
-    public static LpcReference index(LpcReference element, LpcValue index, boolean reverse)
+    public static LpcReference index(LpcReference element, LpcValue indexValue, boolean reverse)
     {
         LpcValue value = element.get();
         if (isString(value))
         {
-            return new StringIndex(element, index, reverse);
+            Index index = new Index(indexValue, reverse);
+            return new StringChar(element, index);
         }
-        throw new UnsupportedOperationException("index - Not implemented");
+        if (MiscSupport.isArray(value))
+        {
+            Index index = new Index(indexValue, reverse);
+            return new ArrayElement(element, index);
+        }
+        if (MiscSupport.isMapping(value))
+        {
+            if (reverse)
+            {
+                throw new LpcRuntimeException("Error - Cannot apply a reverse index to a mapping");
+            }
+            return new MappingElement(element, indexValue);
+        }
+        throw new UnsupportedOperationException("index (" + value.getActualType() + ") - Not implemented");
     }
 
     public static LpcValue index(LpcValue element, LpcValue index, boolean reverse)
@@ -45,11 +67,19 @@ public class IndexSupport
         return null;
     }
 
-    public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endElement,
+    public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endIndex,
             boolean endReverse)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        LpcType type = element.getType();
+        if (Types.STRING.equals(type))
+        {
+            return new StringSubstring(element, new Index(startIndex, startReverse), new Index(endIndex, endReverse));
+        }
+        if (type.getArrayDepth() > 0)
+        {
+            return new SubArray(element, new Index(startIndex, startReverse), new Index(endIndex, endReverse));
+        }
+        throw new UnsupportedOperationException("index (" + type + ") - Not implemented");
     }
 
     public static LpcValue index(LpcValue element, LpcValue startIndex, boolean startReverse, LpcValue endElement,

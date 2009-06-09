@@ -18,17 +18,24 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
-import org.hamcrest.core.IsSame;
-
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
+import java.util.ArrayList;
+import java.util.List;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNumber;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
+import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
 
 /**
  * 
@@ -72,52 +79,111 @@ public class MathSupport
 
     public static LpcValue add(LpcValue left, LpcValue right)
     {
+        if (left == null || right == null)
+        {
+            throw new NullPointerException("Internal Error - Attempt to add null value (" + left + "+" + right + ")");
+        }
         if (isString(left))
         {
             return new StringValue(left.asString() + right.asString());
         }
-        throw new UnsupportedOperationException("add - Not implemented");
+        if (isArray(left) && isArray(right))
+        {
+            return addArrays(left, right);
+        }
+        if (isInt(left) && isInt(right))
+        {
+            return add(left.asLong(), right.asLong());
+        }
+        if (isNumber(left) && isNumber(right))
+        {
+            return addDouble(left.asDouble(), right.asDouble());
+        }
+        throw new UnsupportedOperationException("add - Not implemented for "
+                + left.getActualType()
+                + " + "
+                + right.getActualType());
     }
 
-    public static LpcValue add(int left, LpcValue right)
+    private static LpcValue addDouble(double left, double right)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        return new FloatValue(left + right);
     }
 
-    public static LpcValue add(LpcValue left, int right)
+    private static LpcValue addArrays(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        List<LpcValue> leftList = left.asList();
+        List<LpcValue> rightList = right.asList();
+        List<LpcValue> add = new ArrayList<LpcValue>(leftList.size() + rightList.size());
+        add.addAll(leftList);
+        add.addAll(rightList);
+        LpcType type = MiscSupport.commonType(left.getActualType(), right.getActualType());
+        return new ArrayValue(type, add);
     }
 
-    public static LpcValue add(int left, int right)
+    public static LpcValue add(long left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        if (Types.INT.equals(right.getActualType()))
+        {
+            return intValue(left + right.asLong());
+        }
+        if (Types.FLOAT.equals(right.getActualType()))
+        {
+            return new FloatValue(left + right.asDouble());
+        }
+        return add(intValue(left), right);
+    }
+
+    public static LpcValue add(LpcValue left, long right)
+    {
+        if (Types.INT.equals(left.getActualType()))
+        {
+            return intValue(left.asLong() + right);
+        }
+        if (Types.FLOAT.equals(left.getActualType()))
+        {
+            return new FloatValue(left.asDouble() + right);
+        }
+        return add(left, intValue(right));
+    }
+
+    public static LpcValue add(long left, long right)
+    {
+        return intValue(left + right);
     }
 
     public static LpcValue multiply(LpcValue left, LpcValue right)
     {
         // @TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("multiply - Not implemented");
     }
 
-    public static LpcValue divide(LpcValue lpcValue, LpcValue _lpc_v590)
+    public static LpcValue divide(LpcValue left, LpcValue right)
     {
         // @TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("divide - Not implemented");
     }
 
-    public static LpcValue subtract(LpcValue lpcValue, LpcValue _lpc_v766)
+    public static LpcValue subtract(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        if (isInt(left) && isInt(right))
+        {
+            return intValue(left.asLong() - right.asLong());
+        }
+        if (isNumber(left) && isNumber(right))
+        {
+            return new FloatValue(left.asDouble() - right.asDouble());
+        }
+        throw new UnsupportedOperationException("subtract("
+                + left.getActualType()
+                + ","
+                + right.getActualType()
+                + ") - Not implemented");
     }
 
-    public static LpcValue modulus(LpcValue lpcValue, LpcValue _lpc_v967)
+    public static LpcValue modulus(LpcValue left, LpcValue right)
     {
         // @TODO Auto-generated method stub
-        return null;
+        throw new UnsupportedOperationException("modulus - Not implemented");
     }
 }

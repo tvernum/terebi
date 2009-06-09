@@ -16,40 +16,55 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm;
+package us.terebi.lang.lpc.runtime.jvm.value;
 
-import java.util.Collections;
+import java.util.Map;
 
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
-import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
-import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
  * 
  */
-public class LpcConstants
+public class MappingElement implements LpcReference
 {
-    public static final class INT
-    {
-        public static final IntValue ZERO = new IntValue(0);
-        public static final IntValue ONE = new IntValue(1);
-        public static final IntValue TWO = new IntValue(2);
-        public static final IntValue MINUS_ONE = new IntValue(-1);
+    private final LpcReference _element;
+    private final LpcValue _index;
 
-        public static final IntValue TRUE = ONE;
-        public static final IntValue FALSE = ZERO;
+    public MappingElement(LpcReference element, LpcValue index)
+    {
+        _element = element;
+        _index = index;
     }
 
-    public static final class STRING
+    public LpcValue get()
     {
-        public static final StringValue BLANK = new StringValue("");
+        Map<LpcValue, LpcValue> map = _element.get().asMap();
+        LpcValue value = map.get(_index);
+        if (value == null)
+        {
+            return NilValue.INSTANCE;
+        }
+        return value;
     }
 
-    public static final class ARRAY
+    public LpcType getType()
     {
-        public static final ArrayValue EMPTY = new ArrayValue(Types.MIXED_ARRAY, Collections.<LpcValue> emptyList());
+        return Types.MIXED;
+    }
+
+    public boolean isSet()
+    {
+        return true;
+    }
+
+    public void set(LpcValue value)
+    {
+        Map<LpcValue, LpcValue> map = _element.get().asMap();
+        map.put(_index, value);
+        // @TODO what if "value" is NIL ?
     }
 
 }

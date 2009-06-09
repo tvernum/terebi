@@ -27,7 +27,10 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 
 /**
  * 
@@ -36,12 +39,17 @@ public class ImplodeEfun extends AbstractEfun implements FunctionSignature, Call
 {
     public List< ? extends ArgumentDefinition> getArguments()
     {
+        // @TODO, this really has 3 signatures, rather than being "MIXED" and "VARARGS"
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("array", Types.MIXED_ARRAY));
         list.add(new ArgumentSpec("delim", Types.MIXED));
-        // @TODO, this really has 3 signatures, rather than being "MIXED" and "VARARGS"
-        list.add(new ArgumentSpec("start", Types.MIXED, false, true));
+        list.add(new ArgumentSpec("start", Types.MIXED));
         return list;
+    }
+
+    public boolean isVarArgs()
+    {
+        return true;
     }
 
     public LpcType getReturnType()
@@ -51,8 +59,29 @@ public class ImplodeEfun extends AbstractEfun implements FunctionSignature, Call
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        LpcValue delim = arguments.get(1);
+        if (arguments.size() >= 2 && isString(delim))
+        {
+            return new StringValue(implodeStrings(arguments.get(0).asList(), arguments.get(1).asString()));
+        }
+        throw new UnsupportedOperationException("implode function - Not implemented");
+    }
+
+    public static CharSequence implodeStrings(List<LpcValue> array, String delim)
+    {
+        StringBuilder result = new StringBuilder();
+        for (LpcValue element : array)
+        {
+            if (isString(element))
+            {
+                if (result.length() > 0)
+                {
+                    result.append(delim);
+                }
+                result.append(element.asString());
+            }
+        }
+        return result;
     }
 
 }

@@ -20,26 +20,30 @@ package us.terebi.lang.lpc.runtime.jvm.support;
 
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 
 /**
  * 
  */
-public class LogicSupport
+public class ValueSupport
 {
-    public static LpcValue not(LpcValue value)
+    public static LpcValue intValue(long value)
     {
-        if (value == null)
+        if (value < 10 && value > -10)
         {
-            throw new NullPointerException("Internal Error - Null value passed to " + LogicSupport.class.getSimpleName());
+            switch ((int) value)
+            {
+                case 0:
+                    return LpcConstants.INT.ZERO;
+                case 1:
+                    return LpcConstants.INT.ONE;
+                case 2:
+                    return LpcConstants.INT.TWO;
+                case -1:
+                    return LpcConstants.INT.MINUS_ONE;
+            }
         }
-        if (value.asBoolean())
-        {
-            return LpcConstants.INT.FALSE;
-        }
-        else
-        {
-            return LpcConstants.INT.TRUE;
-        }
+        return new IntValue(value);
     }
 
 }

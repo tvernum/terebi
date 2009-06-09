@@ -18,7 +18,9 @@
 
 package us.terebi.lang.lpc.compiler.java.test;
 
+import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import lpc.secure.sefun.sefun;
@@ -141,4 +143,36 @@ public class SefunTest
         assertEquals(new IntValue(456), result);
     }
 
+    @Test
+    public void atomize_array() throws Exception
+    {
+        sefun sefun = makeSefunObject();
+        LpcValue[] elements = new LpcValue[] { new StringValue("chicken"), new StringValue("chick"), new StringValue("chook"),
+                new StringValue("hen") };
+        LpcValue array = new ArrayValue(Types.STRING_ARRAY, Arrays.asList(elements));
+        LpcValue result = sefun.atomize_array_(array);
+
+        assertNotNull(result);
+        assertEquals(1, result.getActualType().getArrayDepth());
+        List<LpcValue> list = result.asList();
+        assertNotNull(list);
+        // cHICKEN , chOOK, hEN
+        assertEquals(6 + 3 + 2, list.size());
+        assertEquals(1, result.getActualType().getArrayDepth());
+        for (LpcValue element : list)
+        {
+            assertEquals(Types.STRING, element.getActualType());
+        }
+    }
+
+    @Test
+    public void absolute_path() throws Exception
+    {
+        sefun sefun = makeSefunObject();
+        assertEquals("/foo/", sefun.absolute_path_(new StringValue("/foo/"), new StringValue(".")).asString());
+        assertEquals("/domains/zoop/whig/zah.c", sefun.absolute_path_(new StringValue("/foo/"),
+                new StringValue("^zoop/whig/zah.c")).asString());
+        assertEquals("/foo/xyz/./123",
+                sefun.absolute_path_(new StringValue("/foo/bar"), new StringValue("../xyz/./123/")).asString());
+    }
 }

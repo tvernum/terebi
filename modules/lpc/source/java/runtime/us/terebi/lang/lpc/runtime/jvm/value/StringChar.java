@@ -27,17 +27,15 @@ import us.terebi.lang.lpc.runtime.jvm.type.Types;
 /**
  * 
  */
-public class StringIndex implements LpcReference
+public class StringChar implements LpcReference
 {
     private final LpcReference _string;
-    private final LpcValue _index;
-    private final boolean _reverse;
+    private final Index _index;
 
-    public StringIndex(LpcReference string, LpcValue index, boolean reverse)
+    public StringChar(LpcReference string, Index index)
     {
         _string = string;
         _index = index;
-        _reverse = reverse;
     }
 
     public LpcValue get()
@@ -53,11 +51,7 @@ public class StringIndex implements LpcReference
 
     private int getIndex(String str)
     {
-        long index = _index.asLong();
-        if (_reverse)
-        {
-            index = str.length() - index;
-        }
+        long index = _index.evaluate(str.length());
         if (index < 0)
         {
             throw new LpcRuntimeException("String index (" + index + ") out of bounds");
@@ -90,6 +84,11 @@ public class StringIndex implements LpcReference
         char ch = (char) value.asLong();
         str = str.substring(0, index - 1) + ch + str.substring(index + 1);
         _string.set(new StringValue(str));
+    }
+
+    public String toString()
+    {
+        return getClass().getSimpleName() + ":" + _string + "[" + _index + "]";
     }
 
 }

@@ -104,4 +104,20 @@ public class Types
         return new ExtendedType(ext, depth);
     }
 
+    public static LpcType elementOf(LpcType type)
+    {
+        if (type.getArrayDepth() == 0)
+        {
+            throw new IllegalArgumentException("Type " + type + " is not an array");
+        }
+        if (type.getKind() == LpcType.Kind.EXTENSION)
+        {
+            return extensionType(type.getExtensionType(), type.getArrayDepth() - 1);
+        }
+        else
+        {
+            return getType(type.getKind(), type.getClassDefinition(), type.getArrayDepth() - 1);
+        }
+    }
+
 }

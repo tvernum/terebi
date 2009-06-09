@@ -294,9 +294,15 @@ public class StatementWriter extends BaseASTVisitor implements ParserVisitor
         }
         if (hasDefaultCase)
         {
+            if (index != 0 && !thisCaseTerminates)
+            {
+                writer.print("break;");
+            }
             writer.println("default: throw new "
                     + LpcRuntimeException.class.getName()
-                    + "(\"Internal Error - case table did not match\");");
+                    + "(\"Internal Error - case table did not match : \" + "
+                    + jumpVar
+                    + ");");
         }
         writer.println("}");
 
@@ -461,17 +467,17 @@ public class StatementWriter extends BaseASTVisitor implements ParserVisitor
         writer.println("boolean " + first.name + " = true;");
         writer.println("for(;;" + first.name + " = false) {");
 
-        if (part2.jjtGetNumChildren() != 0)
-        {
-            InternalVariable cond = evaluateExpression(part2.jjtGetChild(0));
-            writer.println("if( " + cond.name + ".asBoolean() ) break;");
-        }
-
         if (part3.jjtGetNumChildren() != 0)
         {
             writer.println("if(!" + first.name + ") { ");
             evaluateExpression(part3.jjtGetChild(0));
             writer.println("}");
+        }
+
+        if (part2.jjtGetNumChildren() != 0)
+        {
+            InternalVariable cond = evaluateExpression(part2.jjtGetChild(0));
+            writer.println("if( !" + cond.name + ".asBoolean() ) break;");
         }
 
         StatementResult result = executeStatement(stmt);

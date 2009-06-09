@@ -16,30 +16,38 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.support;
+package us.terebi.lang.lpc.runtime.jvm.value;
 
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 
-/**
- * 
- */
-public class LogicSupport
+public class Index
 {
-    public static LpcValue not(LpcValue value)
+    public final long index;
+    public final boolean reverse;
+
+    public Index(long idx, boolean rev)
     {
-        if (value == null)
-        {
-            throw new NullPointerException("Internal Error - Null value passed to " + LogicSupport.class.getSimpleName());
-        }
-        if (value.asBoolean())
-        {
-            return LpcConstants.INT.FALSE;
-        }
-        else
-        {
-            return LpcConstants.INT.TRUE;
-        }
+        this.index = idx;
+        this.reverse = rev;
     }
 
+    public Index(LpcValue idx, boolean rev)
+    {
+        this(idx == null ? -1 : idx.asLong(), rev);
+    }
+
+    long evaluate(long collectionSize)
+    {
+        long idx = index;
+        if (reverse)
+        {
+            idx = collectionSize - idx;
+        }
+        return idx;
+    }
+
+    public String toString()
+    {
+        return reverse ? "<" + index : String.valueOf(index);
+    }
 }

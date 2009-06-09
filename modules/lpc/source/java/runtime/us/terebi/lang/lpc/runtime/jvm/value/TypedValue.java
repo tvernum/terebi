@@ -18,83 +18,97 @@
 
 package us.terebi.lang.lpc.runtime.jvm.value;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.ByteSequence;
+import us.terebi.lang.lpc.runtime.Callable;
+import us.terebi.lang.lpc.runtime.ClassInstance;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 
 /**
  * 
  */
-public class StringValue extends AbstractValue implements LpcValue
+public class TypedValue implements LpcValue
 {
-    private final String _value;
+    private final LpcType _type;
+    private final LpcValue _value;
 
-    public StringValue(String value)
+    public TypedValue(LpcType type, LpcValue value)
     {
+        _type = type;
         _value = value;
-    }
-
-    public StringValue(CharSequence charSequence)
-    {
-        this(charSequence.toString());
-    }
-
-    public boolean asBoolean()
-    {
-        return _value != null;
-    }
-
-    public ByteSequence asBuffer()
-    {
-        return new ByteArraySequence(_value.getBytes());
-    }
-
-    public List<LpcValue> asList()
-    {
-        ArrayList<LpcValue> list = new ArrayList<LpcValue>(_value.length());
-        for (int i = 0; i < _value.length(); i++)
-        {
-            list.add(new IntValue(_value.charAt(i)));
-        }
-        return list;
-    }
-
-    protected CharSequence getDescription()
-    {
-        StringBuilder builder = new StringBuilder();
-        builder.append("string \"");
-        builder.append(_value);
-        builder.append("\"");
-        return builder;
-    }
-
-    public String asString()
-    {
-        return _value;
     }
 
     public LpcType getActualType()
     {
-        return Types.STRING;
+        return _type;
     }
 
-    protected boolean valueEquals(LpcValue other)
+    public boolean asBoolean()
     {
-        return this.asString().equals(other.asString());
+        return _value.asBoolean();
     }
 
-    protected int valueHashCode()
+    public ByteSequence asBuffer()
     {
-        return _value.hashCode();
+        return _value.asBuffer();
+    }
+
+    public Callable asCallable()
+    {
+        return _value.asCallable();
+    }
+
+    public ClassInstance asClass()
+    {
+        return _value.asClass();
+    }
+
+    public double asDouble()
+    {
+        return _value.asDouble();
+    }
+
+    public List<LpcValue> asList()
+    {
+        return _value.asList();
+    }
+
+    public long asLong()
+    {
+        return _value.asLong();
+    }
+
+    public Map<LpcValue, LpcValue> asMap()
+    {
+        return _value.asMap();
+    }
+
+    public ObjectInstance asObject()
+    {
+        return _value.asObject();
+    }
+
+    public String asString()
+    {
+        return _value.asString();
     }
 
     public String toString()
     {
-        return _value;
+        return "(" + _type + ")" + _value.toString();
     }
 
+    public int hashCode()
+    {
+        return _value.hashCode();
+    }
+
+    public boolean equals(Object obj)
+    {
+        return _value.equals(obj);
+    }
 }

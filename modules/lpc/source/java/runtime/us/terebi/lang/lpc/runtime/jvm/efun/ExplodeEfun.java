@@ -27,6 +27,8 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -49,8 +51,53 @@ public class ExplodeEfun extends AbstractEfun implements FunctionSignature, Call
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        //        eval return explode( "///AAA//BB/CCC///DDD/EE/", "/" );
+        //        Result = ({ "", "", "AAA", "", "BB", "CCC", "", "", "DDD", "EE" })
+
+        //        eval return explode("/A/B/C/////", "/");
+        //        Result = ({ "A", "B", "C", "", "", "", "" })
+
+        //        eval return explode("//A/B//" , "/" );
+        //        Result = ({ "", "A", "B", "" })
+
+        checkArguments(arguments);
+        String str = arguments.get(0).asString();
+        String delim = arguments.get(1).asString();
+
+        List<LpcValue> parts = explode(str, delim);
+        
+        return new ArrayValue(Types.STRING_ARRAY, parts);
     }
 
+    public static List<LpcValue> explode(String str, String delim)
+    {
+        int current = 0;
+
+        if (str.startsWith(delim))
+        {
+            current = delim.length();
+        }
+        if (str.endsWith(delim))
+        {
+            str = str.substring(0, str.length() - delim.length());
+        }
+
+        List<LpcValue> parts = new ArrayList<LpcValue>();
+        while (true)
+        {
+            int index = str.indexOf(delim, current);
+            if (index == -1)
+            {
+                parts.add(new StringValue(str.substring(current)));
+                break;
+            }
+            else
+            {
+                String part = str.substring(current, index);
+                parts.add(new StringValue(part));
+                current = index + delim.length();
+            }
+        }
+        return parts;
+    }
 }
