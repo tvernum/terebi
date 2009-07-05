@@ -1,0 +1,61 @@
+2009-07-05
+    Support bind() efun
+    Expose function pointers on call stack
+
+2009-07-04 
+    Add owners to functions
+    Add support for evaluate efun
+    Additional tests for function values
+
+2009-07-03
+    Fix argument access in block function literals
+    More function tests
+    Tests for function values
+    Support for calling function values
+    Improved binary operator support
+    Better exception handling/hierarchy in compiler/parser
+    Better handling of long hex values
+    Evaluate $(...) expressions immediately.
+    Fix calls to function expressions (was evaluating arguments in the wrong place)
+
+2009-07-02 
+    Tests for binary operators
+    Correctly handle IO error when looking up source to compile
+    Add Binary XOR support
+    Switch to testing against public domain version of Dead Souls sefun
+    Improved binary operator support
+
+2009-07-01
+    Add test for loop contructs
+    Add do { } while(..) support
+
+2009-06-30 
+    Improved maths support
+
+2009-06-29 
+    Working support for runtime instances 
+    Additional working efuns
+
+2009-06-22 
+    Improved support for LPC class types
+
+2009-06-20 
+    Support for class types
+
+2009-06-12 
+    Throw compile error for undefined class
+    Start attribute support for objects (intended for environment, etc)
+    Add new efuns (sort_array, random, inherit_list). Fix passing of refs.
+    Better toString() support for preprocessor warnings
+
+2009-06-10 
+    Implement member_array efun, and add test for compare_array simul-efun
+    Check for unimplemented (or incorrect) efuns
+    Fix 'allocate' efun
+    Implement 'strsrch' efun
+    Implement typeof efun
+
+2009-06-09 
+    Better indexing support
+    Explode + Implode efuns
+
