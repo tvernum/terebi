@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
@@ -40,7 +41,7 @@ public class CallOutEfun extends AbstractEfun implements FunctionSignature, Call
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("function", Types.MIXED));
         list.add(new ArgumentSpec("delay", Types.INT));
-        list.add(new ArgumentSpec("arguments", Types.MIXED, false, true));
+        list.add(new ArgumentSpec("arguments", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
         return list;
     }
 

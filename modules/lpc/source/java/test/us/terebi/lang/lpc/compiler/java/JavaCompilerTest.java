@@ -24,7 +24,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -33,19 +32,18 @@ import org.apache.commons.io.IOUtils;
 import org.junit.Assert;
 import org.junit.runner.RunWith;
 
-import us.terebi.lang.lpc.compiler.ObjectOutput;
+import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.Source;
-import us.terebi.lang.lpc.compiler.java.context.CompilerObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.test.ObjectTestObject;
 import us.terebi.lang.lpc.compiler.java.test.SwordTestObject;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.jj.ParseException;
 import us.terebi.lang.lpc.parser.jj.Parser;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
-import us.terebi.lang.lpc.runtime.jvm.context.BasicScopeLookup;
-import us.terebi.lang.lpc.runtime.jvm.object.CompiledObject;
+import us.terebi.lang.lpc.runtime.jvm.object.CompiledDefinition;
 import us.terebi.test.TestSuite;
 import us.terebi.test.TestSuiteRunner;
 
@@ -57,33 +55,6 @@ public class JavaCompilerTest implements Callable<Object>
 {
     private final File _lpcFile;
 
-    private final class TestOutput implements ObjectOutput
-    {
-        private final OutputStream _stream;
-        private final String _class;
-
-        TestOutput(String cls, OutputStream stream)
-        {
-            _class = cls;
-            _stream = stream;
-        }
-
-        public OutputStream open()
-        {
-            return _stream;
-        }
-
-        public String getPackageName()
-        {
-            return "us.terebi.lang.lpc.test";
-        }
-
-        public String getClassName()
-        {
-            return _class;
-        }
-    }
-
     public JavaCompilerTest(File lpcFile)
     {
         _lpcFile = lpcFile;
@@ -93,7 +64,7 @@ public class JavaCompilerTest implements Callable<Object>
     {
         return _lpcFile.getName();
     }
-    
+
     public Object call() throws Exception
     {
         testOutputOfCompiler(_lpcFile);
@@ -172,7 +143,7 @@ public class JavaCompilerTest implements Callable<Object>
 
     private String compressWhiteSpace(String string)
     {
-        return string.replace('\n', ' ').replaceAll("\\s+", " ");
+        return string.replace('\n', ' ').replaceAll("\\s+", " ").replaceAll("([(),])\\s+", "$1").replaceAll("\\s+([(),])", "$1");
     }
 
     private String readExpectedOutput(File directory, String base) throws FileNotFoundException, IOException
@@ -186,14 +157,14 @@ public class JavaCompilerTest implements Callable<Object>
     private String compileToJava(Source source, String className) throws IOException
     {
         FunctionMap efuns = StandardEfuns.getSignatures();
-        ObjectManager manager = new CompilerObjectManager();
+        CompilerObjectManager manager = new LpcCompilerObjectManager();
         JavaCompiler compiler = new JavaCompiler(efuns, manager);
-        manager.registerObject(new CompiledObject(manager, new BasicScopeLookup(manager), "/std/lib/object",
-                ObjectTestObject.class));
-        manager.registerObject(new CompiledObject(manager, new BasicScopeLookup(manager), "/std/lib/weapons/sword",
-                SwordTestObject.class));
+        manager.registerObject(new CompiledDefinition<ObjectTestObject>(manager, new BasicScopeLookup(manager),
+                "/std/lib/object.c", ObjectTestObject.class));
+        manager.registerObject(new CompiledDefinition<SwordTestObject>(manager, new BasicScopeLookup(manager),
+                "/std/lib/weapons/sword.c", SwordTestObject.class));
         ByteArrayOutputStream output = new ByteArrayOutputStream();
-        compiler.compile(source, new TestOutput(className, output));
+        compiler.compile(source, new TestOutput(className, output, "us.terebi.lang.lpc.test"));
         return output.toString();
     }
 

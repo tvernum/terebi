@@ -2,6 +2,7 @@
 private mixed fuzz( string ref s )
 {
     s = "!";
+    return s;
 }
 
 public mixed hoozit( string s , object o )

@@ -60,8 +60,9 @@ class InternalVariable
 
     public void declare(PrintWriter writer, boolean declareAsFinal)
     {
-        // @TODO Handle cases when this is outside a methos (i.e. we're declaring a field...)
+        // @TODO Handle cases when this is outside a method (i.e. we're declaring a field...)
         // Either make the variables private, or use an initialiser block...
+        // -- This is probably done. Need to check whether we have all the cases.
         if (declareAsFinal)
         {
             writer.print("final ");

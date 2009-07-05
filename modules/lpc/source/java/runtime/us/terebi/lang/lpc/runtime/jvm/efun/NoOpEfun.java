@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -42,7 +43,7 @@ public class NoOpEfun extends AbstractEfun implements FunctionSignature
 
     public List< ? extends ArgumentDefinition> getArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("args", Types.MIXED, false, true));
+        return Collections.singletonList(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
     }
 
     public LpcType getReturnType()

@@ -18,13 +18,22 @@
 
 package us.terebi.lang.lpc.compiler.java.context;
 
-
+import us.terebi.lang.lpc.compiler.CompilerObjectManager;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 
 /**
  * 
  */
-public interface ObjectManager
+public interface ScopeLookup
 {
-    public CompiledObjectDefinition findObject(String name);
-    public void registerObject(CompiledObjectDefinition object);
+    public boolean isSecureObject();
+
+    public CompilerObjectManager objectManager();
+
+    public FunctionLookup functions();
+    public VariableLookup variables();
+    public ClassLookup classes();
+
+    public void addInherit(String name, ObjectDefinition parent);
+
 }

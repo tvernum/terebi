@@ -20,7 +20,9 @@ package us.terebi.lang.lpc.compiler.java;
 
 import java.io.PrintWriter;
 
+import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.context.CompileContext;
+import us.terebi.lang.lpc.compiler.java.context.LookupException;
 import us.terebi.lang.lpc.parser.ast.ASTArrayStar;
 import us.terebi.lang.lpc.parser.ast.ASTFullType;
 import us.terebi.lang.lpc.parser.ast.ASTType;
@@ -95,7 +97,14 @@ public class TypeWriter
         ClassDefinition classDefinition = null;
         if (className != null)
         {
-            classDefinition = _context.classes().findClass(className);
+            try
+            {
+                classDefinition = _context.classes().findClass(className);
+            }
+            catch (LookupException e)
+            {
+                throw new CompileException(type, e.getMessage());
+            }
         }
         return Types.getType(kind, classDefinition, depth);
     }
@@ -122,14 +131,18 @@ public class TypeWriter
         PrintWriter writer = _context.writer();
 
         writer.print("withType( ");
-        writer.print(fullyQualifiedName(type.getKind()));
-        writer.print(", ");
         if (type.getKind() == LpcType.Kind.CLASS)
         {
-            writer.print("\"");
-            writer.print(type.getClassDefinition().getName());
-            writer.print("\", ");
+            // @TODO Is this reliable ??? Is the class always in scope in the java code?
+            // What about inherited classes?
+            writer.print( new ClassWriter(_context).getInternalName(type.getClassDefinition()));
+            writer.print(".class");
         }
+        else
+        {
+            writer.print(fullyQualifiedName(type.getKind()));
+        }
+        writer.print(", ");
         writer.print(Integer.toString(type.getArrayDepth()));
         writer.print(") ");
     }

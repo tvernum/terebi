@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.compiler;
 
+import us.terebi.lang.lpc.parser.ParserException;
 import us.terebi.lang.lpc.parser.ast.ASTUtil;
 import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.Token;
@@ -38,13 +39,17 @@ public class CompileException extends RuntimeException
 
     public CompileException(SimpleNode node, String message)
     {
-        // @TODO smart truncaton
         super(message + " [at node " + getImage(node) + "]");
-        _token = node.jjtGetFirstToken();
+        _token = (node == null ? null : node.jjtGetFirstToken());
     }
 
     private static CharSequence getImage(SimpleNode node)
     {
+        if (node == null)
+        {
+            return "<??>";
+        }
+        // @TODO smart truncation
         CharSequence image = ASTUtil.getCompleteImage(node);
         if (image.length() > 30)
         {
@@ -53,10 +58,22 @@ public class CompileException extends RuntimeException
         return image;
     }
 
-    public CompileException(String file, int line, CompileException e)
+    public CompileException(String file, int line, CompileException ce)
     {
-        super("At " + file + ":" + line + " " + e.getMessage(), e);
+        super("At " + file + ":" + line + " " + ce.getMessage(), ce);
+        _token = ce.getToken();
+    }
+
+    public CompileException(ParserException e)
+    {
+        super(e);
         _token = e.getToken();
+    }
+
+    public CompileException(String message, Throwable cause)
+    {
+        super(message, cause);
+        _token = null;
     }
 
     public Token getToken()

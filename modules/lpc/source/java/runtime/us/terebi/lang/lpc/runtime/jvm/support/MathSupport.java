@@ -154,14 +154,36 @@ public class MathSupport
 
     public static LpcValue multiply(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        throw new UnsupportedOperationException("multiply - Not implemented");
+        if (isInt(left) && isInt(right))
+        {
+            return intValue(left.asLong() * right.asLong());
+        }
+        if (isNumber(left) && isNumber(right))
+        {
+            return new FloatValue(left.asDouble() * right.asDouble());
+        }
+        throw new UnsupportedOperationException("multiply("
+                + left.getActualType()
+                + ","
+                + right.getActualType()
+                + ") - Not implemented");
     }
 
     public static LpcValue divide(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        throw new UnsupportedOperationException("divide - Not implemented");
+        if (isInt(left) && isInt(right))
+        {
+            return intValue(left.asLong() / right.asLong());
+        }
+        if (isNumber(left) && isNumber(right))
+        {
+            return new FloatValue(left.asDouble() / right.asDouble());
+        }
+        throw new UnsupportedOperationException("divide("
+                + left.getActualType()
+                + ","
+                + right.getActualType()
+                + ") - Not implemented");
     }
 
     public static LpcValue subtract(LpcValue left, LpcValue right)
@@ -183,7 +205,18 @@ public class MathSupport
 
     public static LpcValue modulus(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        throw new UnsupportedOperationException("modulus - Not implemented");
+        if (isInt(left) && isInt(right))
+        {
+            return intValue(left.asLong() % right.asLong());
+        }
+        if (isNumber(left) && isNumber(right))
+        {
+            return new FloatValue(left.asDouble() % right.asDouble());
+        }
+        throw new UnsupportedOperationException("modulus("
+                + left.getActualType()
+                + ","
+                + right.getActualType()
+                + ") - Not implemented");
     }
 }

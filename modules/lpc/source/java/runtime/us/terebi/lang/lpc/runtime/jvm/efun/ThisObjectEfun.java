@@ -26,8 +26,10 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 
 /**
  * 
@@ -46,8 +48,8 @@ public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, C
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO */
-        return VoidValue.INSTANCE;
+        // @TODO - This can be optimised drastically, if we assume there is no sefun, and make "this_object()" a local call in LpcObject
+        ObjectInstance instance = RuntimeContext.get().callStack().peekFrame(0).instance;
+        return new ObjectValue(instance);
     }
-
 }

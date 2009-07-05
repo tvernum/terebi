@@ -25,9 +25,9 @@ import us.terebi.lang.lpc.runtime.jvm.InheritedObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcField;
 import us.terebi.lang.lpc.runtime.jvm.LpcFunction;
 import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
-import us.terebi.lang.lpc.runtime.jvm.LpcMethod;
+import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
-import us.terebi.lang.lpc.runtime.jvm.LpcReturn;
+import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
 import us.terebi.lang.lpc.runtime.jvm.support.ComparisonSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.MathSupport;
 
@@ -35,13 +35,14 @@ import us.terebi.lang.lpc.runtime.jvm.support.MathSupport;
 public class ComplexTestObject extends LpcObject
 {
     public @LpcInherited(name = "sword", lpc = "/std/lib/weapons/sword.c", implementation = "us.terebi.lang.lpc.compiler.java.test.SwordTestObject")
-    InheritedObject<us.terebi.lang.lpc.compiler.java.test.SwordTestObject> inherit_sword = loadInherited(us.terebi.lang.lpc.compiler.java.test.SwordTestObject.class);
+    InheritedObject<us.terebi.lang.lpc.compiler.java.test.SwordTestObject> inherit_sword;
+
     public final LpcField dwarf_kill = new LpcField("dwarf_kill",
-            withModifiers(us.terebi.lang.lpc.runtime.MemberDefinition.Modifier.PRIVATE), withType(
+            withType(
                     us.terebi.lang.lpc.runtime.LpcType.Kind.INT, 0));
 
-    public @LpcMethod(name = "create", modifiers = { us.terebi.lang.lpc.runtime.MemberDefinition.Modifier.PUBLIC })
-    @LpcReturn(kind = us.terebi.lang.lpc.runtime.LpcType.Kind.VOID, depth = 0)
+    public @LpcMember(name = "create", modifiers = { us.terebi.lang.lpc.runtime.MemberDefinition.Modifier.PUBLIC })
+    @LpcMemberType(kind = us.terebi.lang.lpc.runtime.LpcType.Kind.VOID, depth = 0)
     LpcValue create()
     {
         final LpcValue _lpc_v1 = this.inherit_sword.get().create();
@@ -59,7 +60,7 @@ public class ComplexTestObject extends LpcObject
         final LpcValue _lpc_v13 = this.inherit_sword.get().inherit_object.get().set_weight(_lpc_v12);
         final LpcValue _lpc_v14 = makeValue(10);
         final LpcValue _lpc_v15 = this.inherit_sword.get().set_wc(_lpc_v14);
-        final LpcValue _lpc_v16 = new LpcFunction(1)
+        final LpcValue _lpc_v16 = new LpcFunction(getObjectInstance(), 1)
         {
             public LpcValue execute(List< ? extends LpcValue> args)
             {

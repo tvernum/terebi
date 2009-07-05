@@ -33,7 +33,7 @@ public class ArrayValue extends AbstractValue implements LpcValue
     private final List<LpcValue> _list;
     private final LpcType _type;
 
-    public ArrayValue(LpcType type, Collection<? extends LpcValue> collection)
+    public ArrayValue(LpcType type, Collection< ? extends LpcValue> collection)
     {
         this(type, new ArrayList<LpcValue>(collection));
     }
@@ -47,13 +47,17 @@ public class ArrayValue extends AbstractValue implements LpcValue
     public ArrayValue(LpcType type, int size)
     {
         this(type, new ArrayList<LpcValue>(size));
+        for (int i = 0; i < size; i++)
+        {
+            _list.add(NilValue.INSTANCE);
+        }
     }
 
     public List<LpcValue> asList()
     {
         return _list;
     }
-    
+
     protected CharSequence getDescription()
     {
         return _type.toString();
@@ -74,4 +78,23 @@ public class ArrayValue extends AbstractValue implements LpcValue
         return _list.hashCode();
     }
 
+    public CharSequence debugInfo()
+    {
+        if (_list.isEmpty())
+        {
+            return "({ })";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("({ ");
+
+        for (LpcValue value : _list)
+        {
+            builder.append(value.debugInfo());
+            builder.append(" , ");
+        }
+
+        builder.replace(builder.length() - 2, builder.length(), "})");
+        return builder;
+    }
 }

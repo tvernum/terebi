@@ -23,8 +23,7 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
 /**
  * 
  */
-public interface CompiledObjectInstance extends ObjectInstance
+public interface CompiledObjectInstance extends ObjectInstance, CompiledInstance
 {
     public CompiledObjectDefinition getDefinition();
-    public Object getImplementingObject();
 }

@@ -48,7 +48,7 @@ public class FloatValue extends AbstractValue implements LpcValue
     {
         return _value != 0.0;
     }
-    
+
     public double asDouble()
     {
         return _value;
@@ -68,6 +68,11 @@ public class FloatValue extends AbstractValue implements LpcValue
     {
         long bits = Double.doubleToLongBits(_value);
         return (int) (bits ^ (bits >>> 32));
+    }
+
+    public CharSequence debugInfo()
+    {
+        return String.valueOf(_value);
     }
 
 }

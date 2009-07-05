@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
@@ -35,7 +36,7 @@ public class VariableLookup
 {
     public enum Kind
     {
-        FIELD, PARAMETER, LOCAL;
+        FIELD, PARAMETER, REF, LOCAL;
     }
 
     public static class VariableReference
@@ -63,9 +64,10 @@ public class VariableLookup
             return new VariableReference(Kind.FIELD, name, "_f_" + name, type, o, path);
         }
 
-        public static VariableReference parameter(String name, LpcType type)
+        public static VariableReference parameter(String name, ArgumentSemantics semantics, LpcType type)
         {
-            return new VariableReference(Kind.PARAMETER, name, "_p_" + name, type, null, null);
+            return new VariableReference(semantics == ArgumentSemantics.BY_VALUE ? Kind.PARAMETER : Kind.REF, name, "_p_" + name,
+                    type, null, null);
         }
 
         public static VariableReference local(String name, LpcType type)
@@ -139,9 +141,9 @@ public class VariableLookup
         return store(name, var);
     }
 
-    public VariableReference declareParameter(String name, LpcType type)
+    public VariableReference declareParameter(String name, ArgumentSemantics semantics, LpcType type)
     {
-        VariableReference var = VariableReference.parameter(name, type);
+        VariableReference var = VariableReference.parameter(name, semantics, type);
         return store(name, var);
     }
 
@@ -151,7 +153,7 @@ public class VariableLookup
         for (int i = 0; i < vars.length; i++)
         {
             ArgumentDefinition arg = args.get(i);
-            vars[i] = declareParameter(args.get(i).getName(), arg.getType());
+            vars[i] = declareParameter(args.get(i).getName(), arg.getSemantics(), arg.getType());
         }
         return vars;
     }

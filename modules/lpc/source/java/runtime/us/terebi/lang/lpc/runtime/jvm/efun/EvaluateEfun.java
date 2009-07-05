@@ -22,10 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -38,7 +40,7 @@ public class EvaluateEfun extends AbstractEfun implements FunctionSignature, Cal
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("func", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED, false, true));
+        list.add(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
         return list;
     }
 
@@ -46,7 +48,7 @@ public class EvaluateEfun extends AbstractEfun implements FunctionSignature, Cal
     {
         return true;
     }
-    
+
     public LpcType getReturnType()
     {
         return Types.MIXED;
@@ -54,9 +56,16 @@ public class EvaluateEfun extends AbstractEfun implements FunctionSignature, Cal
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        checkArguments(arguments);
-        // @TODO
-        return arguments.get(0);
+        checkArguments(arguments, 1);
+        LpcValue arg = arguments.get(0);
+        if (MiscSupport.isFunction(arg))
+        {
+            return arg.asCallable().execute(arguments.subList(1, arguments.size()));
+        }
+        else
+        {
+            return arg;
+        }
     }
 
 }

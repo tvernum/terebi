@@ -18,7 +18,6 @@
 
 package us.terebi.lang.lpc.runtime.jvm.context;
 
-
 /**
  * 
  */
@@ -37,15 +36,29 @@ public class RuntimeContext
     }
 
     private final Functions _functions;
+    private final ObjectManager _objectManager;
+    private  final CallStack _callStack;
 
-    public RuntimeContext(Functions functions)
+    public RuntimeContext(Functions functions, ObjectManager objectManager)
     {
         _functions = functions;
+        _objectManager = objectManager;
+        _callStack = new CallStack();
     }
 
     public Functions functions()
     {
         return _functions;
+    }
+
+    public ObjectManager objectManager()
+    {
+        return _objectManager;
+    }
+
+    public CallStack callStack()
+    {
+        return _callStack;
     }
 
 }

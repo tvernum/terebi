@@ -27,7 +27,7 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -47,13 +47,31 @@ public class TypeofEfun extends AbstractEfun implements FunctionSignature, Calla
 
     public LpcType getReturnType()
     {
-        return Types.INT;
+        return Types.STRING;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO */
-        return VoidValue.INSTANCE;
+        checkArguments(arguments);
+        LpcValue var = arguments.get(0);
+        String str = getTypeString(var);
+        return new StringValue(str);
+    }
+
+    private String getTypeString(LpcValue var)
+    {
+        LpcType type = var.getActualType();
+        return getTypeString(type);
+    }
+
+    public static String getTypeString(LpcType type)
+    {
+        if (type.getArrayDepth() > 0)
+        {
+            return "array";
+        }
+        LpcType.Kind kind = type.getKind();
+        return kind.name().toLowerCase();
     }
 
 }

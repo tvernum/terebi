@@ -27,6 +27,7 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.AbstractValue;
@@ -41,24 +42,26 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
 {
     private final FunctionSignature _signature;
     private final boolean _strict;
+    private ObjectInstance _owner;
 
-    public LpcFunction(int argumentCount)
+    public LpcFunction(ObjectInstance owner, int argumentCount)
     {
-        this(argumentCount, false);
+        this(owner, argumentCount, false);
     }
 
-    public LpcFunction(ArgumentDefinition... arguments)
+    public LpcFunction(ObjectInstance owner, ArgumentDefinition... arguments)
     {
-        this(new Signature(false, Types.MIXED, Arrays.asList(arguments)));
+        this(owner, new Signature(false, Types.MIXED, Arrays.asList(arguments)));
     }
 
-    public LpcFunction(FunctionSignature signature)
+    public LpcFunction(ObjectInstance owner, FunctionSignature signature)
     {
         _signature = signature;
         _strict = true;
+        _owner = owner;
     }
 
-    public LpcFunction(int argumentCount, boolean strictCount)
+    public LpcFunction(ObjectInstance owner, int argumentCount, boolean strictCount)
     {
         List<ArgumentDefinition> args = new ArrayList<ArgumentDefinition>();
         for (int i = 1; i <= argumentCount; i++)
@@ -67,6 +70,7 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         }
         _signature = new Signature(true, Types.MIXED, args);
         _strict = strictCount;
+        _owner = owner;
     }
 
     protected CharSequence getDescription()
@@ -98,7 +102,9 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
                 throw new LpcRuntimeException("Insufficient number of arguments provided to function literal - argument "
                         + index
                         + " was expected");
-            }else {
+            }
+            else
+            {
                 return NilValue.INSTANCE;
             }
         }
@@ -125,4 +131,18 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         return this.getClass() == other.getClass();
     }
 
+    public CharSequence debugInfo()
+    {
+        return "function" + getSignature().toString() + " { ... }";
+    }
+
+    public ObjectInstance getOwner()
+    {
+        return _owner;
+    }
+
+    public void setOwner(ObjectInstance owner)
+    {
+        _owner = owner;
+    }
 }

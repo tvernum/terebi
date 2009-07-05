@@ -2,7 +2,7 @@
 
 JARS=$(echo lib/* | sed -e's/  */:/g' )
 
-ROOT="samples/ds-2.8.4-lib"
+ROOT="samples/dsIIr8-lib"
 
 f_compile()
 {
@@ -29,9 +29,40 @@ f_root()
     echo $FILE
 }
 
+TMP=/tmp/$(basename $0).$$.text
+
+f_setup()
+{
+    touch $TMP
+}
+
+f_header()
+{
+    for FILE in $( find /tmp/lpc* \( \! -newer $TMP -prune \) -o \( -type f -name "*.java" -print \) )
+    do
+        echo " + $FILE"
+        ex $FILE << ENDEX
+1
+i
+/* 
+ *  This file is a derived work of the Dead Souls II mudlib, which is in the public domain.
+ */
+.
+wq
+ENDEX
+    done
+}
+
+f_cleanup()
+{
+    rm $TMP
+}
+
+f_setup
+
 if [ $# -eq 0 ]
 then
-    for lpc in $( find samples/ds-2.8.4-lib/ -type f -name "*.c" )
+    for lpc in $( find ${ROOT}/ -type f -name "*.c" )
     do
         ERR_FILE=errors/compile/${lpc}
         mkdir  -p $( dirname ${ERR_FILE} )
@@ -62,4 +93,7 @@ else
     done
     f_compile ${OPTS} ${FILES}
 fi
+
+f_header
+f_cleanup
 

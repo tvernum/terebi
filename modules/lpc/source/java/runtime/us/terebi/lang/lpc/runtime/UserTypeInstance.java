@@ -18,9 +18,12 @@
 
 package us.terebi.lang.lpc.runtime;
 
+import java.util.Map;
+
 /**
  */
 public interface UserTypeInstance
 {
     public UserTypeDefinition getDefinition();
+    public Map<FieldDefinition, LpcValue> getFieldValues();
 }

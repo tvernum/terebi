@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.runtime.jvm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
@@ -36,14 +38,17 @@ import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.context.Functions;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ClassReference;
 import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.util.DynamicClassDefinition;
 
 /**
  * 
@@ -51,10 +56,26 @@ import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 public class LpcObject
 {
     private CompiledObjectDefinition _definition;
+    private CompiledObjectInstance _instance;
 
     public void setDefinition(CompiledObjectDefinition definition)
     {
         _definition = definition;
+    }
+
+    public CompiledObjectDefinition getObjectDefinition()
+    {
+        return _definition;
+    }
+    
+    public void setInstance(CompiledObjectInstance instance)
+    {
+        _instance = instance;
+    }
+    
+    public CompiledObjectInstance getObjectInstance()
+    {
+        return _instance;
     }
 
     protected LpcValue makeValue(String value)
@@ -83,29 +104,22 @@ public class LpcObject
         return functions.efun(name);
     }
 
-    protected <T> InheritedObject<T> loadInherited(Class< ? extends T> type)
-    {
-        try
-        {
-            return new InheritedObject<T>(type);
-        }
-        catch (Exception e)
-        {
-            throw new LpcRuntimeException("Cannot load inherited type " + type, e);
-        }
-    }
-
-    protected LpcType withType(Kind kind, int depth)
+    protected static LpcType withType(Kind kind, int depth)
     {
         return Types.getType(kind, null, depth);
     }
 
-    protected LpcType withType(ClassDefinition cls, int depth)
+    protected static LpcType withType(ClassDefinition cls, int depth)
     {
         return Types.getType(Kind.CLASS, cls, depth);
     }
 
-    protected Set<Modifier> withModifiers(Modifier... modifiers)
+    protected static DynamicClassDefinition createClass(String name, Set< ? extends Modifier> modifiers)
+    {
+        return new DynamicClassDefinition(name, modifiers);
+    }
+
+    protected static Set<Modifier> withModifiers(Modifier... modifiers)
     {
         return new HashSet<Modifier>(Arrays.asList(modifiers));
     }
@@ -126,6 +140,11 @@ public class LpcObject
 
     public ArrayValue makeArray(LpcValue... elements)
     {
+        if (elements.length == 0)
+        {
+            return new ArrayValue(Types.MIXED_ARRAY, new ArrayList<LpcValue>());
+        }
+
         List<LpcValue> list = new ArrayList<LpcValue>(Arrays.asList(elements));
         Set<LpcType> types = new HashSet<LpcType>();
         for (LpcValue lpcValue : elements)
@@ -138,8 +157,8 @@ public class LpcObject
             return new ArrayValue(Types.arrayOf(types.iterator().next()), list);
         }
 
-        // @TODO, if all elements of "types" are arrays, then we can be more specific about the type of the new array
-        return new ArrayValue(Types.MIXED_ARRAY, list);
+        LpcType[] typeArray = types.toArray(new LpcType[types.size()]);
+        return new ArrayValue(MiscSupport.commonType(typeArray), list);
     }
 
     public NilValue nil()
@@ -147,9 +166,32 @@ public class LpcObject
         return NilValue.INSTANCE;
     }
 
-    protected LpcValue call(Callable callable, Iterable< ? extends LpcValue>... args)
+    protected LpcValue call(Callable callable, Collection< ? extends LpcValue>... args)
     {
-        // @TODO
-        return nil();
+        List<LpcValue> arguments = new ArrayList<LpcValue>(args.length + 10);
+        for (Collection< ? extends LpcValue> arg : args)
+        {
+            arguments.addAll(arg);
+        }
+        return callable.execute(arguments);
+    }
+
+    protected LpcValue classReference(Class< ? extends LpcClass> cls)
+    {
+        return new ClassReference(classDefinition(cls));
+    }
+
+    protected ClassDefinition classDefinition(Class< ? extends LpcClass> cls)
+    {
+        // @TODO Cache these...
+        try
+        {
+            LpcClass newInstance = cls.newInstance();
+            return newInstance.getClassDefinition();
+        }
+        catch (Exception e)
+        {
+            throw new LpcRuntimeException("Internal Error - Cannot instantiate " + cls);
+        }
     }
 }

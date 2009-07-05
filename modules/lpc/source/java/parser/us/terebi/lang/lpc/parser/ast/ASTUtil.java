@@ -133,7 +133,7 @@ public class ASTUtil
         }
         else
         {
-            return "Node (" + node + ") : " +  getCompleteImage(node);
+            return "Node (" + node + ") : " + getCompleteImage(node);
         }
     }
 
@@ -213,6 +213,11 @@ public class ASTUtil
 
     public static CharSequence getCompleteImage(SimpleNode node)
     {
+        if (node == null)
+        {
+            return "<<no node>>";
+        }
+
         StringBuilder builder = new StringBuilder();
         for (Token token : getTokens(node))
         {

@@ -26,14 +26,33 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.FunctionValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.lang.lpc.runtime.util.CallableProxy;
 
 /**
  * 
  */
 public class BindEfun extends AbstractEfun implements FunctionSignature, Callable
 {
+    public static final class BoundFunction extends CallableProxy
+    {
+        private final ObjectInstance _owner;
+
+        public BoundFunction(Callable func, ObjectInstance owner)
+        {
+            super(func);
+            _owner = owner;
+        }
+
+        public ObjectInstance getOwner()
+        {
+            return _owner;
+        }
+    }
+
     public List< ? extends ArgumentDefinition> getArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
@@ -50,8 +69,10 @@ public class BindEfun extends AbstractEfun implements FunctionSignature, Callabl
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
-        return arguments.get(0);
+        Callable func = arguments.get(0).asCallable();
+        ObjectInstance owner = arguments.get(1).asObject();
+        // @TODO security check in master object
+        return new FunctionValue(new BoundFunction(func, owner));
     }
 
 }

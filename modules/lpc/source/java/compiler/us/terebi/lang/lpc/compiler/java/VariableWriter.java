@@ -33,6 +33,8 @@ import us.terebi.lang.lpc.parser.ast.ASTVariableAssignment;
 import us.terebi.lang.lpc.parser.ast.Node;
 import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.jvm.LpcMember;
+import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
 
 /**
  * 
@@ -48,9 +50,9 @@ public class VariableWriter
         _type = type;
     }
 
-    public void writeField(ASTVariable node, CharSequence modifiers)
+    public VariableReference writeField(ASTVariable node, CharSequence modifiers)
     {
-        print(node, true, modifiers);
+        return print(node, true, modifiers);
     }
 
     public void printLocal(ASTVariable node)
@@ -58,27 +60,49 @@ public class VariableWriter
         print(node, false, null);
     }
 
-    private void print(ASTVariable node, boolean field, CharSequence modifiers)
+    private VariableReference print(ASTVariable node, boolean field, CharSequence modifiers)
     {
         PrintWriter writer = _context.writer();
-
         boolean array = ASTUtil.hasChildType(ASTArrayStar.class, node);
         ASTIdentifier identifier = ASTUtil.getChild(ASTIdentifier.class, node);
         ASTVariableAssignment assignment = ASTUtil.getChild(ASTVariableAssignment.class, node);
 
-        InternalVariable assignmentVariable = null;
-        if (assignment != null)
+        if (field)
         {
             writer.println();
-            Node exprNode = assignment.jjtGetChild(0);
-            assignmentVariable = new ExpressionWriter(_context).evaluate(exprNode);
+            writer.println("/* Field " + ASTUtil.getCompleteImage(identifier) + " (Line:" + identifier.jjtGetFirstToken().beginLine + ") */");
+        }
+        
+        InternalVariable assignmentVariable = null;
+        if (assignment != null && !field)
+        {
+            assignmentVariable = evaluate(assignment);
         }
 
         String name = identifier.jjtGetFirstToken().image;
         TypeWriter typeWriter = new TypeWriter(_context);
         LpcType type = typeWriter.getType(_type, array);
 
-        declareVariable(identifier, field, modifiers, name, type, assignmentVariable);
+        VariableReference var = declareVariable(identifier, field, modifiers, name, type, assignmentVariable);
+        if (assignment != null && field)
+        {
+            writer.println("{");
+            assignmentVariable = evaluate(assignment);
+            writer.print(var.internalName);
+            writer.print(".set(");
+            assignmentVariable.value(writer);
+            writer.println(");");
+            writer.println("}");
+        }
+
+        return var;
+    }
+
+    private InternalVariable evaluate(ASTVariableAssignment assignment)
+    {
+        _context.writer().println();
+        Node exprNode = assignment.jjtGetChild(0);
+        return new ExpressionWriter(_context).evaluate(exprNode);
     }
 
     public VariableReference declareLocalVariable(SimpleNode node, String name, LpcType type, InternalVariable init)
@@ -113,34 +137,67 @@ public class VariableWriter
         PrintWriter writer = _context.writer();
         TypeWriter typeWriter = new TypeWriter(_context);
 
-        String javaType;
+        String javaVarType;
+        String javaObjectType;
         if (var.kind == VariableLookup.Kind.FIELD)
         {
-            javaType = "LpcField";
-            writer.print("public ");
+            javaVarType = javaObjectType = "LpcField";
+            writer.print("public @");
+            writer.print(LpcMember.class.getName());
+            writer.print("(name=\"");
+            writer.print(var.name);
+            writer.print("\", modifiers={");
+            writer.print(modifiers);
+            writer.print("})\n@");
+            writer.print(LpcMemberType.class.getName() + "(");
+            writer.print("kind=");
+            writer.print(TypeWriter.fullyQualifiedName(var.type.getKind()));
+            writer.print(", depth=");
+            writer.print(Integer.toString(var.type.getArrayDepth()));
+            if (var.type.isClass())
+            {
+                writer.print(", className=\"");
+                writer.print(var.type.getClassDefinition().getName());
+                writer.print("\"");
+            }
+            writer.println(")");
         }
         else
         {
-            javaType = "LpcVariable";
+            javaObjectType = "LpcVariable";
+            if (var.kind == VariableLookup.Kind.REF)
+            {
+                javaVarType = "LpcReference";
+            }
+            else
+            {
+                javaVarType = javaObjectType;
+            }
         }
         writer.print("final ");
-        writer.print(javaType);
+        writer.print(javaVarType);
         writer.print(" ");
         writer.print(var.internalName);
+        if (var.kind == VariableLookup.Kind.REF)
+        {
+            writer.println(";");
+            writer.println("if( "
+                    + init.name
+                    + " instanceof LpcReference ) "
+                    + var.internalName
+                    + " = (LpcReference)"
+                    + init.name
+                    + ";");
+            writer.print("else " + var.internalName);
+        }
         writer.print(" = new ");
-        writer.print(javaType);
+        writer.print(javaObjectType);
         writer.print("( \"");
         writer.print(var.name);
         writer.print("\", ");
-        if (var.kind == VariableLookup.Kind.FIELD)
-        {
-            writer.println();
-            printModifers(writer, modifiers);
-            writer.print(", ");
-        }
         typeWriter.printType(var.type);
 
-        if (init != null)
+        if (init != null && var.kind != VariableLookup.Kind.FIELD)
         {
             writer.print(", ");
             init.value(writer);
@@ -150,7 +207,7 @@ public class VariableWriter
         return var;
     }
 
-    private void printModifers(PrintWriter writer, CharSequence modifiers)
+    public static void printModifers(PrintWriter writer, CharSequence modifiers)
     {
         writer.print("withModifiers(");
         writer.print(modifiers);

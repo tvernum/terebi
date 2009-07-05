@@ -26,8 +26,8 @@ import org.apache.commons.io.IOUtils;
 
 import us.terebi.lang.lpc.io.FileFinder;
 import us.terebi.lang.lpc.io.Resource;
-import us.terebi.lang.lpc.io.ResourceLexerSource;
 import us.terebi.lang.lpc.io.ResourceFinder;
+import us.terebi.lang.lpc.io.ResourceLexerSource;
 import us.terebi.lang.lpc.io.SourceFinderFileSystem;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.jj.ParseException;
@@ -99,7 +99,7 @@ public class LpcParser
     /**
      * @deprecated Use {@link #parse(Resource)} instead
      */
-    public ASTObjectDefinition parse(String filename) throws IOException, LexerException
+    public ASTObjectDefinition parse(String filename) throws IOException, ParserException
     {
         Resource resource = _sourceFinder.getResource(filename);
         return parse(resource);
@@ -134,12 +134,20 @@ public class LpcParser
         return new ResourceLexerSource(resource);
     }
 
-    public ASTObjectDefinition parse(Resource resource) throws IOException, LexerException
+    public ASTObjectDefinition parse(Resource resource) throws IOException, ParserException
     {
         LineMapping mapping = new LineMapping(resource.getPath());
         new ParserState(this, mapping);
 
-        String content = preprocess(resource);
+        String content;
+        try
+        {
+            content = preprocess(resource);
+        }
+        catch (LexerException e)
+        {
+            throw new ParserException("Error in preprocessor for resource " + resource + " - " + e.getMessage(), e);
+        }
 
         Parser parser = new Parser(new StringReader(content));
         parser.setDebug(_debug);
@@ -164,11 +172,9 @@ public class LpcParser
                 }
                 int line = mapping.getLine(inputLine);
                 err.append(line);
-
-                System.err.println(err);
+                throw new ParserException(file, line, pe);
             }
-            pe.printStackTrace(System.err);
-            return null;
+            throw new ParserException("Cannot parse resource " + resource, pe);
         }
 
     }

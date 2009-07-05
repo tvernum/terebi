@@ -18,19 +18,25 @@
 
 package us.terebi.lang.lpc.runtime.jvm;
 
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 
 /**
  * 
  */
 public class InheritedObject<T>
 {
-    private final Class< ? extends T> _type;
-    private T _instance;
+    private final String _name;
+    private final CompiledObjectDefinition _definition;
+    private final CompiledObjectInstance _objectInstance;
+    private final T _instance;
 
-    public InheritedObject(Class< ? extends T> type) throws InstantiationException, IllegalAccessException
+    public InheritedObject(String name, Class< ? extends T> type, CompiledObjectDefinition definition)
     {
-        _type = type;
-        _instance = _type.newInstance();
+        _name = name;
+        _definition = definition;
+        _objectInstance = _definition.getInheritableInstance();
+        _instance = type.cast(_objectInstance.getImplementingObject());
     }
 
     public T get()
@@ -38,4 +44,18 @@ public class InheritedObject<T>
         return _instance;
     }
 
+    public String toString()
+    {
+        return getClass().getSimpleName() + ":" + _objectInstance.toString();
+    }
+    
+    public CompiledObjectInstance getObjectInstance()
+    {
+        return _objectInstance;
+    }
+
+    public String getName()
+    {
+        return _name;
+    }
 }

@@ -18,6 +18,7 @@
 
 package us.terebi.util;
 
+
 /**
  * 
  */
@@ -41,4 +42,24 @@ public class StringUtil
         return builder.toString();
     }
 
+    public static CharSequence join(String delim, Object[] values)
+    {
+        if (values.length == 0)
+        {
+            return "";
+        }
+        if (values.length == 1)
+        {
+            return values[0].toString();
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append(values[0]);
+        for (int i = 1; i < values.length; i++)
+        {
+            builder.append(delim);
+            builder.append(values[i]);
+        }
+        return builder;
+    }
 }

@@ -22,6 +22,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TreeSet;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNumber;
+
 import us.terebi.lang.lpc.runtime.ByteSequence;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -39,11 +41,13 @@ public class ComparisonSupport
 
     public static LpcValue notEqual(LpcValue left, LpcValue right)
     {
+        nullCheck(left, right);
         return getBoolean(!left.equals(right));
     }
 
     public static LpcValue equal(LpcValue left, LpcValue right)
     {
+        nullCheck(left, right);
         return getBoolean(left.equals(right));
     }
 
@@ -67,13 +71,10 @@ public class ComparisonSupport
         return getBoolean(compare(left, right) <= 0);
     }
 
-    private static int compare(LpcValue left, LpcValue right)
+    public static int compare(LpcValue left, LpcValue right)
     {
-        if (left == null || right == null)
-        {
-            throw new NullPointerException("Internal Error - null value passed to " + ComparisonSupport.class.getSimpleName());
-        }
-        
+        nullCheck(left, right);
+
         if (left.equals(right))
         {
             return 0;
@@ -101,22 +102,19 @@ public class ComparisonSupport
             return cmp;
         }
 
-        if (leftType.getKind() == LpcType.Kind.FLOAT || leftType.getKind() == LpcType.Kind.INT)
+        if (isNumber(leftType) && isNumber(rightType))
         {
-            if (rightType.getKind() == LpcType.Kind.FLOAT || rightType.getKind() == LpcType.Kind.INT)
+            double leftDouble = left.asDouble();
+            double rightDouble = right.asDouble();
+            if (leftDouble > rightDouble)
             {
-                double leftDouble = left.asDouble();
-                double rightDouble = right.asDouble();
-                if (leftDouble > rightDouble)
-                {
-                    return 1;
-                }
-                if (leftDouble < rightDouble)
-                {
-                    return -1;
-                }
-                return 0;
+                return 1;
             }
+            if (leftDouble < rightDouble)
+            {
+                return -1;
+            }
+            return 0;
         }
         else if (leftType.getKind() == LpcType.Kind.STRING)
         {
@@ -192,6 +190,17 @@ public class ComparisonSupport
         }
 
         return cmp(System.identityHashCode(left), System.identityHashCode(right));
+    }
+
+    private static void nullCheck(LpcValue... values)
+    {
+        for (LpcValue value : values)
+        {
+            if (value == null)
+            {
+                throw new NullPointerException("Internal Error - null value passed to " + ComparisonSupport.class.getSimpleName());
+            }
+        }
     }
 
     private static int compare(Iterable<LpcValue> leftList, Iterable<LpcValue> rightList)

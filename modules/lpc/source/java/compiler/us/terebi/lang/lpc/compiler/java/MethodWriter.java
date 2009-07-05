@@ -40,10 +40,16 @@ import us.terebi.lang.lpc.parser.ast.ASTUtil;
 import us.terebi.lang.lpc.parser.ast.ParserVisitor;
 import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.ParserConstants;
+import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.MemberDefinition;
 import us.terebi.lang.lpc.runtime.LpcType.Kind;
+import us.terebi.lang.lpc.runtime.jvm.LpcMember;
+import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
+import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.lang.lpc.runtime.util.Signature;
 
@@ -74,31 +80,36 @@ public class MethodWriter extends MemberWriter implements ParserVisitor
         LpcType type = new TypeWriter(getContext()).getType(getType(), isArray());
         List< ? extends ArgumentDefinition> args = getArgumentDefinitions(parameterDeclarations);
 
-        String name = identifier.jjtGetFirstToken().image;
+        Token token = identifier.jjtGetFirstToken();
+        String name = token.image;
         String internalName = name + "_";
         FunctionSignature signature = getFunctionSignature(type, args);
         getContext().functions().defineLocalMethod(name, internalName, signature);
         //        System.err.println("Signature of " + name + " is " + signature);
-        VariableReference[] parameterVariables = getContext().variables().declareParameters(args);
 
         if (body == null)
         {
             return;
         }
 
-        print("public @LpcMethod(name=\"" + name + "\", modifiers={");
+        println("\n/* Method " + name + " (Line:" + token.beginLine + ") */");
+
+        VariableReference[] parameterVariables = getContext().variables().declareParameters(args);
+
+        print("public @" + LpcMember.class.getName() + "(name=\"" + name + "\", modifiers={");
         printModifierList();
         println("})");
 
-        print("@LpcReturn(");
+        print("@" + LpcMemberType.class.getName() + "(");
         print("kind=");
         print(TypeWriter.fullyQualifiedName(type.getKind()));
         print(", depth=");
         print(Integer.toString(type.getArrayDepth()));
         if (type.isClass())
         {
-            print(", className=");
+            print(", className=\"");
             print(type.getClassDefinition().getName());
+            print("\"");
         }
         println(")");
 
@@ -150,7 +161,7 @@ public class MethodWriter extends MemberWriter implements ParserVisitor
 
     protected void printModifierList()
     {
-        CharSequence builder = getModifierList(false);
+        CharSequence builder = getModifierList(MemberDefinition.Kind.METHOD);
         getWriter().print(builder);
     }
 
@@ -190,7 +201,9 @@ public class MethodWriter extends MemberWriter implements ParserVisitor
     {
         LpcType type = arg.getType();
 
-        print("@LpcParameter(kind=");
+        print("@");
+        print(LpcParameter.class.getName());
+        print("(kind=");
         print(TypeWriter.fullyQualifiedName(type.getKind()));
         print(", depth=");
         print(Integer.toString(type.getArrayDepth()));
@@ -223,6 +236,6 @@ public class MethodWriter extends MemberWriter implements ParserVisitor
         String name = ASTUtil.getImage(identifier);
 
         LpcType type = new TypeWriter(getContext()).getType(fullType);
-        return new ArgumentSpec(name, type, ref, expander);
+        return new ArgumentSpec(name, type, ref ? ArgumentSemantics.EXPLICIT_REFERENCE : ArgumentSemantics.BY_VALUE, expander);
     }
 }

@@ -24,10 +24,10 @@ import us.terebi.lang.lpc.runtime.LpcType.Kind;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.InheritedObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
-import us.terebi.lang.lpc.runtime.jvm.LpcMethod;
+import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
-import us.terebi.lang.lpc.runtime.jvm.LpcReturn;
+import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 
 /**
@@ -38,23 +38,23 @@ public class SwordTestObject extends LpcObject
     @LpcInherited(name = "object", lpc = "/std/lib/object.c", implementation = "us.terebi.lang.lpc.compiler.java.test.ObjectTestObject")
     public InheritedObject<ObjectTestObject> inherit_object;
 
-    public @LpcMethod(name = "create", modifiers = { Modifier.PUBLIC })
-    @LpcReturn(kind = Kind.VOID, depth = 0)
+    public @LpcMember(name = "create", modifiers = { Modifier.PUBLIC })
+    @LpcMemberType(kind = Kind.VOID, depth = 0)
     LpcValue create()
     {
         return VoidValue.INSTANCE;
     }
 
-    @LpcMethod(name = "set_wc", modifiers = { Modifier.PUBLIC })
-    @LpcReturn(kind = Kind.VOID, depth = 0)
+    @LpcMember(name = "set_wc", modifiers = { Modifier.PUBLIC })
+    @LpcMemberType(kind = Kind.VOID, depth = 0)
     public LpcValue set_wc(@LpcParameter(name = "wc", kind = Kind.INT, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue wc_)
     {
         return VoidValue.INSTANCE;
     }
 
-    @LpcMethod(name = "add_wc_bonus", modifiers = { Modifier.PUBLIC })
-    @LpcReturn(kind = Kind.VOID, depth = 0)
+    @LpcMember(name = "add_wc_bonus", modifiers = { Modifier.PUBLIC })
+    @LpcMemberType(kind = Kind.VOID, depth = 0)
     public LpcValue add_wc_bonus(@LpcParameter(name = "func", kind = Kind.FUNCTION, depth = 0, semantics=ArgumentSemantics.BY_VALUE)
     LpcValue func_)
     {

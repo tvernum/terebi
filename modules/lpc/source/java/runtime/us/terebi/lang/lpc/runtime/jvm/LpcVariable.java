@@ -20,8 +20,9 @@ package us.terebi.lang.lpc.runtime.jvm;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.value.TypedValue;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMoreSpecific;
 
 /**
  * 
@@ -70,7 +71,7 @@ public class LpcVariable implements LpcReference
         {
             throw new IllegalStateException("Internal Error - Attempt to unset variable: " + this);
         }
-        if (value != null && MiscSupport.isMoreSpecific(_type, value.getActualType()))
+        if (value != null && isMoreSpecific(_type, value.getActualType()))
         {
             _value = new TypedValue(_type, value);
         }

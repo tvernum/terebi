@@ -28,7 +28,9 @@ import us.terebi.lang.lpc.runtime.ObjectDefinition;
  */
 public interface CompiledObjectDefinition extends ObjectDefinition
 {
-    public String getImplementationClass(); 
+    public Class<?> getImplementationClass(); 
+    public CompiledObjectInstance getMasterInstance();
     public CompiledObjectInstance newInstance();
+    public CompiledObjectInstance getInheritableInstance();
     public Map<String, ? extends CompiledMethodDefinition> getMethods();
 }

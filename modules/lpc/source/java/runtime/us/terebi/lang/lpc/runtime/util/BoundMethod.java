@@ -55,6 +55,11 @@ public class BoundMethod implements Callable
     {
         return Kind.METHOD;
     }
+    
+    public ObjectInstance getOwner()
+    {
+        return _instance;
+    }
 
     public FunctionSignature getSignature()
     {

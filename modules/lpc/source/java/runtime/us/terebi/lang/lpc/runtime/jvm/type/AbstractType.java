@@ -44,7 +44,7 @@ public abstract class AbstractType implements LpcType
     {
         return getKind() == Kind.CLASS;
     }
-    
+
     public boolean equals(Object obj)
     {
         if (obj == this)

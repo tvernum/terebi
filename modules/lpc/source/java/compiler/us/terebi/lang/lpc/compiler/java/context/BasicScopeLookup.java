@@ -16,12 +16,9 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.context;
+package us.terebi.lang.lpc.compiler.java.context;
 
-import us.terebi.lang.lpc.compiler.java.context.ClassLookup;
-import us.terebi.lang.lpc.compiler.java.context.FunctionLookup;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
-import us.terebi.lang.lpc.compiler.java.context.VariableLookup;
+import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 
 /**
@@ -29,13 +26,13 @@ import us.terebi.lang.lpc.runtime.ObjectDefinition;
  */
 public class BasicScopeLookup implements ScopeLookup
 {
-    protected final ObjectManager _manager;
+    protected final CompilerObjectManager _manager;
     protected final FunctionLookup _functions;
     protected final VariableLookup _variables;
     protected final ClassLookup _classes;
     protected final boolean _secure;
 
-    public BasicScopeLookup(ObjectManager manager)
+    public BasicScopeLookup(CompilerObjectManager manager)
     {
         _manager = manager;
         _functions = new FunctionLookup();
@@ -49,7 +46,7 @@ public class BasicScopeLookup implements ScopeLookup
         return _functions;
     }
 
-    public ObjectManager objectManager()
+    public CompilerObjectManager objectManager()
     {
         return _manager;
     }

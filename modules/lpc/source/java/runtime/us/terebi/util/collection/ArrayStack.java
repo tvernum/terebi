@@ -37,7 +37,12 @@ public class ArrayStack<E> implements Stack<E>
 
     public E peek()
     {
-        return _list.get(_list.size() - 1);
+        return peek(0);
+    }
+
+    public E peek(int offset)
+    {
+        return _list.get(_list.size() - offset - 1);
     }
 
     public E pop()

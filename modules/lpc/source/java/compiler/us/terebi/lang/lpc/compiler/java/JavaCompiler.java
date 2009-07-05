@@ -23,12 +23,20 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Date;
 
+import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.Compiler;
+import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectOutput;
 import us.terebi.lang.lpc.compiler.ObjectSource;
 import us.terebi.lang.lpc.compiler.java.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
+import us.terebi.lang.lpc.parser.ast.ASTClassBody;
+import us.terebi.lang.lpc.parser.ast.ASTDeclaration;
+import us.terebi.lang.lpc.parser.ast.ASTFields;
+import us.terebi.lang.lpc.parser.ast.ASTMethod;
+import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
+import us.terebi.lang.lpc.parser.ast.ASTUtil;
+import us.terebi.lang.lpc.parser.ast.BaseASTVisitor;
 
 /**
  * 
@@ -36,9 +44,9 @@ import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
 public class JavaCompiler implements Compiler
 {
     private final FunctionMap _efuns;
-    private final ObjectManager _manager;
+    private final CompilerObjectManager _manager;
 
-    public JavaCompiler(FunctionMap efuns, ObjectManager manager)
+    public JavaCompiler(FunctionMap efuns, CompilerObjectManager manager)
     {
         _efuns = efuns;
         _manager = manager;
@@ -76,11 +84,40 @@ public class JavaCompiler implements Compiler
         context.writer().print(className);
         context.writer().println(" extends LpcObject {");
         context.variables().pushScope();
-        source.getSyntaxTree().childrenAccept(new InheritanceWriter(context), null);
-        source.getSyntaxTree().childrenAccept(new FieldWriter(context), null);
-        source.getSyntaxTree().childrenAccept(new MethodWriter(context), null);
+        ASTObjectDefinition ast = source.getSyntaxTree();
+        context.writer().println("/* Inheritance */");
+        ast.childrenAccept(new InheritanceWriter(context), null);
+        context.writer().println("/* Members */");
+        writeMembers(ast, context);
         context.variables().popScope();
         context.writer().println("}");
+    }
+
+    private void writeMembers(ASTObjectDefinition ast, final CompileContext context)
+    {
+        final FieldWriter fieldWriter = new FieldWriter(context);
+        final ClassWriter classWriter = new ClassWriter(context);
+        final MethodWriter methodWriter = new MethodWriter(context);
+
+        ast.childrenAccept(new BaseASTVisitor()
+        {
+            public Object visit(ASTDeclaration node, Object data)
+            {
+                if (ASTUtil.hasChildType(ASTFields.class, node))
+                {
+                    return fieldWriter.visit(node, data);
+                }
+                if (ASTUtil.hasChildType(ASTClassBody.class, node))
+                {
+                    return classWriter.visit(node, data);
+                }
+                if (ASTUtil.hasChildType(ASTMethod.class, node))
+                {
+                    return methodWriter.visit(node, data);
+                }
+                throw new CompileException(node, "Internal Error - Unknown declaration type");
+            }
+        }, null);
     }
 
     private void writeJavaDoc(CompileContext context, ObjectSource source)

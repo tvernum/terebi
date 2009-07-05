@@ -20,6 +20,8 @@ package us.terebi.lang.lpc.runtime.jvm.value;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -36,8 +38,8 @@ public class MappingValue extends AbstractValue implements LpcValue
     {
         this(new HashMap<LpcValue, LpcValue>(initialSize));
     }
-    
-    public MappingValue(Map<LpcValue,LpcValue> map)
+
+    public MappingValue(Map<LpcValue, LpcValue> map)
     {
         _map = map;
     }
@@ -65,6 +67,29 @@ public class MappingValue extends AbstractValue implements LpcValue
     protected int valueHashCode()
     {
         return this.asMap().hashCode();
+    }
+
+    public CharSequence debugInfo()
+    {
+        if (_map.isEmpty())
+        {
+            return "([ ])";
+        }
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("([ ");
+
+        Set<Entry<LpcValue, LpcValue>> entries = _map.entrySet();
+        for (Entry<LpcValue, LpcValue> entry : entries)
+        {
+            builder.append(entry.getKey().debugInfo());
+            builder.append(" : ");
+            builder.append(entry.getValue().debugInfo());
+            builder.append(" , ");
+        }
+
+        builder.replace(builder.length() - 2, builder.length(), "])");
+        return builder;
     }
 
 }

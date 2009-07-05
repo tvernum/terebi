@@ -24,6 +24,7 @@ import java.util.Map;
 import us.terebi.lang.lpc.runtime.ByteSequence;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassInstance;
+import us.terebi.lang.lpc.runtime.ExtensionValue;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
@@ -49,7 +50,7 @@ public abstract class AbstractValue implements LpcValue
     {
         return true;
     }
-    
+
     public ByteSequence asBuffer()
     {
         throw isNot("a buffer");
@@ -122,10 +123,16 @@ public abstract class AbstractValue implements LpcValue
     }
 
     protected abstract boolean valueEquals(LpcValue other);
+
     protected abstract int valueHashCode();
-    
+
     public String toString()
     {
         return getDescription().toString();
+    }
+
+    public <T extends ExtensionValue> T asExtension(Class< ? extends T> type)
+    {
+        throw isNot("an extension");
     }
 }

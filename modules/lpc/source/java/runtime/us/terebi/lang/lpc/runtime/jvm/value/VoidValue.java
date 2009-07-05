@@ -53,5 +53,10 @@ public class VoidValue extends AbstractValue
     {
         return 0x79c0;
     }
+    
+    public CharSequence debugInfo()
+    {
+        return "";
+    }
 
 }

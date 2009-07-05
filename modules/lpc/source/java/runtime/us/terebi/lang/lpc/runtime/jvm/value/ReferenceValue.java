@@ -24,6 +24,7 @@ import java.util.Map;
 import us.terebi.lang.lpc.runtime.ByteSequence;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassInstance;
+import us.terebi.lang.lpc.runtime.ExtensionValue;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
@@ -164,6 +165,16 @@ public class ReferenceValue implements LpcReference, LpcValue, LpcReferenceValue
     public LpcType getActualType()
     {
         return getInternalValue().getActualType();
+    }
+
+    public <T extends ExtensionValue> T asExtension(Class< ? extends T> type)
+    {
+        return getInternalValue().asExtension(type);
+    }
+
+    public CharSequence debugInfo()
+    {
+        return getInternalValue().debugInfo();
     }
 
 }

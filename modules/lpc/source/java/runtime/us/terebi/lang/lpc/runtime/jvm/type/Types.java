@@ -22,6 +22,7 @@ import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ExtensionType;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcType.Kind;
+import us.terebi.lang.lpc.runtime.jvm.value.ClassReference;
 
 /**
  * 
@@ -45,6 +46,8 @@ public class Types
     public static final LpcType FLOAT = new SimpleType(Kind.FLOAT);
     public static final LpcType MAPPING = new SimpleType(Kind.MAPPING);
     public static final LpcType BUFFER = new SimpleType(Kind.BUFFER);
+
+    public static final LpcType CLASS_REFERENCE = extensionType(ClassReference.TYPE, 0);
 
     public static LpcType classType(ClassDefinition definition)
     {

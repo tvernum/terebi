@@ -60,6 +60,7 @@ import us.terebi.lang.lpc.runtime.jvm.efun.FindObjectEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FindPlayerEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FlushMessagesEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FunctionExistsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FunctionOwnerEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FunctionpEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FunctionsEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.GetDirectoryInfoEfun;
@@ -244,6 +245,7 @@ public class StandardEfuns
         public static final Efun functionp = new FunctionpEfun();
         public static final Efun evaluate = new EvaluateEfun();
         public static final Efun bind = new BindEfun();
+        public static final Efun function_owner = new FunctionOwnerEfun();
         public static final Efun call_stack = new CallStackEfun();
     }
 

@@ -16,27 +16,23 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.context;
+package us.terebi.lang.lpc.runtime.jvm;
 
-import us.terebi.lang.lpc.compiler.java.context.ClassLookup;
-import us.terebi.lang.lpc.compiler.java.context.FunctionLookup;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
-import us.terebi.lang.lpc.compiler.java.context.VariableLookup;
-import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import us.terebi.lang.lpc.runtime.LpcType;
 
 /**
  * 
  */
-public interface ScopeLookup
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.METHOD, ElementType.FIELD})
+public @interface LpcMemberType
 {
-    public boolean isSecureObject();
-
-    public ObjectManager objectManager();
-
-    public FunctionLookup functions();
-    public VariableLookup variables();
-    public ClassLookup classes();
-
-    public void addInherit(String name, ObjectDefinition parent);
-
+    LpcType.Kind kind();
+    int depth();
+    String className() default "";
 }

@@ -18,156 +18,87 @@
 
 package us.terebi.lang.lpc.runtime.jvm.object;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
-import us.terebi.lang.lpc.runtime.ClassDefinition;
-import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
+import us.terebi.lang.lpc.runtime.AttributeMap;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
-import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
-import us.terebi.lang.lpc.runtime.jvm.LpcField;
-import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
-import us.terebi.lang.lpc.runtime.jvm.LpcMethod;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
-import us.terebi.lang.lpc.runtime.jvm.context.ScopeLookup;
-import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.util.Attributes;
 
 /**
  * 
  */
-public class CompiledObject implements CompiledObjectDefinition
+public class CompiledObject<T extends LpcObject> implements CompiledObjectInstance
 {
-    private final ScopeLookup _lookup;
-    private final Class< ? extends LpcObject> _implementation;
-    private final Map<String, CompiledObjectDefinition> _inherited;
-    private final Map<String, CompiledField> _fields;
-    private final Map<String, CompiledMethod> _methods;
-    private final String _name;
+    private final CompiledObjectDefinition _definition;
+    private final long _id;
+    private final T _object;
+    private final Map<String, ? extends ObjectInstance> _parents;
+    private final AttributeMap _attributes;
 
-    public CompiledObject(ObjectManager manager, ScopeLookup lookup, String name, Class< ? extends LpcObject> implementation)
+    public CompiledObject(CompiledObjectDefinition definition, long id, T object,
+            Map<String, ? extends ObjectInstance> parents)
     {
-        _lookup = lookup;
-        _name = name;
-        _implementation = implementation;
-        _inherited = new HashMap<String, CompiledObjectDefinition>();
-        _fields = new HashMap<String, CompiledField>();
-        _methods = new HashMap<String, CompiledMethod>();
-        introspect(manager);
+        _definition = definition;
+        _id = id;
+        _object = object;
+        _parents = Collections.unmodifiableMap(parents);
+        _attributes = new Attributes();
     }
 
-    private void introspect(ObjectManager manager)
+    public CompiledObjectDefinition getDefinition()
     {
-        Method[] methods = _implementation.getDeclaredMethods();
-        for (Method method : methods)
+        return _definition;
+    }
+
+    public T getImplementingObject()
+    {
+        return _object;
+    }
+
+    public AttributeMap getAttributes()
+    {
+        return _attributes;
+    }
+
+    public long getId()
+    {
+        return _id;
+    }
+
+    public Map<String, ? extends ObjectInstance> getInheritedObjects()
+    {
+        return _parents;
+    }
+
+    public String getCanonicalName()
+    {
+        if (_id == 0)
         {
-            LpcMethod annotation = method.getAnnotation(LpcMethod.class);
-            if (annotation != null)
-            {
-                _methods.put(annotation.name(), new CompiledMethod(this, method, _lookup));
-            }
+            return _definition.getName();
         }
-
-        Field[] fields = _implementation.getDeclaredFields();
-        for (Field field : fields)
+        else
         {
-            if (LpcField.class.isAssignableFrom(field.getType()))
-            {
-                _fields.put(field.getName(), new CompiledField(this, field));
-            }
-            else if (field.getAnnotation(LpcInherited.class) != null)
-            {
-                LpcInherited inherited = field.getAnnotation(LpcInherited.class);
-                assert (inherited != null);
-                _inherited.put(inherited.name(), findInherited(manager, inherited));
-            }
+            return _definition.getName() + "#" + _id;
         }
     }
 
-    private CompiledObjectDefinition findInherited(ObjectManager manager, LpcInherited inherited)
+    public Map<FieldDefinition, LpcValue> getFieldValues()
     {
-        String lpc = inherited.lpc();
-        CompiledObjectDefinition object = manager.findObject(lpc);
-        if (object == null)
+        Map<FieldDefinition, LpcValue> values = new HashMap<FieldDefinition, LpcValue>();
+        Collection< ? extends FieldDefinition> definitions = _definition.getFields().values();
+        for (FieldDefinition definition : definitions)
         {
-            throw new LpcRuntimeException("Internal error - Object manager "
-                    + manager
-                    + " has no object for  "
-                    + lpc
-                    + " but "
-                    + _implementation
-                    + " expects it to be implemented by "
-                    + inherited.implementation());
+            values.put(definition, definition.getValue(this));
         }
-        if (inherited.implementation().equals(object.getImplementationClass()))
-        {
-            return object;
-        }
-        throw new LpcRuntimeException("Internal error - Object manager "
-                + manager
-                + " thinks "
-                + lpc
-                + " is implemented by "
-                + object
-                + " but "
-                + _implementation
-                + " expected "
-                + inherited.implementation());
-    }
-
-    public String getImplementationClass()
-    {
-        return _implementation.getName();
-    }
-
-    public Map<String, ClassDefinition> getDefinedClasses()
-    {
-        // @TODO Support for classes
-        return Collections.emptyMap();
-    }
-
-    public ObjectInstance getInheritableInstance()
-    {
-        // @TODO Auto-generated method stub
-        return null;
-    }
-
-    public Map<String, ? extends ObjectDefinition> getInheritedObjects()
-    {
-        return Collections.unmodifiableMap(_inherited);
-    }
-
-    public ObjectInstance getMasterInstance()
-    {
-        // @TODO Auto-generated method stub
-        return null;
-    }
-
-    public Map<String, ? extends CompiledMethodDefinition> getMethods()
-    {
-        return Collections.unmodifiableMap(_methods);
-    }
-
-    public CompiledObjectInstance newInstance()
-    {
-        // @TODO Auto-generated method stub
-        return null;
-    }
-
-    public Map<String, ? extends FieldDefinition> getFields()
-    {
-        return Collections.unmodifiableMap(_fields);
-    }
-
-    public String getName()
-    {
-        return _name;
+        return values;
     }
 
 }

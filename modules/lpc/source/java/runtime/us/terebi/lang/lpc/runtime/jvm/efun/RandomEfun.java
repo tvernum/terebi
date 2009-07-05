@@ -27,8 +27,9 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
 
 /**
  * 
@@ -40,7 +41,6 @@ public class RandomEfun extends AbstractEfun
     public RandomEfun()
     {
         _random = new Random();
-
     }
 
     public List< ? extends ArgumentDefinition> getArguments()
@@ -64,8 +64,7 @@ public class RandomEfun extends AbstractEfun
         }
         else
         {
-            int r = _random.nextInt((int) n);
-            return new IntValue(r);
+            return intValue(_random.nextInt((int) n));
         }
     }
 

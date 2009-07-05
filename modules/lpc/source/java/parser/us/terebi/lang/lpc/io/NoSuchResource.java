@@ -77,4 +77,9 @@ public class NoSuchResource implements Resource
         throw new FileNotFoundException(getPath());
     }
 
+    public String toString()
+    {
+        return getClass().getSimpleName() + "(" + getPath() + ")";
+    }
+
 }

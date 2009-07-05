@@ -71,11 +71,11 @@ public class ClassLookup
 
         if (match.isEmpty())
         {
-            throw new LpcRuntimeException("The class" + className + " has been defined in the current scope");
+            throw new LookupException("The class " + className + " has not been defined in the current scope");
         }
         if (match.size() > 1)
         {
-            throw new LpcRuntimeException("Multiple classes with the name "
+            throw new LookupException("Multiple classes with the name "
                     + className
                     + " have been defined in the current scope - "
                     + ToString.toString(match));
@@ -101,6 +101,11 @@ public class ClassLookup
     public void addInherit(String name, ObjectDefinition parent)
     {
         _inherited.put(name, parent);
+    }
+
+    public void defineClass(ClassDefinition classDefinition)
+    {
+        _local.put(classDefinition.getName(), classDefinition);
     }
 
 }

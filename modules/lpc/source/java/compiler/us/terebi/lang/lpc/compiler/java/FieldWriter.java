@@ -22,13 +22,13 @@ import us.terebi.lang.lpc.compiler.java.context.CompileContext;
 import us.terebi.lang.lpc.parser.ast.ASTFields;
 import us.terebi.lang.lpc.parser.ast.ASTVariable;
 import us.terebi.lang.lpc.parser.ast.ParserVisitor;
+import us.terebi.lang.lpc.runtime.MemberDefinition;
 
 /**
  * 
  */
 public class FieldWriter extends MemberWriter implements ParserVisitor
 {
-
     public FieldWriter(CompileContext context)
     {
         super(context);
@@ -41,7 +41,7 @@ public class FieldWriter extends MemberWriter implements ParserVisitor
 
     public Object visit(ASTVariable node, Object data)
     {
-        CharSequence modifiers = getModifierList(true);
+        CharSequence modifiers = getModifierList(MemberDefinition.Kind.FIELD);
         new VariableWriter(getContext(), getType()).writeField(node, modifiers);
         return data;
     }

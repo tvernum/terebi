@@ -19,6 +19,8 @@
 package us.terebi.lang.lpc.compiler.java;
 
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Set;
 
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.context.CompileContext;
@@ -31,6 +33,7 @@ import us.terebi.lang.lpc.parser.ast.BaseASTVisitor;
 import us.terebi.lang.lpc.parser.jj.ParserConstants;
 import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.MemberDefinition;
+import us.terebi.lang.lpc.runtime.MemberDefinition.Kind;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 
 /**
@@ -83,7 +86,8 @@ public class MemberWriter extends BaseASTVisitor
 
     public Object visit(ASTDeclaration node, Object data)
     {
-        return node.childrenAccept(this, data);
+        final Object result = node.childrenAccept(this, data);
+        return result;
     }
 
     public Object visit(ASTModifiers node, Object data)
@@ -105,11 +109,16 @@ public class MemberWriter extends BaseASTVisitor
         return data;
     }
 
-    protected CharSequence getModifierList(boolean field)
+    protected CharSequence getModifierList(Kind kind)
+    {
+        return getModifierList(getModifiers(kind));
+    }
+
+    protected CharSequence getModifierList(Set< ? extends Modifier> modifiers)
     {
         StringBuilder builder = new StringBuilder();
         boolean first = true;
-        for (Token token : ASTUtil.getTokens(_modifiers))
+        for (Modifier modifier : modifiers)
         {
             if (first)
             {
@@ -119,14 +128,13 @@ public class MemberWriter extends BaseASTVisitor
             {
                 builder.append(',');
             }
-            builder.append(TypeWriter.fullyQualifiedName(getModifier(token, field)));
+            builder.append(TypeWriter.fullyQualifiedName(modifier));
         }
         return builder;
     }
 
-    private Modifier getModifier(Token token, boolean field)
+    private Modifier getModifier(Token token, Kind kind)
     {
-
         switch (token.kind)
         {
             case ParserConstants.PUBLIC:
@@ -136,38 +144,34 @@ public class MemberWriter extends BaseASTVisitor
             case ParserConstants.PRIVATE:
                 return MemberDefinition.Modifier.PRIVATE;
             case ParserConstants.STATIC:
-                if (field)
+                switch (kind)
+                {
+                    case FIELD:
+                        return MemberDefinition.Modifier.NOSAVE;
+                    case METHOD:
+                        return MemberDefinition.Modifier.NOMASK;
+                }
+                break;
+            case ParserConstants.NOSAVE:
+                if (kind == MemberDefinition.Kind.FIELD)
                 {
                     return MemberDefinition.Modifier.NOSAVE;
                 }
-                else
+                break;
+            case ParserConstants.NOMASK:
+                if (kind == MemberDefinition.Kind.METHOD)
                 {
                     return MemberDefinition.Modifier.NOMASK;
                 }
-            case ParserConstants.NOSAVE:
-                if (field)
-                {
-                    return MemberDefinition.Modifier.NOSAVE;
-                }
-                throw new CompileException(token, token.image + " is not a valid modifier for a field member");
-            case ParserConstants.NOMASK:
-                if (field)
-                {
-                    throw new CompileException(token, token.image + " is not a valid modifier for a field member");
-                }
-                return MemberDefinition.Modifier.NOMASK;
+                break;
             case ParserConstants.VARARGS:
-                if (field)
+                if (kind == MemberDefinition.Kind.METHOD)
                 {
-                    throw new CompileException(token, token.image + " is not a valid modifier for a field member");
+                    return MemberDefinition.Modifier.VARARGS;
                 }
-                return MemberDefinition.Modifier.VARARGS;
-            default:
-                throw new CompileException(token, token.image
-                        + " is not a valid modifier for a "
-                        + (field ? "field" : "method")
-                        + " member");
+                break;
         }
+        throw new CompileException(token, token.image + " is not a valid modifier for a " + kind.name().toLowerCase());
     }
 
     protected void print(String string)
@@ -178,5 +182,16 @@ public class MemberWriter extends BaseASTVisitor
     protected void println(String string)
     {
         _context.writer().println(string);
+    }
+
+    protected Set< ? extends Modifier> getModifiers(Kind kind)
+    {
+        Set<Modifier> modifiers = new HashSet<Modifier>();
+        for (Token token : ASTUtil.getTokens(_modifiers))
+        {
+            Modifier modifier = getModifier(token, kind);
+            modifiers.add(modifier);
+        }
+        return modifiers;
     }
 }

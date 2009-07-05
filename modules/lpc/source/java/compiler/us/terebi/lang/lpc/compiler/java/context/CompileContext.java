@@ -21,9 +21,8 @@ package us.terebi.lang.lpc.compiler.java.context;
 import java.io.Closeable;
 import java.io.PrintWriter;
 
+import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
-import us.terebi.lang.lpc.runtime.jvm.context.BasicScopeLookup;
-import us.terebi.lang.lpc.runtime.jvm.context.ScopeLookup;
 
 
 /**
@@ -34,7 +33,7 @@ public class CompileContext implements Closeable, ScopeLookup
     private final ScopeLookup _scope;
     private final PrintWriter _writer;
     
-    public CompileContext(PrintWriter writer, ObjectManager manager)
+    public CompileContext(PrintWriter writer, CompilerObjectManager manager)
     {
         _scope = new BasicScopeLookup(manager);
         _writer = writer;
@@ -70,7 +69,7 @@ public class CompileContext implements Closeable, ScopeLookup
         return _scope.isSecureObject();
     }
 
-    public ObjectManager objectManager()
+    public CompilerObjectManager objectManager()
     {
         return _scope.objectManager();
     }

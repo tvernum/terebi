@@ -31,19 +31,18 @@ import org.apache.commons.jci.stores.ResourceStore;
 import org.apache.commons.jci.stores.ResourceStoreClassLoader;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LineMapping;
 import us.terebi.lang.lpc.parser.LpcParser;
+import us.terebi.lang.lpc.parser.ParserException;
 import us.terebi.lang.lpc.parser.ParserState;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.Token;
-import us.terebi.lang.lpc.preprocessor.LexerException;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
-import us.terebi.lang.lpc.runtime.jvm.context.ScopeLookup;
-import us.terebi.lang.lpc.runtime.jvm.object.CompiledObject;
+import us.terebi.lang.lpc.runtime.jvm.object.CompiledDefinition;
 import us.terebi.util.ToString;
 
 /**
@@ -59,11 +58,11 @@ public class ObjectBuilder implements ObjectCompiler
     private final FileResourceReader _reader;
     private final FileResourceStore _store;
     private final ClassLoader _classLoader;
-    private final ObjectManager _manager;
+    private final CompilerObjectManager _manager;
     private final ScopeLookup _scope;
     private boolean _compileOnly;
 
-    public ObjectBuilder(ResourceFinder sourceFinder, ObjectManager manager, ScopeLookup scope, LpcParser parser,
+    public ObjectBuilder(ResourceFinder sourceFinder, CompilerObjectManager manager, ScopeLookup scope, LpcParser parser,
             Compiler compiler, JavaCompiler javaCompiler, File workingDirectory)
     {
         _sourceFinder = sourceFinder;
@@ -86,13 +85,20 @@ public class ObjectBuilder implements ObjectCompiler
             Resource resource = _sourceFinder.getResource(objectSource);
             ast = parse(resource);
         }
-        catch (LexerException e)
+        catch (ParserException e)
         {
-            throw new CompileException((Token) null, e.getMessage());
+            throw new CompileException(e);
         }
         catch (IOException e)
         {
-            throw new CompileException(ast, e.getMessage());
+            if (ast == null)
+            {
+                throw new CompileException("Cannot access source " + objectSource + " - " + e.getMessage(), e);
+            }
+            else
+            {
+                throw new CompileException(ast, e.getMessage());
+            }
         }
         LineMapping lineMapping = ParserState.getState().getLineMapping();
         try
@@ -106,7 +112,7 @@ public class ObjectBuilder implements ObjectCompiler
             }
             compileToByteCode(ast, output);
             Class< ? extends LpcObject> cls = loadClass(ast, output);
-            return new CompiledObject(_manager, _scope, objectSource, cls);
+            return new CompiledDefinition<LpcObject>(_manager, _scope, objectSource, cls);
         }
         catch (IOException e)
         {
@@ -200,7 +206,7 @@ public class ObjectBuilder implements ObjectCompiler
         return output;
     }
 
-    private ASTObjectDefinition parse(Resource resource) throws IOException, LexerException
+    private ASTObjectDefinition parse(Resource resource) throws IOException, ParserException
     {
         _parser.setSourceFinder(_sourceFinder);
         return _parser.parse(resource);
@@ -209,5 +215,10 @@ public class ObjectBuilder implements ObjectCompiler
     public void setCompileOnly(boolean compileOnly)
     {
         _compileOnly = compileOnly;
+    }
+
+    public CompilerObjectManager getObjectManager()
+    {
+        return _manager;
     }
 }

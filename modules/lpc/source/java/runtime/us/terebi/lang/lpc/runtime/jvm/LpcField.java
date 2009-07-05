@@ -18,11 +18,9 @@
 
 package us.terebi.lang.lpc.runtime.jvm;
 
-import java.util.Set;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 
 /**
  * 
@@ -30,19 +28,17 @@ import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 public class LpcField implements LpcReference
 {
     private final String _name;
-    private final Set< ? extends Modifier> _modifiers;
     private final LpcType _type;
     private LpcValue _value;
 
-    public LpcField(String name, Set< ? extends Modifier> modifiers, LpcType type)
+    public LpcField(String name, LpcType type)
     {
-        this(name, modifiers, type, null);
+        this(name, type, null);
     }
 
-    public LpcField(String name, Set< ? extends Modifier> modifiers, LpcType type, LpcValue value)
+    public LpcField(String name, LpcType type, LpcValue value)
     {
         _name = name;
-        _modifiers = modifiers;
         _type = type;
         _value = value;
     }
@@ -50,11 +46,6 @@ public class LpcField implements LpcReference
     public String getName()
     {
         return _name;
-    }
-
-    public Set< ? extends Modifier> getModifiers()
-    {
-        return _modifiers;
     }
 
     public LpcValue get()

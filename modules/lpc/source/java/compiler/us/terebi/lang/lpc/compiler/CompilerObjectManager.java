@@ -16,23 +16,21 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm;
+package us.terebi.lang.lpc.compiler;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 
-import us.terebi.lang.lpc.runtime.LpcType;
+
 
 /**
  * 
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface LpcReturn
+public interface CompilerObjectManager extends ObjectManager
 {
-    LpcType.Kind kind();
-    int depth();
-    String className() default "";
+    public CompiledObjectDefinition findObject(String name);
+    public void registerObject(CompiledObjectDefinition definition);
+    public void registerObject(CompiledObjectInstance object);
+    public long allocateObjectIdentifier();
 }

@@ -81,7 +81,7 @@ public class ArgumentSpec implements ArgumentDefinition
                 builder.append(" ref ");
                 break;
             case IMPLICIT_REFERENCE:
-                builder.append(" ~");
+                builder.append(" &");
                 break;
             default:
                 builder.append(" ");

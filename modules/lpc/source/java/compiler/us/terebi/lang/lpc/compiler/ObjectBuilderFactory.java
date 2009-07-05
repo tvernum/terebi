@@ -24,15 +24,14 @@ import java.io.IOException;
 import org.apache.commons.jci.compilers.JavaCompilerFactory;
 
 import us.terebi.lang.lpc.compiler.java.JavaCompiler;
-import us.terebi.lang.lpc.compiler.java.context.CompilerObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
+import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.io.FileFinder;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LpcParser;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
-import us.terebi.lang.lpc.runtime.jvm.context.BasicScopeLookup;
-import us.terebi.lang.lpc.runtime.jvm.context.ScopeLookup;
 
 /**
  * 
@@ -40,14 +39,14 @@ import us.terebi.lang.lpc.runtime.jvm.context.ScopeLookup;
 public class ObjectBuilderFactory
 {
     private FunctionMap _efuns;
-    private ObjectManager _manager;
+    private CompilerObjectManager _manager;
     private LpcParser _parser;
     private File _workingDir;
 
     public ObjectBuilderFactory() throws IOException
     {
         _efuns = StandardEfuns.getSignatures();
-        _manager = new CompilerObjectManager();
+        _manager = new LpcCompilerObjectManager();
         _parser = new LpcParser();
 
         _workingDir = File.createTempFile("lpc", "test");
@@ -61,7 +60,7 @@ public class ObjectBuilderFactory
         _efuns = efuns;
     }
 
-    public void setManager(ObjectManager manager)
+    public void setManager(CompilerObjectManager manager)
     {
         _manager = manager;
     }

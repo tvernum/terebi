@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
@@ -42,7 +43,7 @@ public class MapEfun extends AbstractEfun implements FunctionSignature, Callable
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("collection", Types.MIXED));
         list.add(new ArgumentSpec("func", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED, false, true));
+        list.add(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
         return list;
     }
 

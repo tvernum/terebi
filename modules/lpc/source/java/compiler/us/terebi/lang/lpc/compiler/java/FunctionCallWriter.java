@@ -24,6 +24,7 @@ import java.util.List;
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
+import us.terebi.lang.lpc.compiler.java.context.VariableLookup.VariableReference;
 import us.terebi.lang.lpc.parser.ast.ASTArgumentExpression;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionArguments;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionCall;
@@ -39,6 +40,8 @@ import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
+import us.terebi.lang.lpc.runtime.FunctionSignature;
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.Callable.Kind;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ReferenceValue;
@@ -140,7 +143,8 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
 
     public InternalVariable writeFunction(FunctionReference function, FunctionArgument[] argVars)
     {
-        InternalVariable var = new InternalVariable(_context, false, function.signature.getReturnType());
+        FunctionSignature signature = function.signature;
+        InternalVariable var = new InternalVariable(_context, false, signature.getReturnType());
         var.declare(_context.writer());
         _context.writer().print(" = ");
 
@@ -184,6 +188,34 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
                     break;
             }
         }
+
+        printArguments(argVars, expand);
+
+        for (int i = argVars.length; i < signature.getArguments().size(); i++)
+        {
+            if (i > 0)
+            {
+                writer.print(" , ");
+            }
+            if (signature.getArguments().get(i).isVarArgs())
+            {
+                writer.print("makeArray()");
+            }
+            else
+            {
+                writer.print("nil()");
+            }
+        }
+
+        
+        writer.println(");");
+        return var;
+    }
+
+    public void printArguments(FunctionArgument[] argVars, boolean expand)
+    {
+        PrintWriter writer = _context.writer();
+
         boolean first = true;
         for (FunctionArgument argVar : argVars)
         {
@@ -225,22 +257,6 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
                 argVar.variable.value(writer);
             }
         }
-
-        for (int i = argVars.length; i < function.signature.getArguments().size(); i++)
-        {
-            if (first)
-            {
-                first = false;
-            }
-            else
-            {
-                writer.print(" , ");
-            }
-            writer.print("nil()");
-        }
-
-        writer.println(");");
-        return var;
     }
 
     public FunctionArgument[] processArguments(FunctionReference function, InternalVariable[] prelim, ASTFunctionArguments args)
@@ -331,7 +347,7 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
                             + data.function.name
                             + " requires a reference value");
                 }
-                return new FunctionArgument(printRef(var.name), true, false);
+                return new FunctionArgument(printRef(var.name, var.type), true, false);
             }
             else
             {
@@ -344,16 +360,15 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
     {
         ASTIdentifier identifier = (ASTIdentifier) node.jjtGetChild(0);
         ClassDefinition definition = _context.classes().findClass(identifier);
-        String className = definition.getName();
 
         String varName = _context.variables().allocateInternalVariableName();
         InternalVariable var = new InternalVariable(varName, false, Types.classType(definition));
 
         PrintWriter writer = _context.writer();
         var.declare(writer);
-        writer.print(" = new LpcClass(this, ");
-        writer.print(className);
-        writer.print(")");
+        writer.print(" = classReference(");
+        writer.print(new ClassWriter(_context).getInternalName(definition));
+        writer.println(".class);");
         return var;
     }
 
@@ -368,21 +383,25 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
                     + " does not accept references");
         }
         SimpleNode identifier = (SimpleNode) node.jjtGetChild(0);
-        String init = ASTUtil.getImage(identifier);
-        // @TODO check the symbol table for the type (and to check whether it's been declared, etc)
-        return printRef(init);
+        String initName = ASTUtil.getImage(identifier);
+        VariableReference init = _context.variables().findVariable(initName);
+        if (init == null)
+        {
+            throw new CompileException(identifier, "The variable " + initName + " has not been declared");
+        }
+        return printRef(init.internalName, init.type);
     }
 
-    private InternalVariable printRef(String initFrom)
+    private InternalVariable printRef(String init, LpcType type)
     {
         String name = _context.variables().allocateInternalVariableName();
         _context.writer().print("final LpcReferenceValue ");
         _context.writer().print(name);
-        _context.writer().print("= new " + ReferenceValue.class.getName() + "(");
-        _context.writer().print(initFrom);
-        _context.writer().print(");");
+        _context.writer().print(" = new " + ReferenceValue.class.getName() + "(");
+        _context.writer().print(init);
+        _context.writer().println(");");
 
-        return new InternalVariable(name, true, Types.MIXED);
+        return new InternalVariable(name, true, type);
     }
 
     private void printCallExecution(Kind kind, FunctionReference function)

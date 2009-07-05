@@ -25,6 +25,8 @@ import java.util.Map;
 public interface ObjectInstance extends UserTypeInstance
 {
     public ObjectDefinition getDefinition();
-    public Map<String, ObjectInstance> getInheritedObjects();
+    public Map<String, ? extends ObjectInstance> getInheritedObjects();
     public long getId();
+    public AttributeMap getAttributes();
+    public String getCanonicalName();
 }

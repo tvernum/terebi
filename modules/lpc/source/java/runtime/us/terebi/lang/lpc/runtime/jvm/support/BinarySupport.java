@@ -18,6 +18,8 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
+
 import us.terebi.lang.lpc.runtime.LpcValue;
 
 /**
@@ -27,14 +29,56 @@ public class BinarySupport
 {
     public static LpcValue leftShift(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        return intValue(left.asLong() << right.asLong());
     }
 
-    public static LpcValue binaryOr(LpcValue _lpc_v4610, LpcValue _lpc_v4613)
+    public static LpcValue rightShift(LpcValue left, LpcValue right)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        return intValue(left.asLong() >> right.asLong());
+    }
+
+    public static LpcValue binaryOr(LpcValue... values)
+    {
+        long v = 0;
+        for (LpcValue value : values)
+        {
+            v |= value.asLong();
+        }
+        return intValue(v);
+    }
+
+    public static LpcValue binaryAnd(LpcValue... values)
+    {
+        long v = 0xFFFFFFFFFFFFFFFFL;
+        for (LpcValue value : values)
+        {
+            v &= value.asLong();
+        }
+        return intValue(v);
+    }
+
+    public static LpcValue xor(LpcValue... values)
+    {
+        long v = 0;
+        boolean first = true;
+        for (LpcValue value : values)
+        {
+            if (first)
+            {
+                v = value.asLong();
+                first = false;
+            }
+            else
+            {
+                v ^= value.asLong();
+            }
+        }
+        return intValue(v);
+    }
+
+    public static LpcValue not(LpcValue value)
+    {
+        return intValue(~value.asLong());
     }
 
 }

@@ -24,6 +24,7 @@ import java.util.Map;
 import us.terebi.lang.lpc.runtime.ByteSequence;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassInstance;
+import us.terebi.lang.lpc.runtime.ExtensionValue;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
@@ -110,5 +111,15 @@ public class TypedValue implements LpcValue
     public boolean equals(Object obj)
     {
         return _value.equals(obj);
+    }
+
+    public <T extends ExtensionValue> T asExtension(Class< ? extends T> type)
+    {
+        return _value.asExtension(type);
+    }
+
+    public CharSequence debugInfo()
+    {
+        return _value.debugInfo();
     }
 }

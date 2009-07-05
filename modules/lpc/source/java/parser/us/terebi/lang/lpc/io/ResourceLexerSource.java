@@ -47,4 +47,8 @@ public class ResourceLexerSource extends LexerSource
         return _resource.getName();
     }
 
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + _resource + "}";
+    }
 }

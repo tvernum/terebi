@@ -39,4 +39,7 @@ public interface LpcValue
     public ClassInstance asClass();
     public boolean asBoolean();
 
+    public <T extends ExtensionValue> T asExtension(Class<? extends T> type);
+
+    public CharSequence debugInfo(); 
 }

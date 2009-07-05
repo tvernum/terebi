@@ -27,6 +27,7 @@ import java.util.Set;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
@@ -34,12 +35,11 @@ import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.MemberDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
-import us.terebi.lang.lpc.runtime.LpcType.Kind;
-import us.terebi.lang.lpc.runtime.jvm.LpcMethod;
+import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
-import us.terebi.lang.lpc.runtime.jvm.LpcReturn;
-import us.terebi.lang.lpc.runtime.jvm.context.ScopeLookup;
+import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -75,13 +75,13 @@ public class CompiledMethod implements CompiledMethodDefinition
         {
             throw new LpcRuntimeException("Method " + method + " should return " + LpcValue.class);
         }
-        LpcReturn returnAnnotation = method.getAnnotation(LpcReturn.class);
+        LpcMemberType returnAnnotation = method.getAnnotation(LpcMemberType.class);
         if (returnAnnotation == null)
         {
             throw new LpcRuntimeException("Method "
                     + method
                     + " is not annotated with a return value ("
-                    + LpcReturn.class.getSimpleName()
+                    + LpcMemberType.class.getSimpleName()
                     + ")");
         }
         LpcType returnType = getType(returnAnnotation.kind(), returnAnnotation.className(), returnAnnotation.depth());
@@ -96,7 +96,7 @@ public class CompiledMethod implements CompiledMethodDefinition
                     parameterAnnotation.varargs());
         }
 
-        LpcMethod methodAnnotation = method.getAnnotation(LpcMethod.class);
+        LpcMember methodAnnotation = method.getAnnotation(LpcMember.class);
         boolean varargs = Arrays.asList(methodAnnotation.modifiers()).contains(Modifier.VARARGS);
 
         return new Signature(varargs, returnType, Arrays.asList(arguments));
@@ -109,18 +109,18 @@ public class CompiledMethod implements CompiledMethodDefinition
 
     private Set< ? extends Modifier> resolveModifiers(Method method)
     {
-        LpcMethod annotation = method.getAnnotation(LpcMethod.class);
+        LpcMember annotation = method.getAnnotation(LpcMember.class);
         Modifier[] modifiers = annotation.modifiers();
         return new HashSet<Modifier>(Arrays.asList(modifiers));
     }
 
     private String resolveName(Method method)
     {
-        LpcMethod annotation = method.getAnnotation(LpcMethod.class);
+        LpcMember annotation = method.getAnnotation(LpcMember.class);
         return annotation.name();
     }
 
-    private LpcType getType(Kind kind, String className, int depth)
+    private LpcType getType(LpcType.Kind kind, String className, int depth)
     {
         ClassDefinition classDef = findClass(className);
         LpcType t = Types.getType(kind, classDef, depth);
@@ -180,7 +180,17 @@ public class CompiledMethod implements CompiledMethodDefinition
         }
         catch (InvocationTargetException e)
         {
-            throw new LpcRuntimeException("During method " + _method + " - " + e.getMessage(), e);
+            Throwable cause = e.getCause();
+            if (cause == null)
+            {
+                cause = e;
+            }
+            String causeMessage = cause.getMessage();
+            if (causeMessage == null)
+            {
+                causeMessage = cause.getClass().getSimpleName();
+            }
+            throw new LpcRuntimeException("During method " + _method + " - " + causeMessage, cause);
         }
     }
 
@@ -212,5 +222,10 @@ public class CompiledMethod implements CompiledMethodDefinition
     public String getInternalName()
     {
         return _method.getName();
+    }
+
+    public MemberDefinition.Kind getKind()
+    {
+        return MemberDefinition.Kind.METHOD;
     }
 }

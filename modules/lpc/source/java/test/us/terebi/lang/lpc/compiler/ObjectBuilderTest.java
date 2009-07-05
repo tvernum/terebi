@@ -18,28 +18,24 @@
 
 package us.terebi.lang.lpc.compiler;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Map;
 
 import org.apache.commons.jci.compilers.JavaCompilerFactory;
 import org.junit.Test;
 
 import us.terebi.lang.lpc.compiler.java.JavaCompiler;
+import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
-import us.terebi.lang.lpc.compiler.java.context.CompilerObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
-import us.terebi.lang.lpc.compiler.java.context.ObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.io.ByteArrayResource;
 import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LpcParser;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
-import us.terebi.lang.lpc.runtime.jvm.context.BasicScopeLookup;
-import us.terebi.lang.lpc.runtime.jvm.context.ScopeLookup;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -52,7 +48,7 @@ public class ObjectBuilderTest
     @Test
     public void tryCompilingSimpleLpcObject() throws Exception
     {
-        ObjectManager manager = new CompilerObjectManager();
+        CompilerObjectManager manager = new LpcCompilerObjectManager();
         FunctionMap efuns = StandardEfuns.getSignatures();
 
         ResourceFinder finder = new ResourceFinder()

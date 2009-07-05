@@ -20,14 +20,20 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ListIterator;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
 
 /**
  * 
@@ -58,8 +64,66 @@ public class MemberArrayEfun extends AbstractEfun implements FunctionSignature, 
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments, 2);
+        LpcValue item = arguments.get(0);
+        LpcValue array = arguments.get(1);
+        LpcValue arg3 = arguments.get(2);
+        long start = isInt(arg3) ? arg3.asLong() : 0;
+
+        if (item == null)
+        {
+            throw new NullPointerException("Internal Error - Cannot search for null member");
+        }
+
+        if (MiscSupport.isString(array))
+        {
+            if (isInt(item))
+            {
+                return ValueSupport.intValue(searchString(array.asString(), item.asLong(), start));
+            }
+        }
+        else if (MiscSupport.isArray(array))
+        {
+            return ValueSupport.intValue(searchList(array.asList(), item, start));
+        }
+        return LpcConstants.INT.MINUS_ONE;
     }
 
+    private long searchString(String str, long charValue, long start)
+    {
+        if (charValue > Character.MAX_VALUE)
+        {
+            return -1;
+        }
+        if (start > str.length())
+        {
+            return -1;
+        }
+        for (int i = (int) start; i < str.length(); i++)
+        {
+            if (str.charAt(i) == charValue)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    private long searchList(List<LpcValue> list, LpcValue item, long start)
+    {
+        if (start > list.size())
+        {
+            return -1;
+        }
+
+        ListIterator<LpcValue> iterator = list.listIterator((int) start);
+        while (iterator.hasNext())
+        {
+            if (item.equals(iterator.next()))
+            {
+                return iterator.previousIndex();
+            }
+        }
+        return -1;
+    }
 }

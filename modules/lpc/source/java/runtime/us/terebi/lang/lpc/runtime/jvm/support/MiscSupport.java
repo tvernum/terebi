@@ -61,9 +61,24 @@ public class MiscSupport
         return isInt(value) || isFloat(value);
     }
 
+    public static boolean isNumber(LpcType type)
+    {
+        return Types.INT.equals(type) || Types.FLOAT.equals(type);
+    }
+
+    public static boolean isFunction(LpcValue value)
+    {
+        return isType(Types.FUNCTION, value);
+    }
+
     public static boolean isArray(LpcValue value)
     {
         return value.getActualType().getArrayDepth() > 0;
+    }
+
+    public static boolean isClassReference(LpcValue value)
+    {
+        return isType(Types.CLASS_REFERENCE, value);
     }
 
     public static LpcValue getValue(boolean bool)
@@ -130,6 +145,10 @@ public class MiscSupport
 
     public static boolean isMoreSpecific(LpcType type, LpcType value)
     {
+        if (Types.FLOAT.equals(type) && Types.INT.equals(value))
+        {
+            return true;
+        }
         if (value.getKind() != Kind.MIXED)
         {
             return false;

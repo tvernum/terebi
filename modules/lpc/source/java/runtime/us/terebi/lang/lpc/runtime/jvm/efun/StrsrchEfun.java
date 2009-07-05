@@ -26,6 +26,9 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -34,7 +37,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class StrsrchEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-//    int strsrch( string str, string substr | int char, int flag );
+    //    int strsrch( string str, string substr | int char, int flag );
     public List< ? extends ArgumentDefinition> getArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
@@ -56,8 +59,54 @@ public class StrsrchEfun extends AbstractEfun implements FunctionSignature, Call
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments, 2);
+        String str = arguments.get(0).asString();
+        LpcValue pattern = arguments.get(1);
+        long flag = 0;
+        if (arguments.size() >= 3)
+        {
+            flag = arguments.get(2).asLong();
+        }
+        if (MiscSupport.isString(pattern))
+        {
+            return ValueSupport.intValue(search(str, pattern.asString(), flag));
+        }
+        if (MiscSupport.isInt(pattern))
+        {
+            return ValueSupport.intValue(search(str, pattern.asLong(), flag));
+        }
+        throw new LpcRuntimeException("Argument 2 to "
+                + getName()
+                + " must be either a string or a character (int) not "
+                + pattern.getActualType());
     }
 
+    private long search(String str, long charValue, long flag)
+    {
+        if (charValue > Character.MAX_VALUE)
+        {
+            return -1;
+        }
+        char ch = (char) charValue;
+        if (flag == -1)
+        {
+            return str.lastIndexOf(ch);
+        }
+        else
+        {
+            return str.indexOf(ch);
+        }
+    }
+
+    private long search(String str, String pattern, long flag)
+    {
+        if (flag == -1)
+        {
+            return str.lastIndexOf(pattern);
+        }
+        else
+        {
+            return str.indexOf(pattern);
+        }
+    }
 }

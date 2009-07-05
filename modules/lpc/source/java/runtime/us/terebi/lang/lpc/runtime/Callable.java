@@ -36,8 +36,9 @@ public interface Callable
     }
 
     public Kind getKind();
-
+    
     public FunctionSignature getSignature();
+    public ObjectInstance getOwner();
 
     public LpcValue execute(List< ? extends LpcValue> arguments);
     public LpcValue execute(LpcValue... arguments);

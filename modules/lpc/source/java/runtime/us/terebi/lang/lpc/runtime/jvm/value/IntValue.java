@@ -68,4 +68,9 @@ public class IntValue extends AbstractValue
     {
         return (int)(_value ^ (_value >>> 32));
     }
+
+    public CharSequence debugInfo()
+    {
+        return String.valueOf(_value);
+    }
 }

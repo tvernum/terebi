@@ -31,7 +31,13 @@ public interface MemberDefinition
         // STATIC is returned as PROTECTED or NOSAVE
     }
 
+    public enum Kind
+    {
+        FIELD, CLASS, METHOD;
+    }
+
     public Set< ? extends Modifier> getModifiers();
     public String getName();
     public UserTypeDefinition getDeclaringType();
+    public Kind getKind();
 }

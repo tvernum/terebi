@@ -75,5 +75,10 @@ public class NilValue extends AbstractValue implements LpcValue
     {
         return 0x79c;
     }
+    
+    public CharSequence debugInfo()
+    {
+        return "0";
+    }
 
 }

@@ -27,12 +27,14 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
 import us.terebi.util.Range;
+import us.terebi.util.StringUtil;
 
 /**
  * 
@@ -41,7 +43,12 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
 {
     public LpcValue execute(LpcValue... arguments)
     {
-        return execute(Arrays.asList(arguments));
+        LpcValue result = execute(Arrays.asList(arguments));
+        if (result == null)
+        {
+            throw new NullPointerException("Internal Error - efun " + getName() + " returned NULL");
+        }
+        return result;
     }
 
     public Kind getKind()
@@ -54,6 +61,11 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         return this;
     }
 
+    public ObjectInstance getOwner()
+    {
+        return null;
+    }
+    
     public boolean isVarArgs()
     {
         return false;
@@ -107,12 +119,21 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         {
             return;
         }
+        if (isVarArgs() && actualType.getKind() == LpcType.Kind.NIL)
+        {
+            return;
+        }
+        badArgumentType(index, actualType, expectedType);
+    }
+
+    protected LpcValue badArgumentType(int index, LpcType actualType, LpcType... expectedTypes)
+    {
         throw new LpcRuntimeException("Bad argument "
                 + index
                 + " to "
                 + getName()
                 + " expected "
-                + expectedType
+                + StringUtil.join("|", expectedTypes)
                 + " got "
                 + actualType);
     }
@@ -120,7 +141,11 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
     protected CharSequence getName()
     {
         StringBuilder builder = new StringBuilder();
-        String name = getClass().getName();
+        String name = getClass().getSimpleName();
+        if (name.endsWith("Efun"))
+        {
+            name = name.substring(0, name.length() - 4);
+        }
         for (int i = 0; i < name.length(); i++)
         {
             char ch = name.charAt(i);
@@ -144,5 +169,19 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
     protected IntValue getValue(boolean bool)
     {
         return bool ? LpcConstants.INT.TRUE : LpcConstants.INT.FALSE;
+    }
+
+    protected void checkArguments(List< ? extends LpcValue> arguments, int minCount)
+    {
+        if (arguments.size() < minCount)
+        {
+            throw new LpcRuntimeException(getName()
+                    + " requires at least "
+                    + minCount
+                    + " argument(s) but only "
+                    + arguments.size()
+                    + " were provided");
+        }
+        this.checkArguments(arguments);
     }
 }

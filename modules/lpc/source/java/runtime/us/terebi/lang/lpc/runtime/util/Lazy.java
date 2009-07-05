@@ -16,25 +16,26 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import java.lang.annotation.Retention;
-
-import us.terebi.lang.lpc.runtime.MemberDefinition;
+package us.terebi.lang.lpc.runtime.util;
 
 /**
  * 
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
-@Documented
-public @interface LpcMethod
+public abstract class Lazy<T>
 {
-    String name();
-    MemberDefinition.Modifier[] modifiers();
+    private T _object;
+
+    protected abstract T load();
+
+    public T get()
+    {
+        synchronized (this)
+        {
+            if (_object == null)
+            {
+                _object = load();
+            }
+        }
+        return _object;
+    }
 }

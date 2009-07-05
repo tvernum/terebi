@@ -27,6 +27,7 @@ import us.terebi.lang.lpc.parser.ast.ASTInherit;
 import us.terebi.lang.lpc.parser.ast.ASTUtil;
 import us.terebi.lang.lpc.parser.ast.BaseASTVisitor;
 import us.terebi.lang.lpc.parser.ast.ParserVisitor;
+import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
 
 /**
  * 
@@ -55,19 +56,20 @@ public class InheritanceWriter extends BaseASTVisitor implements ParserVisitor
 
         String name = getName(from);
         PrintWriter writer = _context.writer();
-        writer.print("public @LpcInherited(name=\"");
+        writer.print("public @");
+        writer.print(LpcInherited.class.getName());
+        writer.print("(name=\"");
         writer.print(name);
         writer.print("\", lpc=\"");
         writer.print(from);
         writer.print("\", implementation=\"");
-        writer.print(parent.getImplementationClass());
+        String implementation = parent.getImplementationClass().getName();
+        writer.print(implementation);
         writer.print("\") InheritedObject<");
-        writer.print(parent.getImplementationClass());
+        writer.print(implementation);
         writer.print("> inherit_");
         writer.print(name);
-        writer.print(" = loadInherited(");
-        writer.print(parent.getImplementationClass());
-        writer.println(".class);");
+        writer.println(";");
 
         _context.addInherit(name, parent);
 

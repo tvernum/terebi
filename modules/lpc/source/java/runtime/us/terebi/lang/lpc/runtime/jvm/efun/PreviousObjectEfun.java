@@ -26,8 +26,12 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayBuilder;
+import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -37,7 +41,12 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
 {
     public List< ? extends ArgumentDefinition> getArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("arguments", Types.MIXED, false, true));
+        return Collections.singletonList(new ArgumentSpec("arguments", Types.INT));
+    }
+
+    public boolean isVarArgs()
+    {
+        return true;
     }
 
     public LpcType getReturnType()
@@ -47,8 +56,29 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO */
-        return VoidValue.INSTANCE;
+        checkArguments(arguments);
+        long index = 0;
+        if (!arguments.isEmpty())
+        {
+            index = arguments.get(0).asLong();
+        }
+
+        CallStack callStack = RuntimeContext.get().callStack();
+
+        if (index == -1)
+        {
+            ArrayBuilder array = new ArrayBuilder(Types.OBJECT_ARRAY, callStack.size());
+            for (int i = 1; i < callStack.size(); i++)
+            {
+                MajorFrame frame = callStack.peekFrame(i);
+                array.add(frame.instance);
+            }
+            return array.toArray();
+        }
+
+        int offset = (int) (index + 1);
+        MajorFrame frame = callStack.peekFrame(offset);
+        return new ObjectValue(frame.instance);
     }
 
 }

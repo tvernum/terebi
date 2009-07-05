@@ -96,6 +96,11 @@ public class FunctionLookup
                     method.getDeclaringType(), objectPath.toArray(new String[objectPath.size()]));
         }
 
+        public static FunctionReference function(String expr)
+        {
+            return new FunctionReference(Callable.Kind.FUNCTION, expr, expr, GenericSignature.INSTANCE, null, null);
+        }
+
         public String toString()
         {
             if (object == null)

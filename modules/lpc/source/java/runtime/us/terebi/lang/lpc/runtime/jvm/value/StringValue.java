@@ -97,4 +97,33 @@ public class StringValue extends AbstractValue implements LpcValue
         return _value;
     }
 
+    public CharSequence debugInfo()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append('"');
+        for (int i = 0; i < _value.length(); i++)
+        {
+            char ch = _value.charAt(i);
+            switch (ch)
+            {
+                case '\n':
+                    builder.append("\\n");
+                    break;
+                case '\t':
+                    builder.append("\\t");
+                    break;
+                case '\\':
+                    builder.append("\\\\");
+                    break;
+                case '\"':
+                    builder.append("\\\"");
+                    break;
+                default:
+                    builder.append(ch);
+                    break;
+            }
+        }
+        return builder;
+    }
+
 }

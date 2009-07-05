@@ -18,6 +18,7 @@
 
 package us.terebi.test;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.concurrent.Callable;
@@ -27,7 +28,6 @@ import org.junit.internal.runners.InitializationError;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
 import org.junit.runner.notification.RunNotifier;
-
 
 /**
  * 
@@ -64,6 +64,10 @@ public class TestSuiteRunner extends Runner
         try
         {
             suite = method.invoke(null);
+        }
+        catch (InvocationTargetException e)
+        {
+            throw new InitializationError(e.getCause());
         }
         catch (Exception e)
         {

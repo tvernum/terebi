@@ -18,23 +18,33 @@
 
 package us.terebi.lang.lpc.compiler.java.context;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
+import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectCompiler;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.util.Predicate;
+import us.terebi.util.collection.PredicateIterator;
 
 /**
  * 
  */
-public class CompilerObjectManager implements ObjectManager
+public class LpcCompilerObjectManager implements CompilerObjectManager
 {
     private final Map<String, CompiledObjectDefinition> _definitions;
+    private final Map<ObjectId, CompiledObjectInstance> _objects;
     private ObjectCompiler _compiler;
+    private long _id;
 
-    public CompilerObjectManager()
+    public LpcCompilerObjectManager()
     {
         _definitions = new HashMap<String, CompiledObjectDefinition>();
+        _objects = new HashMap<ObjectId, CompiledObjectInstance>();
         _compiler = null;
+        _id = 0;
     }
 
     public void setCompiler(ObjectCompiler compiler)
@@ -58,6 +68,11 @@ public class CompilerObjectManager implements ObjectManager
         _definitions.put(normalise(object.getName()), object);
     }
 
+    public void registerObject(CompiledObjectInstance object)
+    {
+        _objects.put(new ObjectId(object), object);
+    }
+
     private String normalise(String name)
     {
         if (name.endsWith(".c"))
@@ -70,5 +85,54 @@ public class CompilerObjectManager implements ObjectManager
             name = "/" + name;
         }
         return name;
+    }
+
+    public long allocateObjectIdentifier()
+    {
+        synchronized (this)
+        {
+            _id++;
+            return _id;
+        }
+    }
+
+    public ObjectInstance findObject(String name, int id)
+    {
+        return findObject(new ObjectId(findObject(name), id));
+    }
+
+    private ObjectInstance findObject(ObjectId objectId)
+    {
+        return _objects.get(objectId);
+    }
+
+    public Iterable< ? extends ObjectInstance> objects()
+    {
+        return _objects.values();
+    }
+
+    public Iterable< ? extends ObjectInstance> objects(final String name)
+    {
+        final Predicate<CompiledObjectInstance> predicate = new Predicate<CompiledObjectInstance>()
+        {
+            public boolean test(CompiledObjectInstance element)
+            {
+                return name.equals(element.getDefinition().getName());
+            }
+        };
+        final Collection<CompiledObjectInstance> values = _objects.values();
+
+        return new Iterable<CompiledObjectInstance>()
+        {
+            public Iterator<CompiledObjectInstance> iterator()
+            {
+                return new PredicateIterator<CompiledObjectInstance>(predicate, values.iterator());
+            }
+        };
+    }
+
+    public String toString()
+    {
+        return getClass().getSimpleName() + "(" + _compiler + ")";
     }
 }

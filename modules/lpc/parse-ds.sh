@@ -2,7 +2,7 @@
 
 JARS=$(echo lib/* | sed -e's/  */:/g' )
 
-ROOT="samples/ds-2.8.4-lib"
+ROOT="samples/dsIIr8-lib"
 
 f_parse()
 {
@@ -27,7 +27,7 @@ f_root()
 
 if [ $# -eq 0 ]
 then
-    for lpc in $( find samples/ds-2.8.4-lib/ -type f -name "*.c" )
+    for lpc in $( find ${ROOT}/ -type f -name "*.c" )
     do
         ERR_FILE=errors/${lpc}
         mkdir  -p $( dirname ${ERR_FILE} )

@@ -73,4 +73,8 @@ public class ByteArrayResource implements Resource
         return true;
     }
 
+    public String toString()
+    {
+        return getClass().getSimpleName() + "(" + _name + ", size=" + _bytes.length + ")";
+    }
 }

@@ -137,6 +137,7 @@ public class StatementWriter extends BaseASTVisitor implements ParserVisitor
 
         if (var != null)
         {
+            // @TODO Check the return type is valid
             writer.print(" ");
             var.value(writer);
         }
@@ -633,7 +634,7 @@ public class StatementWriter extends BaseASTVisitor implements ParserVisitor
         writer.println("while(true) {");
 
         InternalVariable exprVar = evaluateExpression(exprNode);
-        writer.print("if(");
+        writer.print("if(!");
         exprVar.value(writer);
         writer.println(".asBoolean()) break; ");
 
@@ -653,7 +654,30 @@ public class StatementWriter extends BaseASTVisitor implements ParserVisitor
     private StatementResult visitDoWhile(@SuppressWarnings("unused")
     ASTLoopStatement node)
     {
-        throw new UnsupportedOperationException("visitDoWhile - Not implemented");
+        // <DO> Statement() <WHILE> <LEFT_BRACKET> Expression() <RIGHT_BRACKET> <SEMI> 
+        Node stmtNode = node.jjtGetChild(0);
+        Node exprNode = node.jjtGetChild(1);
+
+        PrintWriter writer = _context.writer();
+        writer.println("while(true) {");
+
+        StatementResult result = executeStatement(stmtNode);
+
+        InternalVariable exprVar = evaluateExpression(exprNode);
+        writer.print("if(!");
+        exprVar.value(writer);
+        writer.println(".asBoolean()) break; ");
+
+        writer.println("}");
+
+        if (result.termination == StatementResult.TerminationType.RETURN)
+        {
+            return result;
+        }
+        else
+        {
+            return StatementResult.NON_TERMINAL;
+        }
     }
 
     private StatementResult executeStatement(Node stmt)

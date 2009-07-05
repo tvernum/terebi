@@ -35,6 +35,7 @@ import us.terebi.lang.lpc.parser.ast.ASTArithmeticExpression;
 import us.terebi.lang.lpc.parser.ast.ASTArrayElement;
 import us.terebi.lang.lpc.parser.ast.ASTArrayLiteral;
 import us.terebi.lang.lpc.parser.ast.ASTAssignmentExpression;
+import us.terebi.lang.lpc.parser.ast.ASTBinaryAndExpression;
 import us.terebi.lang.lpc.parser.ast.ASTBinaryOrExpression;
 import us.terebi.lang.lpc.parser.ast.ASTCallOther;
 import us.terebi.lang.lpc.parser.ast.ASTCastExpression;
@@ -42,6 +43,8 @@ import us.terebi.lang.lpc.parser.ast.ASTCatch;
 import us.terebi.lang.lpc.parser.ast.ASTComparisonExpression;
 import us.terebi.lang.lpc.parser.ast.ASTCompoundExpression;
 import us.terebi.lang.lpc.parser.ast.ASTConstant;
+import us.terebi.lang.lpc.parser.ast.ASTExclusiveOrExpression;
+import us.terebi.lang.lpc.parser.ast.ASTExpressionCall;
 import us.terebi.lang.lpc.parser.ast.ASTFullType;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionArguments;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionCall;
@@ -74,6 +77,7 @@ import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.jvm.LpcFunction;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
@@ -97,6 +101,31 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
     public InternalVariable visit(ASTFunctionCall node, Object data)
     {
         return new FunctionCallWriter(_context).writeFunction(node);
+    }
+
+    public InternalVariable visit(ASTExpressionCall node, Object data)
+    {
+        assert node.jjtGetNumChildren() == 2 : "Incorrect number of children in " + node;
+
+        SimpleNode expression = (SimpleNode) node.jjtGetChild(0);
+        ASTFunctionArguments arguments = (ASTFunctionArguments) node.jjtGetChild(1);
+
+        InternalVariable exprVar = evaluate(expression);
+
+        InternalVariable var = new InternalVariable(_context, false, Types.MIXED);
+
+        FunctionCallWriter fcw = new FunctionCallWriter(_context);
+        FunctionReference function = FunctionReference.function(ASTUtil.getCompleteImage(expression).toString());
+        FunctionArgument[] argValues = fcw.processArguments(function, new InternalVariable[0], arguments);
+
+        PrintWriter writer = _context.writer();
+        var.declare(writer);
+        writer.print(" = CallableSupport.asCallable(");
+        exprVar.value(writer);
+        writer.print(").execute(");
+        fcw.printArguments(argValues, false);
+        writer.println(");");
+        return var;
     }
 
     public Object visit(ASTVariableReference node, Object data)
@@ -315,9 +344,9 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         var.declare(writer);
         writer.print(" = ClassSupport.getField( ");
         previous.value(writer);
-        writer.print(" , ");
+        writer.print(" , \"");
         writer.print(fieldName);
-        writer.println(";");
+        writer.println("\");");
         return var;
     }
 
@@ -326,11 +355,14 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         Object constant = new ConstantHandler(_context).getConstant(node);
         if (constant instanceof Number)
         {
-            return printNumber((Number) constant);
-        }
-        if (constant instanceof Number)
-        {
-            return printNumber((Number) constant);
+            if (node.jjtGetFirstToken().kind == ParserConstants.HEXADECIMAL_LITERAL)
+            {
+                return printHex((Number) constant);
+            }
+            else
+            {
+                return printNumber((Number) constant);
+            }
         }
         else if (constant instanceof Character)
         {
@@ -403,6 +435,11 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         return printValue(number, Types.INT);
     }
 
+    private Object printHex(Number number)
+    {
+        return printValue("0x" + Long.toHexString(number.longValue()), Types.INT);
+    }
+
     private boolean isZero(Number number)
     {
         return number instanceof Long && ((Long) number).longValue() == 0;
@@ -441,14 +478,16 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
             int index = getPositionalIndex(identifier);
             if (index > argCount)
             {
-                argCount++;
+                argCount = index;
             }
         }
 
         PrintWriter writer = _context.writer();
         InternalVariable var = new InternalVariable(_context, false, Types.FUNCTION);
         var.declare(writer);
-        writer.print(" = new LpcFunction(");
+        writer.print(" = new ");
+        writer.print(LpcFunction.class.getName());
+        writer.print("(getObjectInstance(),");
         writer.print(argCount);
         writer.println(") {\npublic LpcValue execute(List<? extends LpcValue> args) {");
 
@@ -519,8 +558,9 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         PrintWriter writer = _context.writer();
         InternalVariable var = new InternalVariable(_context, false, Types.FUNCTION);
         var.declare(writer);
-        writer.print(" = new LpcFunction(");
-
+        writer.print(" = new ");
+        writer.print(LpcFunction.class.getName());
+        writer.print("(getObjectInstance(),");
         boolean first = true;
         for (ArgumentDefinition arg : argumentDefinitions)
         {
@@ -549,7 +589,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         writer.println(") {\npublic LpcValue execute(List<? extends LpcValue> args) {");
 
         VariableWriter variableWriter = new VariableWriter(_context, null);
-        int index = 0;
+        int index = 1;
         for (ArgumentDefinition arg : argumentDefinitions)
         {
             variableWriter.declareLocalVariable(signatureNode, arg.getName(), arg.getType(), getPositionalVariable(index));
@@ -798,6 +838,10 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
                 return true;
             }
             if (allowed.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() <= allowed.getArrayDepth())
+            {
+                return true;
+            }
+            if (Types.FLOAT.equals(allowed) && Types.INT.equals(type))
             {
                 return true;
             }
@@ -1132,8 +1176,18 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
 
     public InternalVariable visit(ASTImmediateExpression node, Object data)
     {
-        // @TODO make this immediate
-        return evaluate(node.jjtGetChild(0));
+        Node expr = node.jjtGetChild(0);
+        InternalVariable expressionValue = evaluate(expr);
+        InternalVariable immediateValue = new InternalVariable(_context, false, expressionValue.type);
+        PrintWriter writer = _context.writer();
+
+        writer.println("/* Immediate value: " + ASTUtil.getCompleteImage(node) + "*/");
+        immediateValue.declare(writer);
+        writer.print(" = ");
+        expressionValue.value(writer);
+        writer.println(";");
+
+        return immediateValue;
     }
 
     public Object visit(ASTCompoundExpression node, Object data)
@@ -1179,6 +1233,21 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
 
     public Object visit(ASTBinaryOrExpression node, Object data)
     {
+        return binaryExpression(node, "binaryOr");
+    }
+
+    public Object visit(ASTBinaryAndExpression node, Object data)
+    {
+        return binaryExpression(node, "binaryAnd");
+    }
+
+    public Object visit(ASTExclusiveOrExpression node, Object data)
+    {
+        return binaryExpression(node, "xor");
+    }
+
+    private Object binaryExpression(SimpleNode node, String binaryFunction)
+    {
         InternalVariable[] vars = new InternalVariable[node.jjtGetNumChildren()];
 
         for (int i = 0; i < vars.length; i++)
@@ -1192,7 +1261,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
 
         InternalVariable result = new InternalVariable(_context, false, Types.INT);
         result.declare(writer);
-        writer.print(" = BinarySupport.binaryOr( ");
+        writer.print(" = BinarySupport." + binaryFunction + "( ");
 
         boolean first = true;
         for (InternalVariable internalVariable : vars)
@@ -1211,4 +1280,5 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
 
         return result;
     }
+
 }

@@ -18,14 +18,19 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -33,7 +38,6 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class InheritListEfun extends AbstractEfun
 {
-    @SuppressWarnings("unused")
     private final boolean _deep;
 
     public InheritListEfun(boolean deep)
@@ -54,8 +58,46 @@ public class InheritListEfun extends AbstractEfun
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
-        return VoidValue.INSTANCE;
+        ObjectInstance obj = arguments.get(0).asObject();
+        ObjectDefinition definition = obj.getDefinition();
+        List<LpcValue> inherit = null;
+        if (_deep)
+        {
+            inherit = deepInheritList(definition);
+        }
+        else
+        {
+            inherit = shallowInheritList(definition);
+        }
+        return new ArrayValue(Types.STRING_ARRAY, inherit);
+    }
+
+    private List<LpcValue> deepInheritList(ObjectDefinition definition)
+    {
+        List<LpcValue> list = new ArrayList<LpcValue>();
+        deepInheritList(definition, list);
+        return list;
+    }
+
+    private void deepInheritList(ObjectDefinition definition, List<LpcValue> list)
+    {
+        Collection< ? extends ObjectDefinition> inherited = definition.getInheritedObjects().values();
+        for (ObjectDefinition object : inherited)
+        {
+            list.add(new StringValue(object.getName()));
+            deepInheritList(object, list);
+        }
+    }
+
+    private List<LpcValue> shallowInheritList(ObjectDefinition definition)
+    {
+        Collection< ? extends ObjectDefinition> inherited = definition.getInheritedObjects().values();
+        List<LpcValue> list = new ArrayList<LpcValue>(inherited.size());
+        for (ObjectDefinition object : inherited)
+        {
+            list.add(new StringValue(object.getName()));
+        }
+        return list;
     }
 
 }

@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
@@ -39,7 +40,7 @@ public class SprinfEfun extends AbstractEfun implements FunctionSignature, Calla
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("format", Types.STRING));
-        list.add(new ArgumentSpec("vars", Types.MIXED, false, true));
+        list.add(new ArgumentSpec("vars", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
         return list;
     }
 

@@ -18,8 +18,10 @@
 
 package us.terebi.lang.lpc.compiler.java.test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 
@@ -27,12 +29,18 @@ import lpc.secure.sefun.sefun;
 
 import org.junit.Test;
 
+import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
+import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.LpcField;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
 import us.terebi.lang.lpc.runtime.jvm.context.Functions;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.object.CompiledDefinition;
+import us.terebi.lang.lpc.runtime.jvm.object.CompiledObject;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
@@ -41,18 +49,41 @@ import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 /**
  * 
  */
 public class SefunTest
 {
+    private static CompiledDefinition<sefun> _definition;
+    private static LpcCompilerObjectManager _manager;
+
     private sefun makeSefunObject()
     {
+        if (_definition == null)
+        {
+            _manager = new LpcCompilerObjectManager();
+            ScopeLookup lookup = new BasicScopeLookup(_manager);
+            _definition = new CompiledDefinition<sefun>(_manager, lookup, "sefun", sefun.class);
+        }
         Functions functions = StandardEfuns.getImplementation();
-        RuntimeContext.set(new RuntimeContext(functions));
-        sefun sefun = new sefun();
-        return sefun;
+        RuntimeContext.set(new RuntimeContext(functions, _manager));
+        CompiledObject<sefun> instance = _definition.newInstance();
+        RuntimeContext.get().callStack().pushFrame(CallStack.Origin.APPLY, instance);
+
+        // printMemoryUsage("*");
+
+        return instance.getImplementingObject();
+    }
+
+    @SuppressWarnings("unused")
+    private void printMemoryUsage(String prefix)
+    {
+        System.gc();
+        Runtime runtime = Runtime.getRuntime();
+        new Formatter(System.err).format("%s Memory: %6dk / %6dk / %6dk\n", prefix,
+                (runtime.totalMemory() - runtime.freeMemory()) / 1024, runtime.totalMemory() / 1024, runtime.maxMemory() / 1024);
     }
 
     @Test
@@ -174,5 +205,65 @@ public class SefunTest
                 new StringValue("^zoop/whig/zah.c")).asString());
         assertEquals("/foo/xyz/./123",
                 sefun.absolute_path_(new StringValue("/foo/bar"), new StringValue("../xyz/./123/")).asString());
+    }
+
+    @Test
+    public void compare_array() throws Exception
+    {
+        sefun sefun = makeSefunObject();
+        List<LpcValue> list1 = new ArrayList<LpcValue>();
+        List<LpcValue> list2 = new ArrayList<LpcValue>();
+        list1.add(new StringValue("abc"));
+        list1.add(new StringValue("xyz"));
+        list2.addAll(list1);
+
+        ArrayValue arr1 = new ArrayValue(Types.STRING_ARRAY, list1);
+        ArrayValue arr2 = new ArrayValue(Types.MIXED_ARRAY, list2);
+        assertEquals(LpcConstants.INT.ONE, sefun.compare_array_(arr1, arr2));
+
+        list1.add(new StringValue("123"));
+        assertEquals(LpcConstants.INT.ZERO, sefun.compare_array_(arr1, arr2));
+
+        list2.add(list1.get(list1.size() - 1));
+        assertEquals(LpcConstants.INT.ONE, sefun.compare_array_(arr1, arr2));
+
+        list2.add(LpcConstants.INT.MINUS_ONE);
+        assertEquals(LpcConstants.INT.ZERO, sefun.compare_array_(arr1, arr2));
+
+    }
+
+    @Test
+    public void scramble_array() throws Exception
+    {
+        sefun sefun = makeSefunObject();
+        List<LpcValue> list = new ArrayList<LpcValue>();
+        list.add(new IntValue(0));
+        list.add(new IntValue(2));
+        list.add(new IntValue(4));
+        list.add(new IntValue(1));
+        list.add(new IntValue(3));
+        ArrayValue array = new ArrayValue(Types.MIXED_ARRAY, list);
+
+        LpcValue result = sefun.scramble_array_(array);
+
+        // Value passed in should not change...
+        assertSame(list, array.asList());
+        assertEquals(0, list.get(0).asLong());
+        assertEquals(2, list.get(1).asLong());
+        assertEquals(4, list.get(2).asLong());
+        assertEquals(1, list.get(3).asLong());
+        assertEquals(3, list.get(4).asLong());
+
+        assertEquals(Types.MIXED_ARRAY, result.getActualType());
+        List<LpcValue> resultList = result.asList();
+        assertEquals(list.size(), resultList.size());
+    }
+
+    @Test
+    public void sefun_exists() throws Exception
+    {
+        sefun sefun = makeSefunObject();
+        assertEquals(LpcConstants.INT.ONE, sefun.sefun_exists_(new StringValue("sefun_exists")));
+        assertEquals(LpcConstants.INT.ZERO, sefun.sefun_exists_(new StringValue("xyzzy")));
     }
 }
