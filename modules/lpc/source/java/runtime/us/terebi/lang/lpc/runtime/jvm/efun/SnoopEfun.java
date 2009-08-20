@@ -34,7 +34,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class SnoopEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("snooper", Types.OBJECT));

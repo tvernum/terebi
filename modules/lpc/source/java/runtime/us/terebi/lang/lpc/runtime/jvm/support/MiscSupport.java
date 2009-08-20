@@ -18,6 +18,8 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
+import java.util.Collection;
+
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ExtensionType;
 import us.terebi.lang.lpc.runtime.LpcType;
@@ -34,6 +36,11 @@ public class MiscSupport
     public static boolean isType(LpcType type, LpcValue value)
     {
         return type.equals(value.getActualType());
+    }
+
+    public static boolean isNil(LpcValue value)
+    {
+        return isType(Types.NIL, value);
     }
 
     public static boolean isString(LpcValue value)
@@ -71,14 +78,35 @@ public class MiscSupport
         return isType(Types.FUNCTION, value);
     }
 
+    public static boolean isObject(LpcValue value)
+    {
+        return isType(Types.OBJECT, value);
+    }
+
     public static boolean isArray(LpcValue value)
     {
         return value.getActualType().getArrayDepth() > 0;
     }
 
+    public static boolean isClass(LpcValue value)
+    {
+        return value.getActualType().isClass();
+    }
+
+    public static boolean isExtension(LpcValue value)
+    {
+        LpcType type = value.getActualType();
+        return type.getKind() == Kind.EXTENSION && type.getArrayDepth() == 0 ;
+    }
+
     public static boolean isClassReference(LpcValue value)
     {
         return isType(Types.CLASS_REFERENCE, value);
+    }
+
+    public static boolean isStringArray(LpcValue value)
+    {
+        return value.getActualType().getArrayDepth() == 1 && value.getActualType().getKind() == Kind.STRING;
     }
 
     public static LpcValue getValue(boolean bool)
@@ -91,6 +119,18 @@ public class MiscSupport
         {
             return LpcConstants.INT.FALSE;
         }
+    }
+
+    public static LpcType commonType(Collection<LpcValue> values)
+    {
+        LpcType[] types = new LpcType[values.size()];
+        int i = 0;
+        for (LpcValue value : values)
+        {
+            types[i] = value.getActualType();
+            i++;
+        }
+        return commonType(types);
     }
 
     public static LpcType commonType(LpcType... types)

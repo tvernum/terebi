@@ -35,7 +35,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class ToIntEfun extends AbstractEfun
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("arg", Types.MIXED));
     }

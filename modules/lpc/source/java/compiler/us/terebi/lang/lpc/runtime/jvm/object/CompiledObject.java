@@ -31,6 +31,7 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.util.Attributes;
+import us.terebi.lang.lpc.runtime.util.Destructable;
 
 /**
  * 
@@ -39,7 +40,7 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
 {
     private final CompiledObjectDefinition _definition;
     private final long _id;
-    private final T _object;
+    private final Destructable<T> _object;
     private final Map<String, ? extends ObjectInstance> _parents;
     private final AttributeMap _attributes;
 
@@ -48,11 +49,18 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
     {
         _definition = definition;
         _id = id;
-        _object = object;
+        _object = new Destructable<T>(object);
         _parents = Collections.unmodifiableMap(parents);
         _attributes = new Attributes();
     }
 
+    public void destruct()
+    {
+        _attributes.asMap().clear();
+        _parents.clear();
+        _object.destroy();
+    }
+    
     public CompiledObjectDefinition getDefinition()
     {
         return _definition;
@@ -60,7 +68,7 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
 
     public T getImplementingObject()
     {
-        return _object;
+        return _object.get();
     }
 
     public AttributeMap getAttributes()
@@ -99,6 +107,11 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
             values.put(definition, definition.getValue(this));
         }
         return values;
+    }
+    
+    public String toString()
+    {
+        return getCanonicalName();
     }
 
 }

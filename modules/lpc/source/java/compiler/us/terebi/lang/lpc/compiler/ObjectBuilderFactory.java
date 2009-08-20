@@ -26,38 +26,33 @@ import org.apache.commons.jci.compilers.JavaCompilerFactory;
 import us.terebi.lang.lpc.compiler.java.JavaCompiler;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
-import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.io.FileFinder;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LpcParser;
-import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
+
+import static java.util.Arrays.asList;
 
 /**
  * 
  */
 public class ObjectBuilderFactory
 {
-    private FunctionMap _efuns;
+    private Efuns _efuns;
     private CompilerObjectManager _manager;
     private LpcParser _parser;
     private File _workingDir;
 
-    public ObjectBuilderFactory() throws IOException
+    public ObjectBuilderFactory(Efuns efuns) throws IOException
     {
-        _efuns = StandardEfuns.getSignatures();
-        _manager = new LpcCompilerObjectManager();
+        _efuns = efuns;
         _parser = new LpcParser();
 
         _workingDir = File.createTempFile("lpc", "test");
         _workingDir.delete();
         _workingDir.mkdir();
         _workingDir.deleteOnExit();
-    }
-
-    public void setEfuns(FunctionMap efuns)
-    {
-        _efuns = efuns;
     }
 
     public void setManager(CompilerObjectManager manager)
@@ -83,9 +78,27 @@ public class ObjectBuilderFactory
 
     public ObjectBuilder createBuilder(ResourceFinder finder)
     {
+        if (_manager == null)
+        {
+            _manager = new LpcCompilerObjectManager();
+        }
         Compiler javaCompiler = new JavaCompiler(_efuns, _manager);
         org.apache.commons.jci.compilers.JavaCompiler eclipseCompiler = new JavaCompilerFactory().createCompiler("eclipse");
         ScopeLookup scope = new BasicScopeLookup(_manager);
-        return new ObjectBuilder(finder, _manager, scope, _parser, javaCompiler, eclipseCompiler, _workingDir);
+        ObjectBuilder builder = new ObjectBuilder(finder, _manager, scope, _parser, javaCompiler, eclipseCompiler, _workingDir);
+        for (Object object : asList(_manager, _parser, _efuns, finder))
+        {
+            setCompiler(object, builder);
+        }
+        return builder;
+    }
+
+    private void setCompiler(Object object, ObjectCompiler compiler)
+    {
+        if (object instanceof CompilerAware)
+        {
+            CompilerAware ca = (CompilerAware) object;
+            ca.setCompiler(compiler);
+        }
     }
 }

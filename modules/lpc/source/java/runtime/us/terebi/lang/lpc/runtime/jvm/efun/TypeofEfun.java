@@ -35,7 +35,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class TypeofEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("var", Types.MIXED));
     }

@@ -23,8 +23,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import us.terebi.lang.lpc.compiler.CompilerAware;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectCompiler;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.util.Predicate;
 import us.terebi.util.collection.PredicateIterator;
@@ -32,12 +34,14 @@ import us.terebi.util.collection.PredicateIterator;
 /**
  * 
  */
-public class LpcCompilerObjectManager implements CompilerObjectManager
+public class LpcCompilerObjectManager implements CompilerObjectManager, CompilerAware
 {
     private final Map<String, CompiledObjectDefinition> _definitions;
     private final Map<ObjectId, CompiledObjectInstance> _objects;
     private ObjectCompiler _compiler;
     private long _id;
+    private String _master;
+    private String _sefun;
 
     public LpcCompilerObjectManager()
     {
@@ -45,6 +49,9 @@ public class LpcCompilerObjectManager implements CompilerObjectManager
         _objects = new HashMap<ObjectId, CompiledObjectInstance>();
         _compiler = null;
         _id = 0;
+
+        _master = null;
+        _sefun = null;
     }
 
     public void setCompiler(ObjectCompiler compiler)
@@ -66,6 +73,12 @@ public class LpcCompilerObjectManager implements CompilerObjectManager
     public void registerObject(CompiledObjectDefinition object)
     {
         _definitions.put(normalise(object.getName()), object);
+        forceLoad(object);
+    }
+
+    private CompiledObjectInstance forceLoad(CompiledObjectDefinition object)
+    {
+        return object.getMasterInstance();
     }
 
     public void registerObject(CompiledObjectInstance object)
@@ -134,5 +147,50 @@ public class LpcCompilerObjectManager implements CompilerObjectManager
     public String toString()
     {
         return getClass().getSimpleName() + "(" + _compiler + ")";
+    }
+
+    public ObjectDefinition defineMasterObject(String name)
+    {
+        if (_master == null)
+        {
+            _master = name;
+        }
+        else if (!_master.equals(name))
+        {
+            throw new IllegalStateException("Master object is already defined as " + _master + " cannot redfined as " + name);
+        }
+        return findObject(_master);
+    }
+
+    public ObjectDefinition defineSimulatedEfunObject(String name)
+    {
+        if (_sefun != null && !_sefun.equals(name))
+        {
+            throw new IllegalStateException("Simulated Efun object is already defined as "
+                    + _sefun
+                    + " cannot redfined as "
+                    + name);
+        }
+        CompiledObjectDefinition definition = findObject(name);
+        _sefun = name;
+        return definition;
+    }
+
+    public ObjectInstance getMasterObject()
+    {
+        if (_master == null)
+        {
+            return null;
+        }
+        return findObject(_master).getMasterInstance();
+    }
+
+    public ObjectInstance getSimulatedEfunObject()
+    {
+        if (_sefun == null)
+        {
+            return null;
+        }
+        return findObject(_sefun).getMasterInstance();
     }
 }

@@ -52,8 +52,8 @@ public class Preprocessor {
 	private Stack<State>			states;
 	private Source					source;
 
-	private List<String>			quoteincludepath;	/* -iquote */
-	private List<String>			sysincludepath;		/* -I */
+	private List<VirtualFile>			quoteincludepath;	/* -iquote */
+	private List<VirtualFile>			sysincludepath;		/* -I */
 	private Set<Feature>			features;
 	private Set<Warning>			warnings;
 	private VirtualFileSystem		filesystem;
@@ -66,8 +66,8 @@ public class Preprocessor {
 		this.states = new Stack<State>();
 		states.push(new State());
 		this.source = null;
-		this.quoteincludepath = new ArrayList<String>();
-		this.sysincludepath = new ArrayList<String>();
+		this.quoteincludepath = new ArrayList<VirtualFile>();
+		this.sysincludepath = new ArrayList<VirtualFile>();
 		this.features = EnumSet.noneOf(Feature.class);
 		this.warnings = EnumSet.noneOf(Warning.class);
 		this.filesystem = new JavaFileSystem();
@@ -90,8 +90,8 @@ public class Preprocessor {
 	/**
 	 * Sets the VirtualFileSystem used by this Preprocessor.
 	 */
-	public void setFileSystem(VirtualFileSystem filesystem) {
-		this.filesystem = filesystem;
+	public void setFileSystem(VirtualFileSystem fileSys) {
+		this.filesystem = fileSys;
 	}
 
 	/**
@@ -108,8 +108,8 @@ public class Preprocessor {
 	 * The listener is notified of warnings, errors and source
 	 * changes, amongst other things.
 	 */
-	public void setListener(PreprocessorListener listener) {
-		this.listener = listener;
+	public void setListener(PreprocessorListener ppListener) {
+		this.listener = ppListener;
 		Source	s = source;
 		while (s != null) {
 			// s.setListener(listener);
@@ -341,7 +341,7 @@ public class Preprocessor {
 	 * Sets the user include path used by this Preprocessor.
 	 */
 	/* Note for future: Create an IncludeHandler? */
-	public void setQuoteIncludePath(List<String> path) {
+	public void setQuoteIncludePath(List<VirtualFile> path) {
 		this.quoteincludepath = path;
 	}
 
@@ -350,7 +350,7 @@ public class Preprocessor {
 	 *
 	 * This list may be freely modified by user code.
 	 */
-	public List<String> getQuoteIncludePath() {
+	public List<VirtualFile> getQuoteIncludePath() {
 		return quoteincludepath;
 	}
 
@@ -358,7 +358,7 @@ public class Preprocessor {
 	 * Sets the system include path used by this Preprocessor.
 	 */
 	/* Note for future: Create an IncludeHandler? */
-	public void setSystemIncludePath(List<String> path) {
+	public void setSystemIncludePath(List<VirtualFile> path) {
 		this.sysincludepath = path;
 	}
 
@@ -367,7 +367,7 @@ public class Preprocessor {
 	 *
 	 * This list may be freely modified by user code.
 	 */
-	public List<String> getSystemIncludePath() {
+	public List<VirtualFile> getSystemIncludePath() {
 		return sysincludepath;
 	}
 
@@ -971,11 +971,11 @@ public class Preprocessor {
 	/**
 	 * Includes a file from an include path, by name.
 	 */
-	private boolean include(Iterable<String> path, String name)
+	private boolean include(Iterable<VirtualFile> path, String name)
 						throws IOException,
 								LexerException {
-		for (String dir : path) {
-			VirtualFile	file = filesystem.getFile(dir, name);
+		for (VirtualFile dir : path) {
+			VirtualFile	file = dir.getChildFile(name);
 			if (include(file))
 				return true;
 		}
@@ -1005,10 +1005,10 @@ public class Preprocessor {
 		StringBuilder	buf = new StringBuilder();
 		if (quoted) {
 			buf.append(" .");
-			for (String dir : quoteincludepath)
+			for (VirtualFile dir : quoteincludepath)
 				buf.append(" ").append(dir);
 		}
-		for (String dir : sysincludepath)
+		for (VirtualFile dir : sysincludepath)
 			buf.append(" ").append(dir);
 		error(line, 0, "File not found: " + name + " in" + buf);
 	}

@@ -32,7 +32,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class UserpEfun extends AbstractEfun
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("ob", Types.OBJECT));
     }

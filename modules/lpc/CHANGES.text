@@ -1,4 +1,39 @@
+2009-07-11
+    Initial support for sprintf efun
+
+2009-07-09
+    repeat_string() and replace_string() efuns
+    Add 'isNil' support function
+    Implode on function (reduce)
+    Additional test cases for strings
+
+2009-07-08
+    Test cases for strings
+    Use constant int values in return value of sizeof/strlen
+    Support for efuns: unique_array filter filter_array map_array
+    Additional test cases for arrays
+
+2009-07-07
+    Test cases for arrays
+    Support open-ended ranges on array indexing
+    Correctly determine type of array literals.
+    Track times for compilation steps
+
+2009-07-06
+    Tests for mappings
+    Support addition of string + int|float
+    Support addition of mapping + mapping
+    map_delete() efun
+    values() efun
+    filter() efun for mappings
+    filter_mapping() efun
+    map_mapping() efun
+    Make map(mapping, ..) synonomous with map_mapping(mapping, ..)
+    Support array/string/mapping index of an rvalue.
+
 2009-07-05
+    Support running tests from ant
+    Include change log
     Support bind() efun
     Expose function pointers on call stack
 

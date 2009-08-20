@@ -238,19 +238,21 @@ public class BaseASTVisitor implements ParserVisitor
 
     public Object visit(ASTIndexPostfix node, Object data)
     {
-
         return null;
     }
 
     public Object visit(ASTIndexExpression node, Object data)
     {
-
+        return null;
+    }
+    
+    public Object visit(ASTRange node, Object data)
+    {
         return null;
     }
 
     public Object visit(ASTFunctionArguments node, Object data)
     {
-
         return null;
     }
 

@@ -27,7 +27,9 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 
@@ -36,7 +38,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
  */
 public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.emptyList();
     }
@@ -48,8 +50,16 @@ public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, C
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO - This can be optimised drastically, if we assume there is no sefun, and make "this_object()" a local call in LpcObject
-        ObjectInstance instance = RuntimeContext.get().callStack().peekFrame(0).instance;
+        // @TODO - This can be optimised drastically, if we assume there is no sefun overriding this_object(), and make "this_object()" a local call in LpcObject
+        ThreadContext context = RuntimeContext.obtain();
+        ObjectInstance instance = this_object(context);
         return new ObjectValue(instance);
+    }
+
+    public static ObjectInstance this_object(ThreadContext context)
+    {
+        CallStack stack = context.callStack();
+        ObjectInstance instance = stack.peekFrame(0).instance;
+        return instance;
     }
 }

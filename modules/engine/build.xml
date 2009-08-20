@@ -1,0 +1,92 @@
+<project name="terebi.engine"  default="all" basedir="."  xmlns:ivy="antlib:org.apache.ivy.ant" >
+
+  <property name="dir.source"                   location="source/"                       />
+  <property name="dir.source.java"              location="${dir.source}/java"            />
+  <property name="dir.source.resource"          location="${dir.source}/resource"        />
+  <property name="dir.source.resource.server"   location="${dir.source.resource}/server" />
+  <property name="dir.source.resource.test"     location="${dir.source.resource}/test"   />
+  <property name="dir.source.build"             location="${dir.source}/build"           />
+
+  <property name="dir.output"         location="output/ant"            />
+  <property name="dir.output.classes" location="${dir.output}/classes" />
+  <property name="dir.output.junit"   location="${dir.output}/junit"   />
+
+  <target name="all"   description="Builds Engine module + runs tests" depends="build, test" />
+  <target name="build" description="Builds Engine module"              depends="libs, compile " />
+
+  <import file="${dir.source.build}/install-ivy.xml" />
+
+  <target name="libs" depends="init-ivy" >
+<!--
+        <ivy:resolve file="${dir.source.build}/ivy.xml" type="jar" />
+        <ivy:retrieve type="jar"  />
+-->
+  </target>
+
+  <target name="compile" depends="compile.engine, compile.test" />
+
+  <macrodef name="compile_java">
+       <attribute name="dir" />
+       <attribute name="classpath" />
+       <sequential>
+            <mkdir dir="${dir.output.classes}" />
+            <javac srcdir="${dir.source.java}/@{dir}"
+                   destdir="${dir.output.classes}"
+                   classpathref="@{classpath}"
+                   debug="false"
+                   deprecation="false" 
+                   optimize="true"
+                   listfiles="false"
+                   source="1.5">
+            </javac>
+       </sequential>
+  </macrodef>
+
+  <path id="build.classpath.server">
+    <fileset dir="lib/server" />
+    <pathelement location="../lpc/output/ant/classes/" />
+    <pathelement location="../net/output/ant/classes/" />
+  </path>
+
+  <path id="build.classpath.test">
+    <path refid="build.classpath.server" />
+    <fileset dir="lib/test" />
+  </path>
+
+  <target name="compile.engine">
+    <compile_java dir="config" classpath="build.classpath.server" />
+    <compile_java dir="objects" classpath="build.classpath.server" />
+    <compile_java dir="server" classpath="build.classpath.server" />
+    <compile_java dir="plugin" classpath="build.classpath.server" />
+    <compile_java dir="start" classpath="build.classpath.server" />
+  </target>
+     
+  <target name="compile.test">
+    <compile_java dir="test" classpath="build.classpath.test" />
+  </target>
+     
+  <target name="test">
+    <mkdir dir="${dir.output.junit}" />
+    <junit fork="yes" forkmode="once"  dir="${basedir}" >
+      <classpath>
+        <path refid="build.classpath.test" />
+        <pathelement location="${dir.output.classes}" />
+        <pathelement location="${dir.source.resource.test}" />
+        <pathelement location="${dir.source.resource.server}" />
+      </classpath>
+      <batchtest todir="${dir.output.junit}">
+        <fileset dir="${dir.source.java}/test">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+      <formatter type="xml" />
+      <formatter type="plain" />
+    </junit>
+  </target>
+
+  <target name="clean">
+    <delete dir="${dir.output}" />
+  </target>
+
+</project>
+

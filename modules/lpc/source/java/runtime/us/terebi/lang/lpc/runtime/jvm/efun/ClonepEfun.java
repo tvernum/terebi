@@ -38,7 +38,7 @@ public class ClonepEfun extends AbstractEfun implements FunctionSignature, Calla
     //    int clonep();
     //    int clonep(mixed arg) ;
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("arg", Types.MIXED));
     }

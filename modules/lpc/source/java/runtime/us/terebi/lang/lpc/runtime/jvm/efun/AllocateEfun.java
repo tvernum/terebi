@@ -38,7 +38,7 @@ public class AllocateEfun extends AbstractEfun implements FunctionSignature, Cal
 {
     private static final int ARRAY_MAX = 0xFFFF;
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("size", Types.INT));
     }

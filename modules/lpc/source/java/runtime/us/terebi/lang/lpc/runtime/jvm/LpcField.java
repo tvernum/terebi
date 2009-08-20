@@ -21,6 +21,7 @@ package us.terebi.lang.lpc.runtime.jvm;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 
 /**
  * 
@@ -33,7 +34,7 @@ public class LpcField implements LpcReference
 
     public LpcField(String name, LpcType type)
     {
-        this(name, type, null);
+        this(name, type, NilValue.INSTANCE);
     }
 
     public LpcField(String name, LpcType type, LpcValue value)

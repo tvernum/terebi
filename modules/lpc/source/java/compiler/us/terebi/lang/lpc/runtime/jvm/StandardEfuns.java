@@ -23,105 +23,9 @@ import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
-import us.terebi.lang.lpc.runtime.jvm.context.Functions;
-import us.terebi.lang.lpc.runtime.jvm.context.MappedFunctions;
-import us.terebi.lang.lpc.runtime.jvm.efun.AllocateEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.AllocateMappingEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ArraypEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.BindEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.BufferpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CallOtherEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CallOutEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CallOutInfoEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CallStackEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CapitalizeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ClasspEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CloneObjectEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ClonepEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CopyFileEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CreateDirectoryEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CryptEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.CtimeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.DebugInfoEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.DebugMessageEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.DestructEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
-import us.terebi.lang.lpc.runtime.jvm.efun.EnvironmentEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ErrorEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.EvaluateEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ExecEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ExplodeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FileNameEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FileSizeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FilterEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FindLivingEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FindObjectEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FindPlayerEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FlushMessagesEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FunctionExistsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FunctionOwnerEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FunctionpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.FunctionsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.GetDirectoryInfoEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ImplodeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.InheritListEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.InheritsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.InteractiveEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.IntpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.InventoryEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.KeysEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.LivingEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.LivingsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.LoadObjectEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.LocaltimeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.LowerCaseEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.MapEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.MappEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.MasterEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.MemberArrayEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.MessageEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.NoOpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.NullpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ObjectpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ObjectsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.PluralizeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.PresentEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.PreviousObjectEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.QueryIpNameEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.QueryIpNumberEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.QueryPrivsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.QuerySnoopEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.QuerySnoopingEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.RandomEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ReadBytesEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ReadFileEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.RegexpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.RemoveFileEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ReplaceStringEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ResetEvalCostEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.SetEvalLimitEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ShutdownEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.SizeofEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.SnoopEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.SortArrayEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.SprinfEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.SscanfEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.StringpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.StrlenEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.StrsrchEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.TerminalColourEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ThisPlayerEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.TimeEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ToFloatEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ToIntEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.TypeofEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.UpperCaseEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.UserpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.UsersEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.WriteEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.WriteFileEfun;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
+import us.terebi.lang.lpc.runtime.jvm.context.MappedEfuns;
+import us.terebi.lang.lpc.runtime.jvm.efun.*;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
@@ -143,9 +47,10 @@ public class StandardEfuns
         public static final Efun explode = new ExplodeEfun();
         public static final Efun strlen = new StrlenEfun();
         public static final Efun sscanf = new SscanfEfun();
-        public static final Efun sprintf = new SprinfEfun();
+        public static final Efun sprintf = new SprintfEfun();
         public static final Efun strsrch = new StrsrchEfun();
         public static final Efun replace_string = new ReplaceStringEfun();
+        public static final Efun repeat_string = new RepeatStringEfun();
         public static final Efun regexp = new RegexpEfun();
         public static final Efun lower_case = new LowerCaseEfun();
         public static final Efun upper_case = new UpperCaseEfun();
@@ -159,10 +64,17 @@ public class StandardEfuns
         public static final Efun allocate = new AllocateEfun();
         public static final Efun allocate_mapping = new AllocateMappingEfun();
         public static final Efun keys = new KeysEfun();
+        public static final Efun values = new ValuesEfun();
+        public static final Efun map_delete = new MapDeleteEfun();
         public static final Efun filter = new FilterEfun();
+        public static final Efun filter_array = new FilterEfun();
+        public static final Efun filter_mapping = new FilterMappingEfun();
         public static final Efun map = new MapEfun();
+        public static final Efun map_array = new MapArrayEfun();
+        public static final Efun map_mapping = new MapMappingEfun();
         public static final Efun sort_array = new SortArrayEfun();
         public static final Efun member_array = new MemberArrayEfun();
+        public static final Efun unique_array = new UniqueArrayEfun();
         public static final Efun arrayp = new ArraypEfun();
         public static final Efun pointerp = arrayp;
         public static final Efun mapp = new MappEfun();
@@ -209,9 +121,7 @@ public class StandardEfuns
     {
         public static final Efun users = new UsersEfun();
         public static final Efun userp = new UserpEfun();
-        public static final Efun interactive = new InteractiveEfun();
         public static final Efun exec = new ExecEfun();
-        public static final Efun this_player = new ThisPlayerEfun();
         public static final Efun find_player = new FindPlayerEfun();
         public static final Efun find_living = new FindLivingEfun();
         public static final Efun living = new LivingEfun();
@@ -285,16 +195,16 @@ public class StandardEfuns
 
     private static final Map<String, Efun> _efuns = new HashMap<String, Efun>();
 
-    public static FunctionMap getSignatures()
+    public static Efuns getImplementation()
     {
         checkPopulated();
-        return new FunctionMap(_efuns);
-    }
-
-    public static Functions getImplementation()
-    {
-        checkPopulated();
-        return new MappedFunctions(_efuns);
+        MappedEfuns efuns = new MappedEfuns();
+        for (String name : _efuns.keySet())
+        {
+            Efun efun = _efuns.get(name);
+            efuns.define(name, efun, efun);
+        }
+        return efuns;
     }
 
     private static void checkPopulated()

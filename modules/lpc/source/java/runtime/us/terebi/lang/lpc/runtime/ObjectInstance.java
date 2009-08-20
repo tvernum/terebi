@@ -29,4 +29,5 @@ public interface ObjectInstance extends UserTypeInstance
     public long getId();
     public AttributeMap getAttributes();
     public String getCanonicalName();
+    public void destruct();
 }

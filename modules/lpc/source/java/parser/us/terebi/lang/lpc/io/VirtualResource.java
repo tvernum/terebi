@@ -64,5 +64,10 @@ public class VirtualResource implements VirtualFile
     {
         return _resource.isFile();
     }
+    
+    public String toString()
+    {
+        return _resource.toString();
+    }
 
 }

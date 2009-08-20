@@ -27,8 +27,12 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMapping;
 
 /**
  * 
@@ -38,12 +42,12 @@ public class MapEfun extends AbstractEfun implements FunctionSignature, Callable
     //    mixed map( mixed x, string fun, object ob, mixed extra, ... );
     //    mixed map( mixed x, function f, mixed extra, ... );
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("collection", Types.MIXED));
         list.add(new ArgumentSpec("func", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
+        list.add(new ArgumentSpec("args", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 
@@ -54,8 +58,17 @@ public class MapEfun extends AbstractEfun implements FunctionSignature, Callable
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments);
+        LpcValue collection = arguments.get(0);
+        if (isMapping(collection))
+        {
+            return StandardEfuns.COLLECTION.map_mapping.execute(arguments);
+        }
+        if (isArray(collection))
+        {
+            return StandardEfuns.COLLECTION.map_array.execute(arguments);
+        }
+        throw new UnsupportedOperationException(getName() + "(" + collection.getActualType() + ", ..) - Not implemented");
     }
 
 }

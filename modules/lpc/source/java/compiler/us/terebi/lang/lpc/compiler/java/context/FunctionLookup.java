@@ -25,6 +25,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.InternalName;
@@ -33,9 +35,11 @@ import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.Callable.Kind;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 
 public class FunctionLookup
 {
+    private final Logger LOG = Logger.getLogger(FunctionLookup.class);
     private final FunctionMap _efuns;
     private final FunctionMap _simul;
     private final FunctionMap _localMethods;
@@ -180,6 +184,14 @@ public class FunctionLookup
         }
         else
         {
+            if ("efun".equals(scope) && LOG.isDebugEnabled())
+            {
+                LOG.debug("No such efun " + name + ". Valid efuns are:");
+                for (String key : _efuns.keySet())
+                {
+                    LOG.debug(" * " + key);
+                }
+            }
             return Collections.emptyList();
         }
     }
@@ -253,6 +265,19 @@ public class FunctionLookup
     public void addEfuns(FunctionMap efuns)
     {
         _efuns.putAll(efuns);
+    }
+
+    public void addEfuns(Efuns efuns)
+    {
+        _efuns.putAll(efuns.getSignatures());
+    }
+
+    public void addSimulEfuns(Iterable< ? extends MethodDefinition> methods)
+    {
+        for (MethodDefinition method : methods)
+        {
+            _simul.put(method.getName(), method.getSignature());
+        }
     }
 
     public void addInherit(String name, ObjectDefinition parent)

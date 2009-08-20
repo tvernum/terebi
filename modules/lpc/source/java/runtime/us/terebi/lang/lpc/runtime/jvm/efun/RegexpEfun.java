@@ -38,7 +38,7 @@ public class RegexpEfun extends AbstractEfun implements FunctionSignature, Calla
     //    string array regexp( string array lines, string pattern);
     //    string array regexp( string array lines, string pattern, int flag);
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("lines", Types.MIXED));

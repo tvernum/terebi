@@ -41,8 +41,13 @@ public class MappingElement implements LpcReference
 
     public LpcValue get()
     {
-        Map<LpcValue, LpcValue> map = _element.get().asMap();
-        LpcValue value = map.get(_index);
+        return get(_element.get(), _index);
+    }
+
+    public static LpcValue get(LpcValue mapping, LpcValue index)
+    {
+        Map<LpcValue, LpcValue> map = mapping.asMap();
+        LpcValue value = map.get(index);
         if (value == null)
         {
             return NilValue.INSTANCE;

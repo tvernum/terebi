@@ -33,7 +33,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
  */
 public class TimeEfun extends AbstractEfun implements FunctionSignature
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.emptyList();
     }

@@ -53,7 +53,7 @@ public class BindEfun extends AbstractEfun implements FunctionSignature, Callabl
         }
     }
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("func", Types.STRING));

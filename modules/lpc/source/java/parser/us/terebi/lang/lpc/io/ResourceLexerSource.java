@@ -33,7 +33,7 @@ public class ResourceLexerSource extends LexerSource
 
     public ResourceLexerSource(Resource resource) throws IOException
     {
-        super(new BufferedReader(new InputStreamReader(resource.open())), true);
+        super(new BufferedReader(new InputStreamReader(resource.openInput())), true);
         _resource = resource;
     }
 

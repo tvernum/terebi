@@ -54,12 +54,12 @@ public class SortArrayEfun extends AbstractEfun implements FunctionSignature, Ca
     //  array sort_array( array arr, function f, ... );
     //  array sort_array( array arr, int direction );    
     //  
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("array", Types.MIXED_ARRAY));
         list.add(new ArgumentSpec("func", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
+        list.add(new ArgumentSpec("args", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 

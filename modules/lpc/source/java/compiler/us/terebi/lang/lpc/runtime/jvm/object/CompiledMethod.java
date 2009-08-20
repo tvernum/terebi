@@ -92,8 +92,8 @@ public class CompiledMethod implements CompiledMethodDefinition
             LpcParameter parameterAnnotation = AnnotationUtil.findAnnotation(LpcParameter.class,
                     method.getParameterAnnotations()[i]);
             LpcType type = getType(parameterAnnotation.kind(), parameterAnnotation.className(), parameterAnnotation.depth());
-            arguments[i] = new ArgumentSpec(parameterAnnotation.name(), type, parameterAnnotation.semantics(),
-                    parameterAnnotation.varargs());
+            arguments[i] = new ArgumentSpec(parameterAnnotation.name(), type, parameterAnnotation.varargs(),
+                    parameterAnnotation.semantics());
         }
 
         LpcMember methodAnnotation = method.getAnnotation(LpcMember.class);
@@ -227,5 +227,10 @@ public class CompiledMethod implements CompiledMethodDefinition
     public MemberDefinition.Kind getKind()
     {
         return MemberDefinition.Kind.METHOD;
+    }
+
+    public String toString()
+    {
+        return _name + " : " + _signature.toString();
     }
 }

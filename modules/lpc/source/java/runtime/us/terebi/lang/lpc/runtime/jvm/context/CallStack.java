@@ -44,6 +44,11 @@ public class CallStack
             this.instance = inst;
             this.javaStackSize = javaStackSz;
         }
+
+        public String toString()
+        {
+            return "<" + origin + ":" + instance + ">";
+        }
     }
 
     private final Stack<MajorFrame> _frames;
@@ -94,6 +99,9 @@ public class CallStack
         return _frames.peek(offset);
     }
 
+    /**
+     * @return An {@link Iterable} over the set of {@link MajorFrame frames}, starting with the bottom-most (newest) frame.
+     */
     public Iterable<MajorFrame> allFrames()
     {
         return _frames;
@@ -102,5 +110,20 @@ public class CallStack
     public int size()
     {
         return _frames.size();
+    }
+
+    public void begin()
+    {
+        _frames.clear();
+    }
+
+    public MajorFrame topFrame()
+    {
+        return _frames.top();
+    }
+
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + _frames + "}";
     }
 }

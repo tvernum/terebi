@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j='http://jakarta.apache.org/log4j/'>
+
+    <!-- TODO : Log to a file -->
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <layout class="org.apache.log4j.PatternLayout"> 
+          <param name="ConversionPattern" value="%d [%t] %-5p %c {%x} - %m%n"/> 
+        </layout> 
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="LevelMin" value="INFO"/>
+            <param name="AcceptOnMatch" value="true"/>
+        </filter>
+        <filter class="org.apache.log4j.varia.DenyAllFilter"/>
+    </appender>
+
+    <appender name="DEBUG_FILE" class="org.apache.log4j.RollingFileAppender"> 
+        <param name="file" value="debug.log"/>
+        <param name="MaxFileSize" value="25KB"/>
+        <param name="MaxBackupIndex" value="9"/>
+        <layout class="org.apache.log4j.PatternLayout"> 
+          <param name="ConversionPattern" value="%d [%t] %-5p %c {%x} - %m%n"/> 
+        </layout> 
+    </appender> 
+
+    <appender name="DEBUG" class="org.apache.log4j.AsyncAppender">
+        <appender-ref ref="DEBUG_FILE"/>
+    </appender>
+
+    <logger name="us.terebi.lang.lpc" additivity="true">
+        <level value="DEBUG" />
+    </logger>
+
+    <logger name="us.terebi" additivity="true">
+        <level value="INFO" />
+        <appender-ref ref="DEBUG" />
+    </logger>
+
+    <root>
+        <level value="INFO" />
+        <appender-ref ref="CONSOLE" />
+    </root>
+    
+</log4j:configuration>
+

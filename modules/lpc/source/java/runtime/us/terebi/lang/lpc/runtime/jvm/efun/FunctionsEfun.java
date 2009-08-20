@@ -40,7 +40,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class FunctionsEfun extends AbstractEfun implements FunctionSignature, Callable
 {
     // string array functions(object, int default: 0);
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("obj", Types.OBJECT));

@@ -18,6 +18,9 @@
 
 package us.terebi.util;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * 
@@ -44,21 +47,28 @@ public class StringUtil
 
     public static CharSequence join(String delim, Object[] values)
     {
-        if (values.length == 0)
+        return join(delim, Arrays.asList(values));
+    }
+
+    public static CharSequence join(String delim, Collection< ? > values)
+    {
+        if (values.isEmpty())
         {
             return "";
         }
-        if (values.length == 1)
+
+        Iterator<?> iterator = values.iterator();
+        if (values.size() == 1)
         {
-            return values[0].toString();
+            return iterator.next().toString();
         }
 
         StringBuilder builder = new StringBuilder();
-        builder.append(values[0]);
-        for (int i = 1; i < values.length; i++)
+        builder.append(iterator.next());
+        while (iterator.hasNext())
         {
             builder.append(delim);
-            builder.append(values[i]);
+            builder.append(iterator.next());
         }
         return builder;
     }

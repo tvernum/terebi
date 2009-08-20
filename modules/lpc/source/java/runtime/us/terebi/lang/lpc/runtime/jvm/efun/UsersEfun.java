@@ -34,7 +34,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
  */
 public class UsersEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.emptyList();
     }

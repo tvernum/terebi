@@ -38,7 +38,7 @@ public class ObjectsEfun extends AbstractEfun implements FunctionSignature, Call
 //    object array objects( string func, object ob );
 //    object array objects( function f);
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("func", Types.MIXED));

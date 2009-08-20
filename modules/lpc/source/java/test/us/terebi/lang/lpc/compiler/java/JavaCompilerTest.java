@@ -35,14 +35,17 @@ import org.junit.runner.RunWith;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.Source;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
-import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
 import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.test.ObjectTestObject;
 import us.terebi.lang.lpc.compiler.java.test.SwordTestObject;
+import us.terebi.lang.lpc.io.FileFinder;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.jj.ParseException;
 import us.terebi.lang.lpc.parser.jj.Parser;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.object.CompiledDefinition;
 import us.terebi.test.TestSuite;
 import us.terebi.test.TestSuiteRunner;
@@ -156,8 +159,9 @@ public class JavaCompilerTest implements Callable<Object>
 
     private String compileToJava(Source source, String className) throws IOException
     {
-        FunctionMap efuns = StandardEfuns.getSignatures();
+        Efuns efuns = StandardEfuns.getImplementation();
         CompilerObjectManager manager = new LpcCompilerObjectManager();
+        RuntimeContext.activate(new SystemContext(efuns, manager, new FileFinder(new File("/"))));
         JavaCompiler compiler = new JavaCompiler(efuns, manager);
         manager.registerObject(new CompiledDefinition<ObjectTestObject>(manager, new BasicScopeLookup(manager),
                 "/std/lib/object.c", ObjectTestObject.class));
@@ -196,7 +200,7 @@ public class JavaCompilerTest implements Callable<Object>
     }
 
     @TestSuite
-    public static List<JavaCompilerTest> suite()
+    public static List<JavaCompilerTest> tests()
     {
         File testDir = new File("source/lpc/test/us/terebi/lang/lpc/compiler/java/");
         File[] files = testDir.listFiles();

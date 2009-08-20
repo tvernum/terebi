@@ -123,7 +123,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         writer.print(" = CallableSupport.asCallable(");
         exprVar.value(writer);
         writer.print(").execute(");
-        fcw.printArguments(argValues, false);
+        fcw.printArguments(argValues, false, -1);
         writer.println(");");
         return var;
     }
@@ -227,7 +227,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         InternalVariable previous = (InternalVariable) data;
         PrintWriter writer = _context.writer();
 
-        // IndexExpression() [ <RANGE> [ IndexExpression() ] ]
+        // IndexExpression() [ Range() [ IndexExpression() ] ]
         if (node.jjtGetNumChildren() == 1)
         {
             ASTIndexExpression indexNode = (ASTIndexExpression) node.jjtGetChild(0);
@@ -246,7 +246,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
         else
         {
             ASTIndexExpression indexStartNode = (ASTIndexExpression) node.jjtGetChild(0);
-            ASTIndexExpression indexEndNode = (ASTIndexExpression) node.jjtGetChild(1);
+            ASTIndexExpression indexEndNode = (node.jjtGetNumChildren() == 3 ? (ASTIndexExpression) node.jjtGetChild(2) : null);
             InternalVariable indexStart = getIndexVariable(indexStartNode);
             InternalVariable indexEnd = getIndexVariable(indexEndNode);
             InternalVariable result = new InternalVariable(_context, previous.reference, /*@TODO*/Types.MIXED);
@@ -268,12 +268,16 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
 
     private InternalVariable getIndexVariable(ASTIndexExpression indexNode)
     {
+        if (indexNode == null)
+        {
+            return new InternalVariable("null");
+        }
         return evaluate(indexNode.jjtGetChild(indexNode.jjtGetNumChildren() - 1));
     }
 
     private boolean isReverseIndex(ASTIndexExpression indexNode)
     {
-        return indexNode.jjtGetNumChildren() == 2;
+        return indexNode != null && indexNode.jjtGetNumChildren() == 2;
     }
 
     public InternalVariable visit(ASTCallOther node, Object data)
@@ -580,9 +584,9 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
             writer.print("\",");
             new TypeWriter(_context).printType(arg.getType());
             writer.print(",");
-            writer.print(fullyQualifiedName(arg.getSemantics()));
-            writer.print(",");
             writer.print(arg.isVarArgs());
+            writer.print(",");
+            writer.print(fullyQualifiedName(arg.getSemantics()));
             writer.print(")");
         }
 
@@ -817,7 +821,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
 
     public static boolean checkType(Node node, InternalVariable var, LpcType... allowedTypes)
     {
-        if (Types.MIXED.equals(var))
+        if (Types.MIXED.equals(var.type))
         {
             return true;
         }
@@ -833,11 +837,11 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
             {
                 return true;
             }
-            if (type.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() <= allowed.getArrayDepth())
+            if (type.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() >= allowed.getArrayDepth())
             {
                 return true;
             }
-            if (allowed.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() <= allowed.getArrayDepth())
+            if (allowed.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() >= allowed.getArrayDepth())
             {
                 return true;
             }

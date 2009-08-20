@@ -21,6 +21,7 @@ package us.terebi.lang.lpc.io;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * 
@@ -67,12 +68,22 @@ public class NoSuchResource implements Resource
         return (_parent == null ? _name : _parent.getPath() + "/" + _name);
     }
 
+    public String getParentName()
+    {
+        return (_parent == null ? "" : _parent.getPath());
+    }
+
     public boolean isFile()
     {
         return false;
     }
 
-    public InputStream open() throws IOException
+    public InputStream openInput() throws IOException
+    {
+        throw new FileNotFoundException(getPath());
+    }
+    
+    public OutputStream openOutput() throws IOException
     {
         throw new FileNotFoundException(getPath());
     }
@@ -80,6 +91,11 @@ public class NoSuchResource implements Resource
     public String toString()
     {
         return getClass().getSimpleName() + "(" + getPath() + ")";
+    }
+
+    public long getSize()
+    {
+        return 0;
     }
 
 }

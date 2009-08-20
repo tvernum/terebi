@@ -236,6 +236,6 @@ public class MethodWriter extends MemberWriter implements ParserVisitor
         String name = ASTUtil.getImage(identifier);
 
         LpcType type = new TypeWriter(getContext()).getType(fullType);
-        return new ArgumentSpec(name, type, ref ? ArgumentSemantics.EXPLICIT_REFERENCE : ArgumentSemantics.BY_VALUE, expander);
+        return new ArgumentSpec(name, type, expander, ref ? ArgumentSemantics.EXPLICIT_REFERENCE : ArgumentSemantics.BY_VALUE);
     }
 }

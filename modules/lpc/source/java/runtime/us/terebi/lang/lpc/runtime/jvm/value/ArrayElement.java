@@ -42,23 +42,28 @@ public class ArrayElement implements LpcReference
 
     public LpcValue get()
     {
-        List<LpcValue> list = _array.get().asList();
-        int index = getIndex(list);
-        return list.get(index);
+        return get(_array.get(), _index);
     }
 
-    private int getIndex(List<LpcValue> list)
+    public static LpcValue get(LpcValue value, Index index)
     {
-        long index = _index.evaluate(list.size());
-        if (index < 0)
+        List<LpcValue> list = value.asList();
+        int i = getIndex(list, index);
+        return list.get(i);
+    }
+
+    private static int getIndex(List<LpcValue> list, Index index)
+    {
+        long i = index.evaluate(list.size());
+        if (i < 0)
         {
-            throw new LpcRuntimeException("Array index (" + index + ") out of bounds");
+            throw new LpcRuntimeException("Array index (" + i + ") out of bounds");
         }
-        if (index >= list.size())
+        if (i >= list.size())
         {
-            throw new LpcRuntimeException("Array index (" + index + ") out of bounds (" + list.size() + ")");
+            throw new LpcRuntimeException("Array index (" + i + ") out of bounds (" + list.size() + ")");
         }
-        return (int) index;
+        return (int) i;
     }
 
     public LpcType getType()
@@ -74,9 +79,8 @@ public class ArrayElement implements LpcReference
     public void set(LpcValue value)
     {
         List<LpcValue> list = _array.get().asList();
-        int index = getIndex(list);
+        int index = getIndex(list, _index);
         list.set(index, value); 
         // @TODO - is this the right semantics? (change the array, rather than the value in the variable...)
     }
-
 }

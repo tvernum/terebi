@@ -19,6 +19,7 @@
 package us.terebi.lang.lpc.runtime.jvm.efun;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
@@ -33,6 +34,7 @@ import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ClassReference;
@@ -48,11 +50,11 @@ import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
  */
 public class CloneObjectEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("name", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
+        list.add(new ArgumentSpec("args", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 
@@ -67,7 +69,7 @@ public class CloneObjectEfun extends AbstractEfun implements FunctionSignature, 
         LpcValue type = arguments.get(0);
         if (isString(type))
         {
-            return cloneObject(type.asString(), arguments.subList(1, arguments.size()));
+            return cloneObject(type.asString(), arguments.get(1).asList());
         }
         if (isClassReference(type))
         {
@@ -79,20 +81,24 @@ public class CloneObjectEfun extends AbstractEfun implements FunctionSignature, 
     private LpcValue newClass(ClassReference ref)
     {
         ClassDefinition definition = ref.getClassDefinition();
-        ClassInstance instance = definition.newInstance();
+        ClassInstance instance = definition.newInstance(Collections.<LpcValue> emptyList());
         return new ClassValue(instance);
     }
 
     private LpcValue cloneObject(String name, List< ? extends LpcValue> arguments)
     {
-        ObjectManager objectManager = RuntimeContext.get().objectManager();
+        SystemContext system = RuntimeContext.obtain().system();
+        ObjectManager objectManager = system.objectManager();
+        if (objectManager == null)
+        {
+            throw new IllegalStateException("No object manager in context " + system);
+        }
         ObjectDefinition definition = objectManager.findObject(name);
         if (definition == null)
         {
             throw new LpcRuntimeException("Object not found - " + name);
         }
-        ObjectInstance instance = definition.newInstance();
-        CallOtherEfun.callOther(instance, "create", arguments);
+        ObjectInstance instance = definition.newInstance(arguments);
         return new ObjectValue(instance);
     }
 

@@ -26,6 +26,12 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
  */
 public interface ObjectManager
 {
+    public ObjectDefinition defineMasterObject(String name);
+    public ObjectInstance getMasterObject();
+
+    public ObjectDefinition defineSimulatedEfunObject(String name);
+    public ObjectInstance getSimulatedEfunObject();
+    
     public ObjectDefinition findObject(String name);
     public ObjectInstance findObject(String name, int id);
     public Iterable< ? extends ObjectInstance> objects();

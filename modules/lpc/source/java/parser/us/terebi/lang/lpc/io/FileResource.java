@@ -21,7 +21,9 @@ package us.terebi.lang.lpc.io;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * 
@@ -33,12 +35,23 @@ public class FileResource implements Resource
 
     public FileResource(File file)
     {
-        this(file, file.getPath());
+        this(file, null);
     }
 
     public FileResource(File file, String path)
     {
         _file = file;
+        if (path != null)
+        {
+            if (path.length() == 0)
+            {
+                path = "/";
+            }
+            else if (path.charAt(0) != '/')
+            {
+                path = "/" + path;
+            }
+        }
         _path = path;
     }
 
@@ -52,6 +65,20 @@ public class FileResource implements Resource
         return _file.getName();
     }
 
+    public String getParentName()
+    {
+        if (_path == null)
+        {
+            return _file.getParent();
+        }
+        int slash = _path.lastIndexOf('/');
+        if (slash == -1)
+        {
+            return _file.getParent();
+        }
+        return _path.substring(0, slash);
+    }
+
     public Resource getParent()
     {
         return new FileResource(_file.getParentFile());
@@ -59,14 +86,26 @@ public class FileResource implements Resource
 
     public String getPath()
     {
-        return _path;
+        if (_path == null)
+        {
+            return _file.getPath();
+        }
+        else
+        {
+            return _path;
+        }
     }
 
-    public InputStream open() throws FileNotFoundException
+    public InputStream openInput() throws FileNotFoundException
     {
         return new FileInputStream(_file);
     }
 
+    public OutputStream openOutput() throws FileNotFoundException
+    {
+        return new FileOutputStream(_file);
+    }
+    
     public boolean exists()
     {
         return _file.exists();
@@ -82,9 +121,16 @@ public class FileResource implements Resource
         return getClass().getSimpleName()
                 + "("
                 + _file
-                + ", type="
+                + ","
+                + (_path == null ? "" : " path=" + _path)
+                + " type="
                 + (_file.isFile() ? 'f' : _file.isDirectory() ? 'd' : _file.exists() ? "s" : '-')
                 + ")";
+    }
+    
+    public long getSize()
+    {
+        return _file.length();
     }
 
 }

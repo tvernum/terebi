@@ -35,7 +35,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class CryptEfun extends AbstractEfun implements FunctionSignature, Callable
 {
 //    string crypt( string str, string seed );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("str", Types.STRING));

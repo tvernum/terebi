@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -29,6 +30,6 @@ public interface ObjectDefinition extends UserTypeDefinition
     public Map<String, ? extends ClassDefinition> getDefinedClasses();
     
     public ObjectInstance getMasterInstance();
-    public ObjectInstance newInstance();
+    public ObjectInstance newInstance(List<? extends LpcValue> arguments);
     public ObjectInstance getInheritableInstance();
 }

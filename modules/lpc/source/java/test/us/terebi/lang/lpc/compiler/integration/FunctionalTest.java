@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -32,6 +33,7 @@ import us.terebi.lang.lpc.compiler.ObjectBuilderFactory;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
+import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 import us.terebi.test.TestSuite;
 import us.terebi.test.TestSuiteRunner;
 
@@ -39,7 +41,7 @@ import us.terebi.test.TestSuiteRunner;
 public class FunctionalTest
 {
     @TestSuite
-    public static List< ? extends Callable<Object>> suite() throws IOException
+    public static List< ? extends Callable<Object>> functionalTests() throws IOException
     {
         List<Callable<Object>> list = new ArrayList<Callable<Object>>();
         ObjectBuilder builder = createBuilder(new File("source/lpc/test/us/terebi/lang/lpc/compiler/functional/"));
@@ -47,30 +49,54 @@ public class FunctionalTest
         list.addAll(getTests("binary.c", builder));
         list.addAll(getTests("math.c", builder));
         list.addAll(getTests("loop.c", builder));
+        list.addAll(getTests("string.c", builder));
         list.addAll(getTests("function.c", builder));
+        list.addAll(getTests("varargs.c", builder));
+        list.addAll(getTests("mapping.c", builder));
+        list.addAll(getTests("array.c", builder));
+        list.addAll(getTests("sprintf.c", builder));
 
         return list;
     }
 
-    private static List< ? extends Callable<Object>> getTests(String file, ObjectBuilder builder)
+    private static List< ? extends Callable<Object>> getTests(final String file, ObjectBuilder builder)
     {
-        CompiledObjectDefinition definition = builder.compile(file);
-        Collection< ? extends CompiledMethodDefinition> methods = definition.getMethods().values();
-        List<MethodTestCase> tests = new ArrayList<MethodTestCase>(methods.size());
-        for (CompiledMethodDefinition method : methods)
+        try
         {
-            if (method.getModifiers().contains(Modifier.PUBLIC))
+            CompiledObjectDefinition definition = builder.compile(file);
+            Collection< ? extends CompiledMethodDefinition> methods = definition.getMethods().values();
+            List<MethodTestCase> tests = new ArrayList<MethodTestCase>(methods.size());
+            for (CompiledMethodDefinition method : methods)
             {
-                tests.add(new MethodTestCase(method, builder));
+                if (method.getModifiers().contains(Modifier.PUBLIC))
+                {
+                    tests.add(new MethodTestCase(method, builder));
+                }
             }
+            return tests;
         }
-        return tests;
+        catch (final RuntimeException e)
+        {
+            Callable<Object> failure = new Callable<Object>()
+            {
+                public Object call() throws Exception
+                {
+                    throw e;
+                }
+                public String toString()
+                {
+                    return file;
+                }
+            };
+            return Collections.<Callable<Object>> singletonList(failure);
+        }
     }
 
     private static ObjectBuilder createBuilder(File directory) throws IOException
     {
-        ObjectBuilderFactory factory = new ObjectBuilderFactory();
+        ObjectBuilderFactory factory = new ObjectBuilderFactory(StandardEfuns.getImplementation());
         ObjectBuilder builder = factory.createBuilder(directory);
+        builder.setPrintStats(System.out);
         return builder;
     }
 

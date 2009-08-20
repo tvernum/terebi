@@ -40,27 +40,32 @@ public class StringChar implements LpcReference
 
     public LpcValue get()
     {
-        String str = _string.get().asString();
-        int index = getIndex(str);
-        if (index == str.length())
+        return get(_string.get(), _index);
+    }
+
+    public static LpcValue get(LpcValue value, Index index)
+    {
+        String str = value.asString();
+        int i = getIndex(str, index);
+        if (i == str.length())
         {
             return NilValue.INSTANCE;
         }
-        return new IntValue(str.charAt(index));
+        return new IntValue(str.charAt(i));
     }
 
-    private int getIndex(String str)
+    private static int getIndex(String str, Index index)
     {
-        long index = _index.evaluate(str.length());
-        if (index < 0)
+        long i = index.evaluate(str.length());
+        if (i < 0)
         {
-            throw new LpcRuntimeException("String index (" + index + ") out of bounds");
+            throw new LpcRuntimeException("String index (" + i + ") out of bounds");
         }
-        if (index > str.length())
+        if (i > str.length())
         {
-            throw new LpcRuntimeException("String index (" + index + ") out of bounds (" + str.length() + ")");
+            throw new LpcRuntimeException("String index (" + i + ") out of bounds (" + str.length() + ")");
         }
-        return (int) index;
+        return (int) i;
     }
 
     public LpcType getType()
@@ -76,7 +81,7 @@ public class StringChar implements LpcReference
     public void set(LpcValue value)
     {
         String str = _string.get().asString();
-        int index = getIndex(str);
+        int index = getIndex(str, _index);
         if (index == str.length())
         {
             throw new LpcRuntimeException("String index (" + index + ") out of bounds (" + str.length() + ") for assignment");

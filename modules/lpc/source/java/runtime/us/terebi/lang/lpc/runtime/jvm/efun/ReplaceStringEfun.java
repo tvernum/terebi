@@ -27,7 +27,10 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNil;
 
 /**
  * 
@@ -35,7 +38,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class ReplaceStringEfun extends AbstractEfun implements FunctionSignature, Callable
 {
     //    string replace_string( string str, string pattern, string replace, [int first], [int last] );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("str", Types.STRING));
@@ -58,8 +61,73 @@ public class ReplaceStringEfun extends AbstractEfun implements FunctionSignature
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments, 3);
+        String str = arguments.get(0).asString();
+        String pattern = arguments.get(1).asString();
+        String replace = arguments.get(2).asString();
+
+        LpcValue first = arguments.get(3);
+        LpcValue last = arguments.get(4);
+
+        return new StringValue(execute(str, pattern, replace, first, last));
     }
 
+    private CharSequence execute(String str, String pattern, String replace, LpcValue first, LpcValue last)
+    {
+        if (isNil(first))
+        {
+            return replace(str, pattern, replace, 0, 0);
+        }
+        if (isNil(last))
+        {
+            return replace(str, pattern, replace, 0, first.asLong());
+        }
+        return replace(str, pattern, replace, first.asLong(), last.asLong());
+    }
+
+    private CharSequence replace(String str, String pattern, String replace, long first, long last)
+    {
+        if (first > last)
+        {
+            return str;
+        }
+
+        if (last == 0)
+        {
+            last = Long.MAX_VALUE;
+        }
+
+        if (first <= 1 && last > str.length())
+        {
+            return str.replace(pattern, replace);
+        }
+
+        int patternLength = pattern.length();
+
+        StringBuilder builder = new StringBuilder();
+        int count = 0;
+        int pos = 0;
+        while (count < last)
+        {
+            int index = str.indexOf(pattern, pos);
+            if (index == -1)
+            {
+                break;
+            }
+            count++;
+            builder.append(str.subSequence(pos, index));
+            if (count < first)
+            {
+                builder.append(pattern);
+            }
+            else
+            {
+                builder.append(replace);
+            }
+            pos = index + patternLength;
+        }
+        builder.append(str.substring(pos));
+
+        return builder;
+    }
 }

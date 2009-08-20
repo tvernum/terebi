@@ -36,7 +36,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class RemoveFileEfun extends AbstractEfun implements FunctionSignature, Callable
 {
     // int rm( string file );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("file", Types.STRING));
     }

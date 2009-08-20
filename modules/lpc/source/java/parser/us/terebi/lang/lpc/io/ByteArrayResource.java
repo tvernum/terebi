@@ -19,7 +19,9 @@
 package us.terebi.lang.lpc.io;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import org.apache.commons.io.FilenameUtils;
 
@@ -44,25 +46,24 @@ public class ByteArrayResource implements Resource
 
     public String getName()
     {
-        return _name;
+        return FilenameUtils.getName(_name);
     }
 
     public Resource getParent()
     {
-        String parent = FilenameUtils.getPath(_name);
-        return new NoSuchResource(parent);
+        return new NoSuchResource(getParentName());
     }
 
-    public String getPath()
-    {
-        return _name;
-    }
-
-    public InputStream open()
+    public InputStream openInput()
     {
         return new ByteArrayInputStream(_bytes);
     }
 
+    public OutputStream openOutput() throws IOException
+    {
+        throw new IOException(getClass().getSimpleName() + " is read-only");
+    }
+    
     public boolean exists()
     {
         return true;
@@ -76,5 +77,20 @@ public class ByteArrayResource implements Resource
     public String toString()
     {
         return getClass().getSimpleName() + "(" + _name + ", size=" + _bytes.length + ")";
+    }
+
+    public String getParentName()
+    {
+        return FilenameUtils.getPath(_name);
+    }
+
+    public String getPath()
+    {
+        return _name;
+    }
+
+    public long getSize()
+    {
+        return _bytes.length;
     }
 }

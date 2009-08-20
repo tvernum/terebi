@@ -35,7 +35,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class CopyFileEfun extends AbstractEfun implements FunctionSignature, Callable
 {
     // int cp(string src, string dst);
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("src", Types.STRING));

@@ -33,9 +33,11 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.LpcType.Kind;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
-import us.terebi.lang.lpc.runtime.jvm.context.Functions;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
@@ -48,6 +50,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.util.BoundMethod;
 import us.terebi.lang.lpc.runtime.util.DynamicClassDefinition;
 
 /**
@@ -67,12 +70,12 @@ public class LpcObject
     {
         return _definition;
     }
-    
+
     public void setInstance(CompiledObjectInstance instance)
     {
         _instance = instance;
     }
-    
+
     public CompiledObjectInstance getObjectInstance()
     {
         return _instance;
@@ -100,8 +103,16 @@ public class LpcObject
 
     protected Callable efun(String name)
     {
-        Functions functions = RuntimeContext.get().functions();
-        return functions.efun(name);
+        SystemContext context = RuntimeContext.obtain().system();
+        Efuns functions = context.efuns();
+        return functions.getImplementation(name);
+    }
+
+    protected Callable simul_efun(String name)
+    {
+        SystemContext context = RuntimeContext.obtain().system();
+        ObjectInstance sefun = context.objectManager().getSimulatedEfunObject();
+        return new BoundMethod(name, sefun);
     }
 
     protected static LpcType withType(Kind kind, int depth)
@@ -158,7 +169,7 @@ public class LpcObject
         }
 
         LpcType[] typeArray = types.toArray(new LpcType[types.size()]);
-        return new ArrayValue(MiscSupport.commonType(typeArray), list);
+        return new ArrayValue(Types.arrayOf(MiscSupport.commonType(typeArray)), list);
     }
 
     public NilValue nil()

@@ -1,5 +1,4 @@
 /* ------------------------------------------------------------------------
- * $Id$
  * Copyright 2009 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,47 +17,99 @@
 
 package us.terebi.lang.lpc.runtime.jvm.context;
 
+import org.apache.log4j.Logger;
+
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+
 /**
  * 
  */
 public class RuntimeContext
 {
-    private static final ThreadLocal<RuntimeContext> CONTEXT = new ThreadLocal<RuntimeContext>();
+    private static final Logger LOG = Logger.getLogger(RuntimeContext.class);
 
-    public static RuntimeContext get()
+    private static final ThreadLocal<ThreadContext> CONTEXT = new ThreadLocal<ThreadContext>();
+
+    public static ThreadContext activate(SystemContext context)
     {
-        return CONTEXT.get();
+        LOG.debug("Activating: " + context);
+        ThreadContext tc = new ThreadContext(context);
+        activate(tc);
+        return tc;
     }
 
-    public static void set(RuntimeContext context)
+    private static void activate(ThreadContext context)
     {
+        ThreadContext existing = CONTEXT.get();
+        if (context == existing)
+        {
+            return;
+        }
+        if (existing != null)
+        {
+            CallStack callStack = existing.callStack();
+            if (callStack.size() > 0)
+            {
+                LOG.warn("Replacing existing context with non-empty call stack " + callStack);
+            }
+        }
         CONTEXT.set(context);
+        context.begin();
     }
 
-    private final Functions _functions;
-    private final ObjectManager _objectManager;
-    private  final CallStack _callStack;
-
-    public RuntimeContext(Functions functions, ObjectManager objectManager)
+    public static void clear()
     {
-        _functions = functions;
-        _objectManager = objectManager;
-        _callStack = new CallStack();
+        CONTEXT.set(null);
     }
 
-    public Functions functions()
+    public static Object lock()
     {
-        return _functions;
+        return get(true).system().lock();
     }
 
-    public ObjectManager objectManager()
+    public static ThreadContext obtain()
     {
-        return _objectManager;
+        ThreadContext context = get(true);
+        checkOwner(context.system().lock());
+        return context;
     }
 
-    public CallStack callStack()
+    public static ThreadContext peek()
     {
-        return _callStack;
+        return get(false);
+    }
+
+    private static void checkOwner(Object token)
+    {
+        try
+        {
+            // We send a notify to the token, which checks that the current thread owns the monitor for that token
+            // We don't care if anyone is waiting on the monitor (in fact, we're assuming that no one is), it's just that this is the only
+            // way to ensure that the synchronization has been done correctly.
+            token.notify();
+        }
+        catch (IllegalMonitorStateException e)
+        {
+            throw new LpcRuntimeException("Attempt to obtain current "
+                    + SystemContext.class.getSimpleName()
+                    + " without synchronizing on "
+                    + RuntimeContext.class.getSimpleName()
+                    + ".lock()");
+        }
+    }
+
+    public static ThreadContext get(boolean required)
+    {
+        ThreadContext context = CONTEXT.get();
+        if (context == null)
+        {
+            if (required)
+            {
+                throw new IllegalStateException("No active context on thread " + Thread.currentThread().getName());
+            }
+            return null;
+        }
+        return context;
     }
 
 }

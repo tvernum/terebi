@@ -32,7 +32,6 @@ public class Output implements ObjectOutput
     private final String _class;
     private final File _file;
 
-    
     public Output(String pkg, String cls, File file)
     {
         _package = pkg;
@@ -60,4 +59,8 @@ public class Output implements ObjectOutput
         return _file;
     }
 
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{P=" + _package + ",C=" + _class + ",F=" + _file + "}";
+    }
 }

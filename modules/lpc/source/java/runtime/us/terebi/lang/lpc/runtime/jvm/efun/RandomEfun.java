@@ -43,7 +43,7 @@ public class RandomEfun extends AbstractEfun
         _random = new Random();
     }
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("n", Types.INT));
     }

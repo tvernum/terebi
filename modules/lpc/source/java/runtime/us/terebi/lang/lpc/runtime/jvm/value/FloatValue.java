@@ -59,6 +59,11 @@ public class FloatValue extends AbstractValue implements LpcValue
         return (long) _value;
     }
 
+    public String asString()
+    {
+        return String.valueOf(_value);
+    }
+
     protected boolean valueEquals(LpcValue other)
     {
         return this.asDouble() == other.asDouble();

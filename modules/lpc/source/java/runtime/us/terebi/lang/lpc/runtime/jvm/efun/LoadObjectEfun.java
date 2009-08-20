@@ -18,7 +18,6 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun;
 
-
 import java.util.Collections;
 import java.util.List;
 
@@ -27,8 +26,12 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -36,20 +39,25 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class LoadObjectEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("file", Types.STRING));
     }
 
-    public LpcType getReturnType()
+    public LpcType getReturnType()  
     {
         return Types.OBJECT;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return VoidValue.INSTANCE;
+        checkArguments(arguments);
+        String file = arguments.get(0).asString();
+        ObjectManager manager = RuntimeContext.obtain().system().objectManager();
+        ObjectDefinition definition = manager.findObject(file);
+        // @TODO - Return nil is "file" does not exist
+        ObjectInstance instance = definition.getMasterInstance();
+        return new ObjectValue(instance);
     }
 
 }

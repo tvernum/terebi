@@ -41,7 +41,7 @@ public class InventoryEfun extends AbstractEfun
         _deep = deep;
     }
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("ob", Types.OBJECT));
     }

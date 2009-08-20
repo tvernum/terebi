@@ -44,4 +44,9 @@ public class Source implements ObjectSource
         return _tree;
     }
 
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + _filename + " : " + _tree + "}";
+    }
+
 }

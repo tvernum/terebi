@@ -34,6 +34,10 @@ public class BasicScopeLookup implements ScopeLookup
 
     public BasicScopeLookup(CompilerObjectManager manager)
     {
+        if (manager == null)
+        {
+            throw new IllegalArgumentException("No " + CompilerObjectManager.class.getSimpleName() + " supplied to " + getClass().getName());
+        }
         _manager = manager;
         _functions = new FunctionLookup();
         _variables = new VariableLookup();

@@ -49,6 +49,7 @@ import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.ParserConstants;
 import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.util.Pair;
@@ -533,7 +534,24 @@ public class StatementWriter extends BaseASTVisitor implements ParserVisitor
         expr = (SimpleNode) child;
         stmt = node.jjtGetChild(++index);
 
-        assert (index == node.jjtGetNumChildren());
+        if (index != node.jjtGetNumChildren() - 1)
+        {
+            StringBuilder text = new StringBuilder();
+            text.append("Index = " + index + " ; Node (" + node.getClass().getSimpleName() + ") has " + node.jjtGetNumChildren());
+            text.append("\nTN1: " + typeNode1 + " - " + ASTUtil.describe(typeNode1));
+            text.append("\nIN1: " + identNode1 + " - " + ASTUtil.describe(identNode1));
+            text.append("\nTN2: " + typeNode2 + " - " + ASTUtil.describe(typeNode2));
+            text.append("\nIN2: " + identNode2 + " - " + ASTUtil.describe(identNode2));
+            text.append("\nEXP: " + expr + " - " + ASTUtil.describe(expr));
+            text.append("\nSTM: " + stmt);
+            text.append("\nChildren = ");
+            for (SimpleNode c : ASTUtil.children(node))
+            {
+                text.append(c);
+                text.append(" ");
+            }
+            throw new InternalError(text.toString());
+        }
 
         PrintWriter writer = _context.writer();
         InternalVariable collection = evaluateExpression(expr);

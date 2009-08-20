@@ -36,7 +36,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class CreateDirectoryEfun extends AbstractEfun implements FunctionSignature, Callable
 {
     // int mkdir( string directory );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("directory", Types.STRING));
     }

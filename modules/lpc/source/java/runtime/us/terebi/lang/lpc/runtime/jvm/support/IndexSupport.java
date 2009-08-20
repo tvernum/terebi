@@ -61,10 +61,27 @@ public class IndexSupport
         throw new UnsupportedOperationException("index (" + value.getActualType() + ") - Not implemented");
     }
 
-    public static LpcValue index(LpcValue element, LpcValue index, boolean reverse)
+    public static LpcValue index(LpcValue element, LpcValue indexValue, boolean reverse)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        if (isString(element))
+        {
+            Index index = new Index(indexValue, reverse);
+            return StringChar.get(element, index);
+        }
+        if (MiscSupport.isArray(element))
+        {
+            Index index = new Index(indexValue, reverse);
+            return ArrayElement.get(element, index);
+        }
+        if (MiscSupport.isMapping(element))
+        {
+            if (reverse)
+            {
+                throw new LpcRuntimeException("Error - Cannot apply a reverse index to a mapping");
+            }
+            return MappingElement.get(element, indexValue);
+        }
+        throw new UnsupportedOperationException("index (" + element.getActualType() + ") - Not implemented");
     }
 
     public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endIndex,

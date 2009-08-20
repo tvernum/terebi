@@ -69,6 +69,10 @@ public class SubArray implements LpcReference
 
     private int getIndex(List< ? extends LpcValue> list, Index idx)
     {
+        if (idx.index == -1)
+        {
+            return list.size() - 1;
+        }
         long index = idx.index;
         if (idx.reverse)
         {

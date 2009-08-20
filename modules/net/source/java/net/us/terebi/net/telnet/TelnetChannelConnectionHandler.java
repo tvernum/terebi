@@ -1,0 +1,221 @@
+/* ------------------------------------------------------------------------
+ * Copyright 2009 Tim Vernum
+ * ------------------------------------------------------------------------
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * ------------------------------------------------------------------------
+ */
+
+package us.terebi.net.telnet;
+
+import java.io.IOException;
+import java.nio.channels.ClosedChannelException;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+
+import org.apache.log4j.Logger;
+
+import us.terebi.net.core.NetException;
+import us.terebi.net.core.Shell;
+import us.terebi.net.core.impl.AbstractComponent;
+import us.terebi.net.core.impl.NoChildren;
+import us.terebi.net.server.impl.ChannelConnectionHandler;
+import us.terebi.net.server.impl.ChannelListener;
+import us.terebi.net.thread.LoggingExecutor;
+import us.terebi.net.thread.SimpleThreadFactory;
+
+/**
+ * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
+ */
+public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren> implements ChannelConnectionHandler
+{
+    final Logger LOG = Logger.getLogger(TelnetChannelConnectionHandler.class);
+
+    private final Selector _selector;
+
+    private ThreadFactory _threadFactory;
+    private Executor _executor;
+    private int _maxErrors;
+    private Shell _shell;
+
+    public TelnetChannelConnectionHandler() throws IOException
+    {
+        _selector = Selector.open();
+        _threadFactory = null;
+        _executor = null;
+        _maxErrors = 0;
+    }
+
+    public void setThreadFactory(ThreadFactory threadFactory)
+    {
+        _threadFactory = threadFactory;
+    }
+
+    public void setExecutor(Executor executor)
+    {
+        _executor = executor;
+    }
+
+    public void setMaxErrors(int maxErrors)
+    {
+        _maxErrors = maxErrors;
+    }
+
+    public void setShell(Shell shell)
+    {
+        _shell = shell;
+    }
+
+    @Override
+    protected void preBegin()
+    {
+        if (_executor == null)
+        {
+            if (_threadFactory == null)
+            {
+                _executor = Executors.newFixedThreadPool(10);
+            }
+            else
+            {
+                _executor = Executors.newFixedThreadPool(10, _threadFactory);
+            }
+            _executor = new LoggingExecutor(_executor);
+        }
+        if (_threadFactory == null)
+        {
+            SimpleThreadFactory simpleThreadFactory = new SimpleThreadFactory();
+            simpleThreadFactory.setDaemon(true);
+            simpleThreadFactory.setPrefix(getClass().getSimpleName() + "[" + System.identityHashCode(this) + "]");
+            setThreadFactory(simpleThreadFactory);
+        }
+        if (_maxErrors == 0)
+        {
+            setMaxErrors(75);
+        }
+    }
+
+    @Override
+    protected void postBegin()
+    {
+        Runnable runnable = new Runnable()
+        {
+            public void run()
+            {
+                try
+                {
+                    select();
+                }
+                catch (InterruptedException e)
+                {
+                    LOG.fatal("Select thread interrupted", e);
+                }
+            }
+        };
+        _threadFactory.newThread(runnable).start();
+    }
+
+    protected void select() throws InterruptedException
+    {
+        int errors = 0;
+        for (;;)
+        {
+            try
+            {
+                LOG.debug("Selecting " + _selector.keys());
+                _selector.select(12500);
+                readConnections(_selector.selectedKeys());
+            }
+            catch (IOException e)
+            {
+                LOG.error("Failed to select readable sockets", e);
+                errors++;
+                if (errors >= _maxErrors)
+                {
+                    LOG.fatal("Select errors have reached " + errors + " - terminating handler " + this);
+                    return;
+                }
+                Thread.sleep(25);
+            }
+        }
+    }
+
+    private void readConnections(Set<SelectionKey> keys)
+    {
+        LOG.debug("Processing keys " + keys);
+        Iterator<SelectionKey> iterator = keys.iterator();
+        while (iterator.hasNext())
+        {
+            final SelectionKey key = iterator.next();
+            // Not interested in read signals on this key until we've finished reading the connection
+            key.interestOps(0);
+            iterator.remove();
+
+            Object attachment = key.attachment();
+            assert attachment instanceof TelnetChannelConnection;
+            final TelnetChannelConnection connection = (TelnetChannelConnection) attachment;
+            Runnable runnable = new Runnable()
+            {
+                public void run()
+                {
+                    key.interestOps(SelectionKey.OP_READ);
+                    readConnection(connection);
+                }
+            };
+            _executor.execute(runnable);
+        }
+    }
+
+    void readConnection(TelnetChannelConnection connection)
+    {
+        LOG.debug("Processing " + connection);
+        try
+        {
+            connection.readInput();
+        }
+        catch (NetException e)
+        {
+            LOG.info("Net exception from connection " + connection, e);
+        }
+    }
+
+    public void newConnection(SocketChannel socket, ChannelListener listener) throws NetException
+    {
+        TelnetChannelConnection connection = new TelnetChannelConnection(socket, listener);
+        if (_shell != null)
+        {
+            connection.bind(_shell);
+        }
+        LOG.info("New connection: " + connection);
+        try
+        {
+            _shell.connectionCreated(connection);
+            socket.configureBlocking(false);
+            SelectionKey key = socket.register(_selector, SelectionKey.OP_READ, connection);
+            connection.setSelectionKey(key);
+            _selector.wakeup();
+        }
+        catch (ClosedChannelException e)
+        {
+            throw new NetException("Socket was closed before it could be registered", e);
+        }
+        catch (IOException e)
+        {
+            throw new NetException("Unexpected I/O Exception on " + socket, e);
+        }
+    }
+}

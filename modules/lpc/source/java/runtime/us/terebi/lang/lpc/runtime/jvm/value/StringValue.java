@@ -99,13 +99,21 @@ public class StringValue extends AbstractValue implements LpcValue
 
     public CharSequence debugInfo()
     {
+        return encodeString(_value);
+    }
+
+    public static CharSequence encodeString(String value)
+    {
         StringBuilder builder = new StringBuilder();
         builder.append('"');
-        for (int i = 0; i < _value.length(); i++)
+        for (int i = 0; i < value.length(); i++)
         {
-            char ch = _value.charAt(i);
+            char ch = value.charAt(i);
             switch (ch)
             {
+                case '\r':
+                    builder.append("\\r");
+                    break;
                 case '\n':
                     builder.append("\\n");
                     break;
@@ -118,11 +126,29 @@ public class StringValue extends AbstractValue implements LpcValue
                 case '\"':
                     builder.append("\\\"");
                     break;
+                case '\b':
+                    builder.append("\\b");
+                    break;
+                case 7:
+                    builder.append("\\a");
+                    break;
+                case 27:
+                    builder.append("\\e");
+                    break;
                 default:
-                    builder.append(ch);
+                    if (ch < 32 || ch > 126)
+                    {
+                        builder.append("\\");
+                        builder.append(Integer.toOctalString(ch));
+                    }
+                    else
+                    {
+                        builder.append(ch);
+                    }
                     break;
             }
         }
+        builder.append('"');
         return builder;
     }
 

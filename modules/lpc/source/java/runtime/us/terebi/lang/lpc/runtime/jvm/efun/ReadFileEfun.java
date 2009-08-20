@@ -35,7 +35,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class ReadFileEfun extends AbstractEfun implements FunctionSignature, Callable
 {
     //    string read_file( string file, int start_line, int number_of_lines );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("file", Types.STRING));

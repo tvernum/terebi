@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,6 +27,6 @@ public interface UserTypeDefinition
 {
     public String getName();
     public Map<String, ? extends FieldDefinition> getFields();
-    public UserTypeInstance newInstance();
+    public UserTypeInstance newInstance(List<? extends LpcValue> arguments);
 
 }

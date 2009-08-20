@@ -32,7 +32,6 @@ import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
  */
 public class CallOtherComparator implements Comparator<LpcValue>
 {
-
     private final ObjectInstance _object;
     private final String _func;
     private final List<LpcValue> _args;

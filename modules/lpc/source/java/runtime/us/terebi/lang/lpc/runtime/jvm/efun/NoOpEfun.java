@@ -41,9 +41,9 @@ public class NoOpEfun extends AbstractEfun implements FunctionSignature
         _value = value;
     }
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
+        return Collections.singletonList(new ArgumentSpec("args", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
     }
 
     public LpcType getReturnType()

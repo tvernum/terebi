@@ -39,7 +39,8 @@ public abstract class AbstractTypecheckEfun extends AbstractEfun
         _type = type;
     }
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    @Override
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("arg", Types.MIXED));
     }

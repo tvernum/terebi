@@ -37,7 +37,7 @@ public class PresentEfun extends AbstractEfun implements FunctionSignature, Call
 {
     //  object present( mixed str);
     //  object present( mixed str, object ob );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("id", Types.MIXED));

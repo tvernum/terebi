@@ -27,6 +27,7 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -34,7 +35,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class WriteEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("message", Types.MIXED));
     }
@@ -46,8 +47,15 @@ public class WriteEfun extends AbstractEfun implements FunctionSignature, Callab
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments);
+        String message = arguments.get(0).asString();
+        write(message);
+        return NilValue.INSTANCE;
+    }
+
+    protected void write(String message)
+    {
+        System.out.println(message);
     }
 
 }

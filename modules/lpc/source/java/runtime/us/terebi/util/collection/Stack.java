@@ -34,4 +34,5 @@ public interface Stack<E> extends Collection<E>
     public E peek();
 
     public E peek(int offset);
+    public E top();
 }

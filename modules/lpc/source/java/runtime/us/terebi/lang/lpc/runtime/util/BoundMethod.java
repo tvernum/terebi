@@ -26,6 +26,7 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 
 /**
  * 
@@ -39,6 +40,21 @@ public class BoundMethod implements Callable
     {
         _method = method;
         _instance = instance;
+    }
+
+    public BoundMethod(String name, ObjectInstance instance)
+    {
+        this(findMethod(name, instance), instance);
+    }
+
+    private static MethodDefinition findMethod(String name, ObjectInstance instance)
+    {
+        MethodDefinition method = instance.getDefinition().getMethods().get(name);
+        if (method == null)
+        {
+            throw new LpcRuntimeException("No such method " + name + " in " + instance);
+        }
+        return method;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
@@ -55,7 +71,7 @@ public class BoundMethod implements Callable
     {
         return Kind.METHOD;
     }
-    
+
     public ObjectInstance getOwner()
     {
         return _instance;
@@ -64,6 +80,11 @@ public class BoundMethod implements Callable
     public FunctionSignature getSignature()
     {
         return _method.getSignature();
+    }
+
+    public String toString()
+    {
+        return _instance.getCanonicalName() + "->" + _method.toString();
     }
 
 }

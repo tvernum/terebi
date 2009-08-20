@@ -22,7 +22,11 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
@@ -31,6 +35,7 @@ import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
+import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.InheritedObject;
@@ -41,12 +46,17 @@ import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.util.Apply;
 
 /**
  * 
  */
 public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDefinition
 {
+    private final Logger LOG = Logger.getLogger(CompiledDefinition.class);
+
+    private static final Apply CREATE = new Apply("create");
+
     private final ScopeLookup _lookup;
     private final Class< ? extends T> _implementation;
     private final Map<String, CompiledObjectDefinition> _inherited;
@@ -62,10 +72,10 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         _lookup = lookup;
         _name = name;
         _implementation = implementation;
-        _inherited = new HashMap<String, CompiledObjectDefinition>();
-        _fields = new HashMap<String, CompiledField>();
-        _classes = new HashMap<String, ClassDefinition>();
-        _methods = new HashMap<String, CompiledMethod>();
+        _inherited = new LinkedHashMap<String, CompiledObjectDefinition>();
+        _fields = new LinkedHashMap<String, CompiledField>();
+        _classes = new LinkedHashMap<String, ClassDefinition>();
+        _methods = new LinkedHashMap<String, CompiledMethod>();
         introspect(manager);
     }
 
@@ -151,7 +161,7 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
 
     public CompiledObjectInstance getInheritableInstance()
     {
-        return newInstance(0, false);
+        return newInstance(0, true, Collections.<LpcValue> emptyList());
     }
 
     public Map<String, ? extends ObjectDefinition> getInheritedObjects()
@@ -163,13 +173,18 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
     {
         if (_master == null)
         {
-            _master = newInstance(0, true);
+            _master = newInstance(0, false, Collections.<LpcValue> emptyList());
         }
         return _master;
     }
 
-    private CompiledObject<T> newInstance(long id, boolean register)
+    private CompiledObject<T> newInstance(long id, boolean forInherit, List< ? extends LpcValue> createArguments)
     {
+        if (id != 0 && _master == null)
+        {
+            getMasterInstance();
+        }
+
         T object = createObject();
 
         Map<String, ObjectInstance> parents = new HashMap<String, ObjectInstance>();
@@ -187,9 +202,10 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         CompiledObject<T> instance = new CompiledObject<T>(this, id, object, parents);
         object.setDefinition(this);
         object.setInstance(instance);
-        if (register)
+        if (!forInherit)
         {
             objectManager().registerObject(instance);
+            CREATE.invoke(instance, createArguments);
         }
         return instance;
     }
@@ -236,14 +252,23 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         return Collections.unmodifiableMap(_methods);
     }
 
-    public CompiledObject<T> newInstance()
+    public CompiledObject<T> newInstance(List< ? extends LpcValue> arguments)
     {
-        return newInstance(objectManager().allocateObjectIdentifier(), true);
+        return newInstance(objectManager().allocateObjectIdentifier(), false, arguments);
     }
 
     private CompilerObjectManager objectManager()
     {
-        return _lookup.objectManager();
+        CompilerObjectManager objectManager = _lookup.objectManager();
+        if (objectManager == null)
+        {
+            LOG.error("No object manager in " + this + " (" + getClass() + ")");
+            LOG.info("Name is " + _name);
+            LOG.info("Implementation is " + _implementation);
+            LOG.info("Lookup is " + _lookup + " (" + _lookup.getClass() + ")");
+            throw new IllegalStateException("No object manager in " + this);
+        }
+        return objectManager;
     }
 
     public Map<String, ? extends FieldDefinition> getFields()
@@ -260,5 +285,4 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
     {
         return getClass().getSimpleName() + "{" + _name + ":" + _implementation + "}";
     }
-
 }

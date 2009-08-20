@@ -126,6 +126,10 @@ public class ASTUtil
 
     public static String describe(SimpleNode node)
     {
+        if (node == null)
+        {
+            return "(Null Node)";
+        }
         List<Token> tokens = getTokens(node);
         if (tokens.isEmpty())
         {

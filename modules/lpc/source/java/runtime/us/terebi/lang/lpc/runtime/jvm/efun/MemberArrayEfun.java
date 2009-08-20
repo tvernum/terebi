@@ -28,12 +28,14 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
-import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
+import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
 
 /**
  * 
@@ -43,7 +45,7 @@ public class MemberArrayEfun extends AbstractEfun implements FunctionSignature, 
     //    int member_array(mixed item, mixed arr);
     //    int member_array(mixed item, mixed arr, int start);
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("item", Types.MIXED));
@@ -75,16 +77,16 @@ public class MemberArrayEfun extends AbstractEfun implements FunctionSignature, 
             throw new NullPointerException("Internal Error - Cannot search for null member");
         }
 
-        if (MiscSupport.isString(array))
+        if (isString(array))
         {
             if (isInt(item))
             {
                 return ValueSupport.intValue(searchString(array.asString(), item.asLong(), start));
             }
         }
-        else if (MiscSupport.isArray(array))
+        else if (isArray(array))
         {
-            return ValueSupport.intValue(searchList(array.asList(), item, start));
+            return intValue(searchList(array.asList(), item, start));
         }
         return LpcConstants.INT.MINUS_ONE;
     }

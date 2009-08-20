@@ -39,7 +39,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class PreviousObjectEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("arguments", Types.INT));
     }
@@ -63,7 +63,7 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
             index = arguments.get(0).asLong();
         }
 
-        CallStack callStack = RuntimeContext.get().callStack();
+        CallStack callStack = RuntimeContext.obtain().callStack();
 
         if (index == -1)
         {

@@ -26,10 +26,14 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isFunction;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNil;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 
 /**
@@ -37,7 +41,7 @@ import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
  */
 public class ImplodeEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         // @TODO, this really has 3 signatures, rather than being "MIXED" and "VARARGS"
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
@@ -59,22 +63,47 @@ public class ImplodeEfun extends AbstractEfun implements FunctionSignature, Call
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
+        checkArguments(arguments, 2);
+        List<LpcValue> list = arguments.get(0).asList();
         LpcValue delim = arguments.get(1);
-        if (arguments.size() >= 2 && isString(delim))
+        LpcValue start = null;
+        if (arguments.size() > 2)
         {
-            return new StringValue(implodeStrings(arguments.get(0).asList(), arguments.get(1).asString()));
+            start = arguments.get(2);
         }
-        throw new UnsupportedOperationException("implode function - Not implemented");
+        return implode(list, delim, start);
+    }
+
+    private LpcValue implode(List<LpcValue> list, LpcValue delim, LpcValue start)
+    {
+        if (isString(delim))
+        {
+            if (!isNil(start))
+            {
+                throw new LpcRuntimeException("implode(array,string) does not take a 3rd argument (" + start.debugInfo() + ")");
+            }
+            return new StringValue(implodeStrings(list, delim.asString()));
+        }
+        if (isFunction(delim))
+        {
+            return reduce(list, delim.asCallable(), start);
+        }
+        return badArgumentType(2, delim.getActualType(), Types.STRING, Types.FUNCTION);
     }
 
     public static CharSequence implodeStrings(List<LpcValue> array, String delim)
     {
         StringBuilder result = new StringBuilder();
+        boolean first = true;
         for (LpcValue element : array)
         {
             if (isString(element))
             {
-                if (result.length() > 0)
+                if (first)
+                {
+                    first = false;
+                }
+                else
                 {
                     result.append(delim);
                 }
@@ -82,6 +111,27 @@ public class ImplodeEfun extends AbstractEfun implements FunctionSignature, Call
             }
         }
         return result;
+    }
+
+    private LpcValue reduce(List<LpcValue> list, Callable function, LpcValue current)
+    {
+        if (list.isEmpty())
+        {
+            return NilValue.INSTANCE;
+        }
+        for (LpcValue value : list)
+        {
+            if(isNil(current))
+            {
+                current = value;
+            }
+            else
+            {
+                current = function.execute(current, value);
+            }
+
+        }
+        return current;
     }
 
 }

@@ -18,16 +18,24 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
+import us.terebi.lang.lpc.io.Resource;
+import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -35,7 +43,9 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class FileSizeEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    private final Logger LOG = Logger.getLogger(FileSizeEfun.class);
+
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("file", Types.STRING));
     }
@@ -48,8 +58,36 @@ public class FileSizeEfun extends AbstractEfun implements FunctionSignature, Cal
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
-        return VoidValue.INSTANCE;
+        String name = arguments.get(0).asString();
+        try
+        {
+            long fs = file_size(name);
+            return ValueSupport.intValue(fs);
+        }
+        catch (IOException e)
+        {
+            LOG.info("Cannot get size of file " + name + " : " + e.toString());
+            return LpcConstants.INT.MINUS_ONE;
+        }
+    }
+
+    public long file_size(String name) throws IOException
+    {
+        SystemContext system = RuntimeContext.obtain().system();
+        ResourceFinder resourceFinder = system.resourceFinder();
+        Resource resource = resourceFinder.getResource(name);
+        if (!resource.exists())
+        {
+            return -1;
+        }
+        else if (!resource.isFile())
+        {
+            return -2;
+        }
+        else
+        {
+            return resource.getSize();
+        }
     }
 
 }

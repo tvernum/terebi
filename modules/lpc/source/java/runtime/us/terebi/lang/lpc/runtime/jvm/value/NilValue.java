@@ -66,6 +66,11 @@ public class NilValue extends AbstractValue implements LpcValue
         return 0;
     }
 
+    public String asString()
+    {
+        return "";
+    }
+    
     protected boolean valueEquals(LpcValue other)
     {
         return true;

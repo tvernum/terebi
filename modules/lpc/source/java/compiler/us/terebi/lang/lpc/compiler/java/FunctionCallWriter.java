@@ -144,6 +144,8 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
     public InternalVariable writeFunction(FunctionReference function, FunctionArgument[] argVars)
     {
         FunctionSignature signature = function.signature;
+        List< ? extends ArgumentDefinition> signatureArguments = signature.getArguments();
+
         InternalVariable var = new InternalVariable(_context, false, signature.getReturnType());
         var.declare(_context.writer());
         _context.writer().print(" = ");
@@ -156,6 +158,16 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
             {
                 expand = true;
                 break;
+            }
+        }
+
+        int varargs = -1;
+        if (!signatureArguments.isEmpty())
+        {
+            ArgumentDefinition lastFormalArgument = signatureArguments.get(signatureArguments.size() - 1);
+            if (argVars.length >= signatureArguments.size() && lastFormalArgument.isVarArgs())
+            {
+                varargs = signatureArguments.size() - 1;
             }
         }
 
@@ -189,15 +201,15 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
             }
         }
 
-        printArguments(argVars, expand);
+        printArguments(argVars, expand, varargs);
 
-        for (int i = argVars.length; i < signature.getArguments().size(); i++)
+        for (int i = argVars.length; i < signatureArguments.size(); i++)
         {
             if (i > 0)
             {
                 writer.print(" , ");
             }
-            if (signature.getArguments().get(i).isVarArgs())
+            if (signatureArguments.get(i).isVarArgs())
             {
                 writer.print("makeArray()");
             }
@@ -207,23 +219,18 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
             }
         }
 
-        
         writer.println(");");
         return var;
     }
 
-    public void printArguments(FunctionArgument[] argVars, boolean expand)
+    public void printArguments(FunctionArgument[] argVars, boolean expand, int varargs)
     {
         PrintWriter writer = _context.writer();
 
-        boolean first = true;
-        for (FunctionArgument argVar : argVars)
+        for (int i = 0; i < argVars.length; i++)
         {
-            if (first)
-            {
-                first = false;
-            }
-            else
+            FunctionArgument argVar = argVars[i];
+            if (i > 0)
             {
                 writer.print(" , ");
             }
@@ -254,8 +261,16 @@ public class FunctionCallWriter extends BaseASTVisitor implements ParserVisitor
             }
             else
             {
+                if (i == varargs)
+                {
+                    writer.print("makeArray(");
+                }
                 argVar.variable.value(writer);
             }
+        }
+        if (varargs > -1)
+        {
+            writer.print(")");
         }
     }
 

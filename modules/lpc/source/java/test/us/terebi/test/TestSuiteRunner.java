@@ -34,10 +34,12 @@ import org.junit.runner.notification.RunNotifier;
  */
 public class TestSuiteRunner extends Runner
 {
+    private long _init;
     private final CompositeRunner _runner;
 
     public TestSuiteRunner(Class< ? > cls) throws InitializationError
     {
+        _init = System.currentTimeMillis();
         _runner = new CompositeRunner(cls.getName());
 
         Method[] methods = cls.getMethods();
@@ -127,7 +129,24 @@ public class TestSuiteRunner extends Runner
 
     public void run(RunNotifier notifier)
     {
-        _runner.run(notifier);
+        long start = System.currentTimeMillis();
+        try
+        {
+            _runner.run(notifier);
+        }
+        finally
+        {
+            long end = System.currentTimeMillis();
+            System.out.println("Execution time ("
+                    + _runner.getDescription().getDisplayName()
+                    + ") - Setup: "
+                    + (start - _init)
+                    + "ms ; Tests: "
+                    + (end - start)
+                    + "ms ; Total: "
+                    + (end - _init)
+                    + "ms");
+        }
     }
 
 }

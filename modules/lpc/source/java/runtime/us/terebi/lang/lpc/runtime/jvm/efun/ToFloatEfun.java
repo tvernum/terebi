@@ -33,7 +33,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class ToFloatEfun extends AbstractEfun
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("i", Types.INT));
     }

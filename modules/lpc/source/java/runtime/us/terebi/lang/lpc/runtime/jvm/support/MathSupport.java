@@ -19,7 +19,9 @@
 package us.terebi.lang.lpc.runtime.jvm.support;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -29,10 +31,12 @@ import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMapping;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNumber;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
@@ -99,10 +103,22 @@ public class MathSupport
         {
             return addDouble(left.asDouble(), right.asDouble());
         }
+        if (isMapping(left) && isMapping(right))
+        {
+            return addMapping(left.asMap(), right.asMap());
+        }
         throw new UnsupportedOperationException("add - Not implemented for "
                 + left.getActualType()
                 + " + "
                 + right.getActualType());
+    }
+
+    private static LpcValue addMapping(Map<LpcValue, LpcValue> left, Map<LpcValue, LpcValue> right)
+    {
+        Map<LpcValue, LpcValue> sum = new HashMap<LpcValue, LpcValue>(left.size() + right.size());
+        sum.putAll(left);
+        sum.putAll(right);
+        return new MappingValue(sum);
     }
 
     private static LpcValue addDouble(double left, double right)

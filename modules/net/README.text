@@ -1,0 +1,8 @@
+This is the network (telnet) component of Terebi.
+
+- The design is inspired by the Jetty project, however all code is original.
+- Some terminology was taken from the telnetd project from sourceforge
+
+- Depedencies are managed with Ivy (http://ant.apache.org/ivy)
+  The build file will automatically install ivy into ${HOME}/.ant/ if you don't already have it
+

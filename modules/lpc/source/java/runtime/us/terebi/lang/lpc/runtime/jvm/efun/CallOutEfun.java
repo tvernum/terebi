@@ -36,12 +36,12 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class CallOutEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("function", Types.MIXED));
         list.add(new ArgumentSpec("delay", Types.INT));
-        list.add(new ArgumentSpec("arguments", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
+        list.add(new ArgumentSpec("arguments", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 

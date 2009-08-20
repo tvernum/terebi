@@ -42,7 +42,7 @@ public abstract class AbstractType implements LpcType
 
     public boolean isClass()
     {
-        return getKind() == Kind.CLASS;
+        return getKind() == Kind.CLASS && getArrayDepth() == 0;
     }
 
     public boolean equals(Object obj)

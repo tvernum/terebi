@@ -5,10 +5,12 @@
   <property name="output"         location="output/ant"         />
   <property name="output.java"    location="output/ant/java"    />
   <property name="output.classes" location="output/ant/classes" />
+  <property name="output.junit"   location="output/ant/junit"   />
 
   <property name="java.parser.package" value="us/terebi/lang/lpc/parser" />
 
-  <target name="all" description="Builds LPC parser" depends="libs,grammar, compile" />
+  <target name="all"   description="Builds LPC parser/compiler + runs tests" depends="build, test" />
+  <target name="build" description="Builds LPC parser/compiler" depends="libs, grammar, compile " />
 
   <target name="grammar" depends="jjtree,javacc" />
 
@@ -58,6 +60,25 @@
             <fileset dir="lib" />
         </classpath>
     </javac>
+  </target>
+
+  <target name="test">
+    <mkdir dir="${output.junit}" />
+    <junit fork="yes" forkmode="once"  dir="${basedir}" >
+      <classpath>
+        <fileset dir="lib" />
+        <pathelement location="${output.classes}" />
+        <pathelement location="source/resource/test" />
+        <pathelement location="source/resource/server" />
+      </classpath>
+      <batchtest todir="${output.junit}">
+        <fileset dir="source/java/test">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+      <formatter type="xml" />
+      <formatter type="plain" />
+    </junit>
   </target>
 
   <target name="clean">

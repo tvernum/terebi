@@ -10,6 +10,10 @@
 		<layout class="org.apache.log4j.TTCCLayout" />
 	</appender>
 
+    <logger name="us.terebi.lang.lpc" additivity="true">
+        <level value="DEBUG" />
+    </logger>
+
 	<root>
 		<level value="INFO" />
 		<appender-ref ref="CONSOLE" />

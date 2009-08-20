@@ -18,9 +18,11 @@
 
 package us.terebi.lang.lpc.compiler.java.context;
 
+import java.util.List;
 import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
+import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 
 /**
@@ -30,7 +32,7 @@ public interface CompiledObjectDefinition extends ObjectDefinition
 {
     public Class<?> getImplementationClass(); 
     public CompiledObjectInstance getMasterInstance();
-    public CompiledObjectInstance newInstance();
+    public CompiledObjectInstance newInstance(List<? extends LpcValue> arguments);
     public CompiledObjectInstance getInheritableInstance();
     public Map<String, ? extends CompiledMethodDefinition> getMethods();
 }

@@ -673,7 +673,12 @@ void Catch() :{}
 
 void IndexPostfix(): {}
 {
-    <LEFT_INDEX> IndexExpression() [ <RANGE> [ IndexExpression() ] ] <RIGHT_INDEX>
+    <LEFT_INDEX> IndexExpression() [ Range() [ IndexExpression() ] ] <RIGHT_INDEX>
+}
+
+void Range(): {}
+{
+	<RANGE>
 }
 
 void IndexExpression(): {}

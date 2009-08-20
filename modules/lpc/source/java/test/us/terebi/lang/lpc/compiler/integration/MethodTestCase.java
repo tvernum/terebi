@@ -30,7 +30,9 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 
@@ -43,6 +45,8 @@ import static org.junit.Assert.fail;
 public class MethodTestCase implements Callable<Object>
 {
     private static final Pattern STRING_REGEX = Pattern.compile("str\\d*_(.*)");
+    private static final Pattern EQUAL_REGEX = Pattern.compile("eq\\d*");
+    private static final Pattern COMPARE_REGEX = Pattern.compile("cmp\\d*_([\\d_]*)");
     private static final Pattern NUMERIC_REGEX = Pattern.compile("\\D+(\\d[\\d_]*)");
 
     private final CompiledMethodDefinition _method;
@@ -67,7 +71,7 @@ public class MethodTestCase implements Callable<Object>
 
     private void testMethod(CompiledMethodDefinition method) throws Exception
     {
-        ObjectInstance instance = method.getDeclaringType().newInstance();
+        ObjectInstance instance = method.getDeclaringType().newInstance(Collections.<LpcValue>emptyList());
         List< ? extends LpcValue> arguments = Collections.emptyList();
         LpcValue result = execute(method, instance, arguments);
 
@@ -78,6 +82,29 @@ public class MethodTestCase implements Callable<Object>
         {
             String expected = matcher.group(1);
             assertEquals(expected, result.asString());
+            return;
+        }
+
+        matcher = EQUAL_REGEX.matcher(name);
+        if (matcher.matches())
+        {
+            List<LpcValue> list = result.asList();
+            assertEquals(list.get(0), list.get(1));
+            return;
+        }
+
+        matcher = COMPARE_REGEX.matcher(name);
+        if (matcher.matches())
+        {
+            String[] elements = matcher.group(1).split("_");
+            assertEquals(0, elements.length % 2);
+            List<LpcValue> list = result.asList();
+            for (int i = 0; i < elements.length; i += 2)
+            {
+                int idx1 = Integer.parseInt(elements[i]);
+                int idx2 = Integer.parseInt(elements[i + 1]);
+                assertEquals(list.get(idx1), list.get(idx2));
+            }
             return;
         }
 
@@ -103,23 +130,26 @@ public class MethodTestCase implements Callable<Object>
 
     private LpcValue execute(CompiledMethodDefinition method, ObjectInstance instance, List< ? extends LpcValue> arguments)
     {
-        RuntimeContext context = new RuntimeContext(StandardEfuns.getImplementation(), _builder.getObjectManager());
-        RuntimeContext.set(context);
-        
-        CallStack stack = context.callStack();
-        stack.pushFrame(Origin.APPLY, instance);
+        SystemContext system = new SystemContext(StandardEfuns.getImplementation(), _builder.getObjectManager(), _builder.getSourceFinder());
+        synchronized (system.lock())
+        {
+            ThreadContext thread = RuntimeContext.activate(system);
 
-        LpcValue result = method.execute(instance, arguments);
+            CallStack stack = thread.callStack();
+            stack.pushFrame(Origin.APPLY, instance);
 
-        MajorFrame frame = stack.peekFrame(0);
-        assertEquals(instance, frame.instance);
-        assertEquals(Origin.APPLY, frame.origin);
+            LpcValue result = method.execute(instance, arguments);
 
-        stack.popFrame();
+            MajorFrame frame = stack.peekFrame(0);
+            assertEquals(instance, frame.instance);
+            assertEquals(Origin.APPLY, frame.origin);
 
-        assertEquals(0, stack.size());
+            stack.popFrame();
 
-        return result;
+            assertEquals(0, stack.size());
+
+            return result;
+        }
     }
 
 }

@@ -38,7 +38,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class StrsrchEfun extends AbstractEfun implements FunctionSignature, Callable
 {
     //    int strsrch( string str, string substr | int char, int flag );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("str", Types.STRING));

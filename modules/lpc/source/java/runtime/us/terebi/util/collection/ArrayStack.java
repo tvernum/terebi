@@ -132,4 +132,14 @@ public class ArrayStack<E> implements Stack<E>
     {
         return _list.toArray(a);
     }
+
+    public E top()
+    {
+        return _list.get(0);
+    }
+    
+    public String toString()
+    {
+        return _list.toString();
+    }
 }

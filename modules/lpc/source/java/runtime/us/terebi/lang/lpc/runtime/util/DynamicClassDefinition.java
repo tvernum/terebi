@@ -22,12 +22,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ClassInstance;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
+import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.UserTypeDefinition;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.util.Factory;
@@ -71,13 +73,13 @@ public class DynamicClassDefinition implements ClassDefinition
         _factory = factory;
     }
 
-    public ClassInstance newInstance()
+    public ClassInstance newInstance(List<? extends LpcValue> arguments)
     {
         if (_factory == null)
         {
             throw new LpcRuntimeException("Internal Error - No factory specified for class definition " + getName());
         }
-        return _factory.create();
+        return _factory.create(arguments.toArray());
     }
 
     public Map<String, ? extends FieldDefinition> getFields()

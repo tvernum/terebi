@@ -36,7 +36,7 @@ import us.terebi.lang.lpc.runtime.util.SystemLog;
  */
 public class DebugMessageEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("msg", Types.STRING));
     }

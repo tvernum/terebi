@@ -59,6 +59,11 @@ public class IntValue extends AbstractValue
         return _value != 0;
     }
 
+    public String asString()
+    {
+        return String.valueOf(_value);
+    }
+    
     protected boolean valueEquals(LpcValue other)
     {
         return this.asLong() == other.asLong();

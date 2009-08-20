@@ -47,7 +47,7 @@ public class GetDirectoryInfoEfun extends AbstractEfun implements FunctionSignat
     //    of subarrays, where the format of each subarray is:
     //
     //      ({ filename, size_of_file, last_time_file_touched })
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("dir", Types.STRING));

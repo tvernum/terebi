@@ -36,11 +36,11 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class EvaluateEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("func", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
+        list.add(new ArgumentSpec("args", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 
@@ -60,7 +60,7 @@ public class EvaluateEfun extends AbstractEfun implements FunctionSignature, Cal
         LpcValue arg = arguments.get(0);
         if (MiscSupport.isFunction(arg))
         {
-            return arg.asCallable().execute(arguments.subList(1, arguments.size()));
+            return arg.asCallable().execute(arguments.get(1).asList());
         }
         else
         {

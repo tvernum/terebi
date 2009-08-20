@@ -37,7 +37,7 @@ public class MessageEfun extends AbstractEfun implements FunctionSignature, Call
 {
     //    void message( mixed class, mixed message, mixed target, mixed exclude );
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("class", Types.MIXED));

@@ -20,6 +20,7 @@ package us.terebi.util.io;
 
 import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -65,6 +66,22 @@ public class IOUtil
         catch (IOException e)
         {
             // Ignore
+        }
+    }
+
+    public static String canonicalPath(File file)
+    {
+        if (file == null)
+        {
+            return "<no file>";
+        }
+        try
+        {
+            return file.getCanonicalPath();
+        }
+        catch (IOException e)
+        {
+            return file.getAbsolutePath();
         }
     }
 }

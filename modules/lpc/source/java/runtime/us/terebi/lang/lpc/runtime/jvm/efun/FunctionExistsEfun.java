@@ -40,7 +40,7 @@ public class FunctionExistsEfun extends AbstractEfun implements FunctionSignatur
 {
 
     //    string function_exists( string str, object ob, int flag );
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("func", Types.STRING));

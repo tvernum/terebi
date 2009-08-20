@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.io;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
  * 
@@ -30,7 +31,10 @@ public interface Resource
     public Resource getParent();
     public String getName();
     public String getPath();
-    public InputStream open() throws IOException;
+    public String getParentName();
+    public InputStream openInput() throws IOException;
+    public OutputStream openOutput() throws IOException;
     public boolean isFile();
     public boolean exists();
+    public long getSize();
 }

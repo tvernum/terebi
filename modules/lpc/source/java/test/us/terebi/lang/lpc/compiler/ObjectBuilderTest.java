@@ -28,7 +28,6 @@ import us.terebi.lang.lpc.compiler.java.JavaCompiler;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
-import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.io.ByteArrayResource;
 import us.terebi.lang.lpc.io.Resource;
@@ -36,6 +35,7 @@ import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LpcParser;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -49,7 +49,7 @@ public class ObjectBuilderTest
     public void tryCompilingSimpleLpcObject() throws Exception
     {
         CompilerObjectManager manager = new LpcCompilerObjectManager();
-        FunctionMap efuns = StandardEfuns.getSignatures();
+        Efuns efuns = StandardEfuns.getImplementation();
 
         ResourceFinder finder = new ResourceFinder()
         {

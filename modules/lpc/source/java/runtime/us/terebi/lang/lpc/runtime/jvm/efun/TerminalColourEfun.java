@@ -36,7 +36,7 @@ public class TerminalColourEfun extends AbstractEfun implements FunctionSignatur
 {
     //    string terminal_colour(string str, mapping m, int wrap, int indent);
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("str", Types.STRING));

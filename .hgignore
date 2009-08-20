@@ -5,6 +5,8 @@ syntax: regexp
 ^modules/[^/]*/errors/
 ^modules/[^/]*/samples/
 ^modules/[^/]*/.settings/
+^modules/lib\.[^/]*/work/
+^modules/lib\.[^/]*/mudlib/save/
 /\.DS_Store
 ^\.DS_Store
 \.swp
@@ -13,3 +15,4 @@ syntax: regexp
 \.zip
 \.gz
 \.bz2
+\.log

@@ -21,18 +21,26 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.Arrays;
 import java.util.List;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isFunction;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
+
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.util.BoundMethod;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
+import us.terebi.lang.lpc.runtime.util.NilCallable;
 import us.terebi.util.Range;
 import us.terebi.util.StringUtil;
 
@@ -41,6 +49,22 @@ import us.terebi.util.StringUtil;
  */
 public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
 {
+    private List< ? extends ArgumentDefinition> _arguments;
+
+    public List< ? extends ArgumentDefinition> getArguments()
+    {
+        synchronized (this)
+        {
+            if (_arguments == null)
+            {
+                _arguments = defineArguments();
+            }
+        }
+        return _arguments;
+    }
+
+    protected abstract List< ? extends ArgumentDefinition> defineArguments();
+
     public LpcValue execute(LpcValue... arguments)
     {
         LpcValue result = execute(Arrays.asList(arguments));
@@ -65,7 +89,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
     {
         return null;
     }
-    
+
     public boolean isVarArgs()
     {
         return false;
@@ -89,8 +113,8 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
             ArgumentDefinition def = argumentDefinitions.get(i);
             LpcValue val = argumentValues.get(i);
             LpcType valType = (val instanceof LpcReference) ? ((LpcReference) val).getType() : val.getActualType();
-            checkType(i, def.getType(), valType);
-            checkSemantics(i, def.getSemantics(), val);
+            checkType(i + 1, def.getType(), valType);
+            checkSemantics(i + 1, def.getSemantics(), val);
         }
     }
 
@@ -183,5 +207,42 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
                     + " were provided");
         }
         this.checkArguments(arguments);
+    }
+
+    public String toString()
+    {
+        StringBuilder builder = new StringBuilder();
+        builder.append(getName());
+        builder.append('(');
+        for (ArgumentDefinition arg : getArguments())
+        {
+            builder.append(arg);
+            builder.append(' ');
+        }
+        builder.append(')');
+        return builder.toString();
+    }
+
+    protected Callable getFunction(LpcValue value, int index)
+    {
+        if (isFunction(value))
+        {
+            return value.asCallable();
+        }
+        if (isString(value))
+        {
+            ObjectInstance thisObject = RuntimeContext.obtain().callStack().peekFrame(0).instance;
+            MethodDefinition method = thisObject.getDefinition().getMethods().get(value.asString());
+            if (method == null)
+            {
+                return new NilCallable(thisObject, Callable.Kind.METHOD);
+            }
+            else
+            {
+                return new BoundMethod(method, thisObject);
+            }
+        }
+        this.badArgumentType(index, value.getActualType(), Types.FUNCTION, Types.STRING);
+        return null;
     }
 }

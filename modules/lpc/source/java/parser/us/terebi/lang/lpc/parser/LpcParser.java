@@ -25,10 +25,12 @@ import java.io.StringReader;
 import org.apache.commons.io.IOUtils;
 
 import us.terebi.lang.lpc.io.FileFinder;
+import us.terebi.lang.lpc.io.FileResource;
 import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.io.ResourceLexerSource;
 import us.terebi.lang.lpc.io.SourceFinderFileSystem;
+import us.terebi.lang.lpc.io.VirtualResource;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.jj.ParseException;
 import us.terebi.lang.lpc.parser.jj.Parser;
@@ -38,6 +40,7 @@ import us.terebi.lang.lpc.preprocessor.LexerException;
 import us.terebi.lang.lpc.preprocessor.Preprocessor;
 import us.terebi.lang.lpc.preprocessor.PreprocessorListener;
 import us.terebi.lang.lpc.preprocessor.Source;
+import us.terebi.lang.lpc.preprocessor.VirtualFile;
 
 /*
  * @TODO
@@ -70,14 +73,22 @@ public class LpcParser
         _debug = debug;
     }
 
-    public void addSystemIncludeDirectory(String dir)
+    public void addSystemIncludeDirectory(String dir) throws IOException
     {
-        _preprocessor.getSystemIncludePath().add(dir);
+        VirtualFile vFile = getVirtualFile(dir);
+        _preprocessor.getSystemIncludePath().add(vFile);
     }
 
-    public void addUserIncludeDirectory(String dir)
+    private VirtualFile getVirtualFile(String dir) throws IOException
     {
-        _preprocessor.getQuoteIncludePath().add(dir);
+        Resource resource = getResource(dir);
+        VirtualFile vFile = getVirtualFile(resource);
+        return vFile;
+    }
+
+    public void addUserIncludeDirectory(String dir) throws IOException
+    {
+        _preprocessor.getQuoteIncludePath().add(getVirtualFile(dir));
     }
 
     public void addAutoIncludeFile(String filename) throws IOException
@@ -101,7 +112,7 @@ public class LpcParser
      */
     public ASTObjectDefinition parse(String filename) throws IOException, ParserException
     {
-        Resource resource = _sourceFinder.getResource(filename);
+        Resource resource = getResource(filename);
         return parse(resource);
     }
 
@@ -112,9 +123,8 @@ public class LpcParser
             _preprocessor.setFileSystem(new SourceFinderFileSystem(_sourceFinder));
         }
 
-        String dirname = resource.getParent().getPath();
+        String dirname = resource.getParentName();
 
-        _preprocessor.addMacro("__SAVE_EXTENSION__", "\".o\"");
         _preprocessor.addMacro("__DIR__", "\"" + dirname + "\"");
         _preprocessor.addInput(getSource(resource));
 
@@ -126,7 +136,12 @@ public class LpcParser
 
     private ResourceLexerSource getSource(String filename) throws IOException
     {
-        return getSource(_sourceFinder.getResource(filename));
+        return getSource(getResource(filename));
+    }
+
+    private Resource getResource(String filename) throws IOException
+    {
+        return _sourceFinder.getResource(filename);
     }
 
     private ResourceLexerSource getSource(Resource resource) throws IOException
@@ -182,6 +197,22 @@ public class LpcParser
     public void addDefine(String name, String value) throws LexerException
     {
         _preprocessor.addMacro(name, value);
+    }
+
+    public void addAutoIncludeFile(File auto) throws IOException
+    {
+        _preprocessor.addInput(getSource(new FileResource(auto)));
+    }
+
+    public void addSystemIncludeDirectory(File dir)
+    {
+        FileResource resource = new FileResource(dir);
+        _preprocessor.getSystemIncludePath().add(getVirtualFile(resource));
+    }
+
+    private VirtualFile getVirtualFile(Resource resource)
+    {
+        return new VirtualResource(resource);
     }
 
 }

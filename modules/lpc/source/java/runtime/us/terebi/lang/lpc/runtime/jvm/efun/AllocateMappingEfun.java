@@ -38,7 +38,7 @@ public class AllocateMappingEfun extends AbstractEfun implements FunctionSignatu
 {
     private static final int MAPPING_MAX = 0xFFFF;
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("size", Types.INT));
     }

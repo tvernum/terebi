@@ -30,6 +30,7 @@ import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LpcParser;
 import us.terebi.lang.lpc.preprocessor.LexerException;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 
 /**
  * 
@@ -140,11 +141,11 @@ public class L2JCompiler
         }
         if (_builder == null)
         {
-            ObjectBuilderFactory factory = new ObjectBuilderFactory();
+            ObjectBuilderFactory factory = new ObjectBuilderFactory(StandardEfuns.getImplementation());
             factory.setParser(_parser);
             _builder = factory.createBuilder(_resourceFinder);
             _builder.setCompileOnly(_compileOnly);
-
+            _builder.setPrintStats(System.out);
         }
 
         CompiledObjectDefinition object = _builder.compile(filename);
@@ -157,7 +158,7 @@ public class L2JCompiler
         {
             return "<null>";
         }
-        
+
         StringBuilder builder = new StringBuilder();
         builder.append(object.getName());
         builder.append(" : ");

@@ -41,12 +41,12 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("object", Types.OBJECT));
         list.add(new ArgumentSpec("method", Types.STRING));
-        list.add(new ArgumentSpec("arguments", Types.MIXED, ArgumentSemantics.BY_VALUE, true));
+        list.add(new ArgumentSpec("arguments", Types.MIXED, true));
         return list;
     }
 
@@ -65,7 +65,7 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
     {
         LpcValue arg1 = arguments.get(0);
         LpcValue arg2 = arguments.get(1);
-        List< ? extends LpcValue> args = arguments.subList(2, arguments.size());
+        List< ? extends LpcValue> args = arguments.get(2).asList();
 
         ObjectInstance target = arg1.asObject();
         String name = arg2.asString();
@@ -82,7 +82,7 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
             return NilValue.INSTANCE;
         }
 
-        CallStack stack = RuntimeContext.get().callStack();
+        CallStack stack = RuntimeContext.obtain().callStack();
         stack.pushFrame(CallStack.Origin.CALL_OTHER, target);
         try
         {

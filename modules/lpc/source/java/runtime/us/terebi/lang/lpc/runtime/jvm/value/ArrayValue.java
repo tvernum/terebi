@@ -40,6 +40,10 @@ public class ArrayValue extends AbstractValue implements LpcValue
 
     public ArrayValue(LpcType type, List<LpcValue> list)
     {
+        if (type.getArrayDepth() == 0)
+        {
+            throw new IllegalArgumentException("Attempt to create array with zero depth");
+        }
         _type = type;
         _list = list;
     }

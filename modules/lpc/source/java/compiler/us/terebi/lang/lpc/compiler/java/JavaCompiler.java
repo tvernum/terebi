@@ -29,7 +29,6 @@ import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectOutput;
 import us.terebi.lang.lpc.compiler.ObjectSource;
 import us.terebi.lang.lpc.compiler.java.context.CompileContext;
-import us.terebi.lang.lpc.compiler.java.context.FunctionMap;
 import us.terebi.lang.lpc.parser.ast.ASTClassBody;
 import us.terebi.lang.lpc.parser.ast.ASTDeclaration;
 import us.terebi.lang.lpc.parser.ast.ASTFields;
@@ -37,16 +36,18 @@ import us.terebi.lang.lpc.parser.ast.ASTMethod;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.ast.ASTUtil;
 import us.terebi.lang.lpc.parser.ast.BaseASTVisitor;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 
 /**
  * 
  */
 public class JavaCompiler implements Compiler
 {
-    private final FunctionMap _efuns;
+    private final Efuns _efuns;
     private final CompilerObjectManager _manager;
 
-    public JavaCompiler(FunctionMap efuns, CompilerObjectManager manager)
+    public JavaCompiler(Efuns efuns, CompilerObjectManager manager)
     {
         _efuns = efuns;
         _manager = manager;
@@ -56,6 +57,11 @@ public class JavaCompiler implements Compiler
     {
         CompileContext context = new CompileContext(new PrintWriter(output.open()), _manager);
         context.functions().addEfuns(_efuns);
+        ObjectInstance sefun = _manager.getSimulatedEfunObject();
+        if (sefun != null)
+        {
+            context.functions().addSimulEfuns(sefun.getDefinition().getMethods().values());
+        }
         try
         {
             writePackage(output, context);

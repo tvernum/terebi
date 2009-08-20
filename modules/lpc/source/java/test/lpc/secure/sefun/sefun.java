@@ -1832,7 +1832,7 @@ public class sefun extends LpcObject
         /* 'if'@3555.5 */
 
         final LpcValue _lpc_v514 = new LpcFunction(getObjectInstance(), new us.terebi.lang.lpc.runtime.util.ArgumentSpec("str", withType(
-                us.terebi.lang.lpc.runtime.LpcType.Kind.STRING, 0), us.terebi.lang.lpc.runtime.ArgumentSemantics.BY_VALUE, false))
+                us.terebi.lang.lpc.runtime.LpcType.Kind.STRING, 0), false, us.terebi.lang.lpc.runtime.ArgumentSemantics.BY_VALUE))
         {
             public LpcValue execute(List< ? extends LpcValue> args)
             {

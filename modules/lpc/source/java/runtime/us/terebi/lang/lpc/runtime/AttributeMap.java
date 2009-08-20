@@ -30,6 +30,7 @@ public interface AttributeMap
     public Object remove(String name);
 
     public int size();
+    public void clear();
     
     public Iterable<String> names();
     

@@ -20,8 +20,9 @@ package us.terebi.lang.lpc.compiler;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.util.Date;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.jci.compilers.CompilationResult;
 import org.apache.commons.jci.compilers.JavaCompiler;
 import org.apache.commons.jci.compilers.JavaCompilerSettings;
@@ -29,6 +30,7 @@ import org.apache.commons.jci.readers.FileResourceReader;
 import org.apache.commons.jci.stores.FileResourceStore;
 import org.apache.commons.jci.stores.ResourceStore;
 import org.apache.commons.jci.stores.ResourceStoreClassLoader;
+import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
@@ -44,12 +46,15 @@ import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.object.CompiledDefinition;
 import us.terebi.util.ToString;
+import us.terebi.util.log.LogContext;
 
 /**
  * 
  */
 public class ObjectBuilder implements ObjectCompiler
 {
+    private final Logger LOG = Logger.getLogger(ObjectBuilder.class);
+
     private final ResourceFinder _sourceFinder;
     private final Compiler _compiler;
     private final File _workingDirectory;
@@ -61,6 +66,7 @@ public class ObjectBuilder implements ObjectCompiler
     private final CompilerObjectManager _manager;
     private final ScopeLookup _scope;
     private boolean _compileOnly;
+    private PrintStream _printStats;
 
     public ObjectBuilder(ResourceFinder sourceFinder, CompilerObjectManager manager, ScopeLookup scope, LpcParser parser,
             Compiler compiler, JavaCompiler javaCompiler, File workingDirectory)
@@ -75,44 +81,70 @@ public class ObjectBuilder implements ObjectCompiler
         _reader = new FileResourceReader(_workingDirectory);
         _store = new FileResourceStore(_workingDirectory);
         _classLoader = new ResourceStoreClassLoader(getClass().getClassLoader(), new ResourceStore[] { _store });
+        _printStats = null;
+    }
+
+    public void setPrintStats(PrintStream printStats)
+    {
+        _printStats = printStats;
     }
 
     public CompiledObjectDefinition compile(String objectSource)
     {
-        ASTObjectDefinition ast = null;
+        Resource resource = getResource(objectSource);
+        return compile(resource);
+    }
+
+    public CompiledObjectDefinition compile(Resource resource)
+    {
+        LogContext lc = new LogContext(resource);
         try
         {
-            Resource resource = _sourceFinder.getResource(objectSource);
-            ast = parse(resource);
-        }
-        catch (ParserException e)
-        {
-            throw new CompileException(e);
-        }
-        catch (IOException e)
-        {
-            if (ast == null)
+            if (LOG.isDebugEnabled())
             {
-                throw new CompileException("Cannot access source " + objectSource + " - " + e.getMessage(), e);
+                LOG.debug("Compiling " + resource);
             }
-            else
+            long startAt = System.currentTimeMillis();
+            CompiledObjectDefinition definition = doCompilation(resource);
+            long endAt = System.currentTimeMillis();
+            if (_printStats != null)
             {
-                throw new CompileException(ast, e.getMessage());
+                printStat("Compiled "
+                        + resource
+                        + " to "
+                        + definition.getImplementationClass()
+                        + " ("
+                        + (endAt - startAt)
+                        + "ms)");
             }
+            return definition;
         }
+        finally
+        {
+            lc.end();
+        }
+    }
+
+    private CompiledObjectDefinition doCompilation(Resource resource)
+    {
+        ASTObjectDefinition ast = getAST(resource);
         LineMapping lineMapping = ParserState.getState().getLineMapping();
         try
         {
-            Source source = getSource(objectSource, ast);
-            Output output = getOutput(objectSource);
+            Source source = getSource(resource, ast);
+            Output output = getOutput(resource);
             compile(source, output);
             if (_compileOnly)
             {
                 return null;
             }
+
             compileToByteCode(ast, output);
             Class< ? extends LpcObject> cls = loadClass(ast, output);
-            return new CompiledDefinition<LpcObject>(_manager, _scope, objectSource, cls);
+
+            CompiledDefinition<LpcObject> definition = loadObjectDefinition(resource, cls);
+
+            return definition;
         }
         catch (IOException e)
         {
@@ -132,9 +164,82 @@ public class ObjectBuilder implements ObjectCompiler
         }
     }
 
+    private CompiledDefinition<LpcObject> loadObjectDefinition(Resource resource, Class< ? extends LpcObject> cls)
+    {
+        long start = System.currentTimeMillis();
+        String name = dropExtension(resource.getPath());
+        CompiledDefinition<LpcObject> definition = new CompiledDefinition<LpcObject>(_manager, _scope, name, cls);
+        long end = System.currentTimeMillis();
+        if (_printStats != null)
+        {
+            printStat("Object definition is " + definition + " (" + (end - start) + "ms)");
+        }
+        return definition;
+    }
+
+    private ASTObjectDefinition getAST(Resource resource)
+    {
+        long start = System.currentTimeMillis();
+        ASTObjectDefinition ast = null;
+        try
+        {
+            if (_printStats != null)
+            {
+                printStat("Compiling " + resource);
+            }
+            ast = parse(resource);
+            long end = System.currentTimeMillis();
+            if (_printStats != null)
+            {
+                printStat(resource.toString()
+                        + " is "
+                        + ast.toString()
+                        + " with "
+                        + ast.jjtGetNumChildren()
+                        + " children ("
+                        + (end - start)
+                        + "ms)");
+            }
+        }
+        catch (ParserException e)
+        {
+            throw new CompileException(e);
+        }
+        catch (IOException e)
+        {
+            if (ast == null)
+            {
+                throw new CompileException("Cannot access source " + resource + " - " + e.getMessage(), e);
+            }
+            else
+            {
+                throw new CompileException(ast, e.getMessage());
+            }
+        }
+        return ast;
+    }
+
+    private Resource getResource(String objectSource)
+    {
+        try
+        {
+            return _sourceFinder.getResource(objectSource);
+        }
+        catch (IOException e)
+        {
+            throw new CompileException("Cannot access source " + objectSource, e);
+        }
+    }
+
+    private void printStat(String message)
+    {
+        _printStats.println(new Date() + " - " + message);
+    }
+
     @SuppressWarnings("unchecked")
     private Class< ? extends LpcObject> loadClass(SimpleNode ast, Output output)
     {
+        long start = System.currentTimeMillis();
         String fqn = output.getPackageName() + "." + output.getClassName();
         try
         {
@@ -152,10 +257,19 @@ public class ObjectBuilder implements ObjectCompiler
         {
             throw new CompileException(ast, "Internal Error - Failed to load generated class " + fqn);
         }
+        finally
+        {
+            long end = System.currentTimeMillis();
+            if (_printStats != null)
+            {
+                printStat("Loading of class " + fqn + " (" + (end - start) + "ms)");
+            }
+        }
     }
 
     private void compileToByteCode(SimpleNode ast, Output output)
     {
+        long start = System.currentTimeMillis();
         JavaCompilerSettings settings = _javaCompiler.createDefaultSettings();
         settings.setSourceVersion("1.5");
         settings.setTargetVersion("1.5");
@@ -174,21 +288,40 @@ public class ObjectBuilder implements ObjectCompiler
         {
             throw new CompileException(ast, "Internal Error" + ToString.toString(result.getErrors()));
         }
+        long end = System.currentTimeMillis();
+        if (_printStats != null)
+        {
+            printStat("Produced byte-code (" + (end - start) + "ms)");
+        }
+
     }
 
     private void compile(Source source, Output output) throws IOException
     {
+        long start = System.currentTimeMillis();
         _compiler.compile(source, output);
+        long end = System.currentTimeMillis();
+
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("Compiled " + source + " to " + output);
+        }
+        if (_printStats != null)
+        {
+            printStat("Produced java output " + output + " (" + (end - start) + "ms)");
+        }
     }
 
-    private Source getSource(String objectSource, ASTObjectDefinition ast)
+    private Source getSource(Resource resource, ASTObjectDefinition ast)
     {
-        return new Source(objectSource, ast);
+        return new Source(resource.getPath(), ast);
     }
 
-    private Output getOutput(String objectSource)
+    private Output getOutput(Resource resource)
     {
-        String path = FilenameUtils.getFullPath(objectSource);
+        String path = resource.getParentName();
+        path = dropExtension(path);
+
         String pkg = "lpc." + path.replace('/', '.');
         pkg = pkg.replace("..", ".");
         if (pkg.endsWith("."))
@@ -196,7 +329,7 @@ public class ObjectBuilder implements ObjectCompiler
             pkg = pkg.substring(0, pkg.length() - 1);
         }
 
-        String cls = FilenameUtils.getBaseName(objectSource);
+        String cls = dropExtension(resource.getName());
         cls.replaceAll("[^A-Za-z0-9]", "_");
 
         String fileName = "lpc/" + path + '/' + cls + ".java";
@@ -204,6 +337,17 @@ public class ObjectBuilder implements ObjectCompiler
         javaFile.getParentFile().mkdirs();
         Output output = new Output(pkg, cls, javaFile);
         return output;
+    }
+
+    private String dropExtension(String path)
+    {
+        int slash = path.lastIndexOf('/');
+        int dot = path.lastIndexOf('.');
+        if (dot > slash)
+        {
+            path = path.substring(0, dot);
+        }
+        return path;
     }
 
     private ASTObjectDefinition parse(Resource resource) throws IOException, ParserException
@@ -220,5 +364,10 @@ public class ObjectBuilder implements ObjectCompiler
     public CompilerObjectManager getObjectManager()
     {
         return _manager;
+    }
+    
+    public ResourceFinder getSourceFinder()
+    {
+        return _sourceFinder;
     }
 }

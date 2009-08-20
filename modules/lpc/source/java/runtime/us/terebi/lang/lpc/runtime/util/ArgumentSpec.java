@@ -31,19 +31,15 @@ public class ArgumentSpec implements ArgumentDefinition
 
     public ArgumentSpec(String name, LpcType type)
     {
-        this(name, type, ArgumentSemantics.BY_VALUE, false);
+        this(name, type, false, ArgumentSemantics.BY_VALUE);
     }
 
-    /**
-     * @deprecated Use {@link #ArgumentSpec(String, LpcType, ArgumentSemantics, boolean)} instead
-     */
-    @Deprecated
-    public ArgumentSpec(String name, LpcType type, boolean ref, boolean varargs)
+    public ArgumentSpec(String name, LpcType type, boolean varargs)
     {
-        this(name, type, ref ? ArgumentSemantics.EXPLICIT_REFERENCE : ArgumentSemantics.BY_VALUE, varargs);
+        this(name, type, varargs, ArgumentSemantics.BY_VALUE);
     }
 
-    public ArgumentSpec(String name, LpcType type, ArgumentSemantics semantics, boolean varargs)
+    public ArgumentSpec(String name, LpcType type, boolean varargs, ArgumentSemantics semantics)
     {
         _name = name;
         _type = type;

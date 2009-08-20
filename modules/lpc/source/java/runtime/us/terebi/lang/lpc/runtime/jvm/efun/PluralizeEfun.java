@@ -116,7 +116,7 @@ public class PluralizeEfun extends AbstractEfun implements FunctionSignature, Ca
         SystemLog.message(msg, cause);
     }
 
-    public List< ? extends ArgumentDefinition> getArguments()
+    protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("str", Types.STRING));
     }
