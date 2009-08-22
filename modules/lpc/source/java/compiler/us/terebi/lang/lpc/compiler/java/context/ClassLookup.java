@@ -28,6 +28,7 @@ import us.terebi.lang.lpc.parser.ast.ASTIdentifier;
 import us.terebi.lang.lpc.parser.ast.ASTUtil;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.util.ToString;
 
@@ -43,6 +44,13 @@ public class ClassLookup
     {
         _local = new HashMap<String, ClassDefinition>();
         _inherited = new HashMap<String, ObjectDefinition>();
+    }
+
+    public ClassLookup(ObjectInstance object)
+    {
+        this();
+        addInherits(object.getDefinition().getInheritedObjects());
+        defineClasses(object.getDefinition().getDefinedClasses().values());
     }
 
     public ClassDefinition findClass(ASTIdentifier classNode)
@@ -106,6 +114,19 @@ public class ClassLookup
     public void defineClass(ClassDefinition classDefinition)
     {
         _local.put(classDefinition.getName(), classDefinition);
+    }
+
+    public void addInherits(Map<String, ? extends ObjectDefinition> parents)
+    {
+        _inherited.putAll(parents);
+    }
+
+    public void defineClasses(Iterable< ? extends ClassDefinition> classes)
+    {
+        for (ClassDefinition classDefinition : classes)
+        {
+            defineClass(classDefinition);
+        }
     }
 
 }

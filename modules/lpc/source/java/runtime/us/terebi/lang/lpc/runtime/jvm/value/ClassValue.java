@@ -40,6 +40,11 @@ public class ClassValue extends AbstractValue implements LpcValue
         _instance = instance;
         _type = Types.classType(instance.getDefinition(), 0);
     }
+    
+    public ClassInstance asClass()
+    {
+        return _instance;
+    }
 
     protected CharSequence getDescription()
     {

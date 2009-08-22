@@ -97,7 +97,8 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         {
             if (LpcField.class.isAssignableFrom(field.getType()))
             {
-                _fields.put(field.getName(), new CompiledField(this, field));
+                CompiledField cf = new CompiledField(this, field);
+                _fields.put(cf.getName(), cf);
             }
             else if (field.getAnnotation(LpcInherited.class) != null)
             {

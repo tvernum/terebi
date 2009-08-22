@@ -22,9 +22,9 @@
             <javac srcdir="${dir.source.java}/@{dir}"
                    destdir="${dir.output.classes}"
                    classpathref="@{classpath}"
-                   debug="false"
+                   debug="true"
                    deprecation="false" 
-                   optimize="true"
+                   optimize="false"
                    listfiles="false"
                    source="1.5">
             </javac>

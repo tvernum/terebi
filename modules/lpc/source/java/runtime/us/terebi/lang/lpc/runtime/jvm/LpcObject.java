@@ -51,7 +51,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.BoundMethod;
-import us.terebi.lang.lpc.runtime.util.DynamicClassDefinition;
+import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
 
 /**
  * 

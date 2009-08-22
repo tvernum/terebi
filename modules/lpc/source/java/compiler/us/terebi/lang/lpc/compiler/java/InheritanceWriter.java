@@ -44,7 +44,7 @@ public class InheritanceWriter extends BaseASTVisitor implements ParserVisitor
     public Object visit(ASTInherit node, Object data)
     {
         _context.objectManager();
-        ConstantHandler constants = new ConstantHandler(_context);
+        ConstantHandler constants = new ConstantHandler();
         String from = constants.getString(ASTUtil.children(node)).toString();
         CompiledObjectDefinition parent = _context.objectManager().findObject(from);
 

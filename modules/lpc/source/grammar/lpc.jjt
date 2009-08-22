@@ -32,12 +32,18 @@ import us.terebi.lang.lpc.parser.ast.ASTUtil;
 public class Parser 
 {
 	private boolean _debug = false;
+	private boolean _constant = false;
 	private String _printPrefix = "";
 	
 	public void setDebug(boolean debug)
 	{
 		this._debug = debug;
 	}
+	
+	public void setConstantsOnly(boolean constants)
+	{
+		this._constant = constants;
+	} 
 	
     /** DEBUG **/
     void jjtreeOpenNodeScope(Node n)
@@ -422,7 +428,7 @@ void OptVariableOrExpression() : {}
 
 void OptExpression() : {}
 {
-	[Expression() ]
+	[ Expression() ]
 }
 
 void ControlStatement() : {}
@@ -451,11 +457,32 @@ void Expression() #void : {}
 
 void SimpleExpression() #void : {}
 {
+    LOOKAHEAD( { this._constant } )
+	    Literal()
+    |
     LOOKAHEAD(UnaryExpression() AssignmentOperator())
         AssignmentExpression()
+        {
+        	if(_constant) 
+        	{
+	    		ParseException e = new ParseException("Illegal assignment expression for constant expression"); 
+		    	SimpleNode prev = (SimpleNode) jjtree.peekNode();
+		    	e.currentToken = prev.jjtGetFirstToken();
+		    	throw e;
+		    }
+		}
     |
     LOOKAHEAD(3) 
         TernaryExpression()
+        {
+        	if(_constant) 
+        	{
+	    		ParseException e = new ParseException("Illegal assignment expression for constant expression"); 
+		    	SimpleNode prev = (SimpleNode) jjtree.peekNode();
+		    	e.currentToken = prev.jjtGetFirstToken();
+		    	throw e;
+		    }
+		}
 }
 
 void AssignmentExpression() : {}
@@ -715,8 +742,15 @@ void ArgumentExpression() : {}
 	ClassType()
 }
 
+ASTLiteralValue LiteralValue() : {}
+{
+	Literal() 
+	{ return jjtThis; }
+}
+
 void Literal() #void : {}
 {
+	(
         Constant()
     |
     	(   LOOKAHEAD(2)
@@ -727,7 +761,11 @@ void Literal() #void : {}
 	    |
 	        LOOKAHEAD(2)
     	    FunctionLiteral()
+	    |
+	        LOOKAHEAD(2)
+    	    ClassLiteral()
     	)
+    )
 }
 
 void Constant() : {}
@@ -754,7 +792,7 @@ void ArrayLiteral() : {}
 
 void ArrayElement() : {}
 {
-	SimpleExpression() [ ElementExpander() ]
+	SimpleExpression() [ LOOKAHEAD( { getToken(1).kind == EXPANDO && !_constant } ) ElementExpander() ]
 }
 
 void ElementExpander() : {}
@@ -780,4 +818,12 @@ void FunctionLiteral() : {}
     <FUNCTION> FunctionSignature() StatementBlock()
 }
 
+void ClassLiteral() : {}
+{
+    <LEFT_BRACKET> <DOLLAR> Identifier() <COLON> [ ClassElement() ( LOOKAHEAD(2) <COMMA> ClassElement() )* ] [ <COMMA> ] <DOLLAR> <RIGHT_BRACKET>
+}
 
+void ClassElement() : {}
+{
+    Identifier() <ASSIGN> SimpleExpression()
+}

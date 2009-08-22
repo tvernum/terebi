@@ -134,7 +134,7 @@ public class CompiledField implements FieldDefinition
                 {
                     _field.set(ci.getImplementingObject(), value);
                 }
-                else if (_field.getType().isAssignableFrom(LpcReference.class))
+                else if (LpcReference.class.isAssignableFrom(_field.getType()))
                 {
                     LpcReference ref = (LpcReference) _field.get(ci.getImplementingObject());
                     ref.set(value);

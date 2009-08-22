@@ -381,4 +381,18 @@ public class BaseASTVisitor implements ParserVisitor
         return null;
     }
 
+    public Object visit(ASTClassLiteral node, Object data)
+    {
+        return null;
+    }
+
+    public Object visit(ASTClassElement node, Object data)
+    {
+        return null;
+    }
+
+    public Object visit(ASTLiteralValue node, Object data)
+    {
+        return null;
+    }
 }

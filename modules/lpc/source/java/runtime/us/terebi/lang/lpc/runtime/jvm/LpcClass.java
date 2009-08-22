@@ -24,7 +24,7 @@ import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.object.CompiledField;
-import us.terebi.lang.lpc.runtime.util.DynamicClassDefinition;
+import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
 
 /**
  * 

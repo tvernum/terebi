@@ -39,7 +39,16 @@ void new_password(string input, int count)
 
 void read_password(string input)
 {
-    _password = input;
+    if( _password == input) 
+    {
+        write( "> " );
+    }
+    else
+    {
+        write("Incorrect password for " + _user + "\n");
+        write("Password: ");
+        efun::input_to( "read_password", INPUT_NO_ESCAPE | INPUT_NO_ECHO );
+    }
 }
 
 public void read_user(string input)
@@ -74,6 +83,6 @@ public void logon()
 
 public void process_input(string input)
 {
-    write("[" + _user + "/" + _password + "] Input: " + input + "\n");
+    write("[" + _user + "] Input: " + input + "\n");
 }
 

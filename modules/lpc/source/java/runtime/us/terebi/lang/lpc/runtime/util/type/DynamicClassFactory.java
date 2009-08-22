@@ -1,5 +1,4 @@
 /* ------------------------------------------------------------------------
- * $Id$
  * Copyright 2009 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,40 +15,26 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.plugins.persist;
+package us.terebi.lang.lpc.runtime.util.type;
 
-import us.terebi.engine.config.Config;
-import us.terebi.engine.plugin.Plugin;
-import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
-import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
-import us.terebi.plugins.persist.efun.RestoreObjectEfun;
-import us.terebi.plugins.persist.efun.SaveObjectEfun;
+import us.terebi.lang.lpc.runtime.ClassDefinition;
+import us.terebi.util.Factory;
 
 /**
- * @version $Revision$
+ * 
  */
-public class PersistPlugin implements Plugin
+public class DynamicClassFactory implements Factory<DynamicClassInstance>
 {
-    public void init(SystemContext context)
+    private final ClassDefinition _definition;
+
+    public DynamicClassFactory(ClassDefinition definition)
     {
-        Efuns efuns = context.efuns();
-        efuns.define("save_object", new SaveObjectEfun());
-        efuns.define("restore_object", new RestoreObjectEfun()); 
+        _definition = definition;
     }
 
-    public void load(Config config, SystemContext context)
+    public DynamicClassInstance create(Object... arguments)
     {
-        // No-op
-    }
-
-    public void run(SystemContext context)
-    {
-        // No-op
-    }
-
-    public void start(SystemContext context)
-    {
-        // No-op
+        return new DynamicClassInstance(_definition);
     }
 
 }

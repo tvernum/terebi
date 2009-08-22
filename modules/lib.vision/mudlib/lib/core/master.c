@@ -24,3 +24,8 @@ public int valid_write(string file, object obj, string func)
     return 1;
 }
 
+public int valid_read(string file, object obj, string func)
+{
+    return 1;
+}
+

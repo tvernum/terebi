@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.util;
+package us.terebi.lang.lpc.runtime.util.type;
 
 import java.util.Arrays;
 import java.util.Collections;

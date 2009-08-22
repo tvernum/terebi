@@ -1,3 +1,54 @@
+2009-08-22
+    Create a parser for literal LPC expressions [for use in restore_object]
+
+2009-08-20
+    file size efun
+    Support calling simulated efuns
+    Move master/sefun objects into ObjectManager rather than system context
+    __SAVE_EXTENSION__ should be set by the engine, not the parser
+    Fix calling functions with trailing collection (varargs)
+
+2009-08-19
+    Include resource finder as a context attachment
+    Add output support to Resource class
+    Fix JavaCompilerTest to set up context
+    Fix ExpressionWriter to output ArgumentSpecs with new parameter order
+
+2009-08-18
+    Don't rebuild arguments list every time it is accessed in an efun
+
+2009-08-17
+    Attach various configurations to the SystemContext
+    Split context into system/thread components
+    Don't share contexts (specifically call stacks) across threads
+
+2009-08-16
+    Clear call-stack even when re-using same context
+    Call create() [with arguments] for new instances (including master instance)
+
+2009-08-15
+    Switch order of "vargs" and "semantics" in ArgumentSpec - vargs is a lot more common than references
+    Initialise fields with Nil rather than null
+    Move "interactive" efun to interactive plugin
+
+2009-08-12
+    More work around RuntimeContext
+
+2009-08-11
+    Setup call stack before invoking an Apply
+    Split RuntimeContext into 2 classes (new class: Context)
+    Add a big lock around the context - LPC is designed to be single-threaded
+
+2009-07-30
+    Enable destruction of objects
+    Join arrays and collections
+    Utility for calling applies
+
+2009-07-12
+    Support %O and %f in sprintf() efun
+    Don't support table mode in sprintf (because the behaviour is bizarre, Dead Souls doesn't use it, and I can't think of a reason why anyone would)
+    Support column mode in sprintf() efun
+
 2009-07-11
     Initial support for sprintf efun
 

@@ -36,7 +36,7 @@ import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.MemberDefinition;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
-import us.terebi.lang.lpc.runtime.util.DynamicClassDefinition;
+import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
 
 /**
  * 

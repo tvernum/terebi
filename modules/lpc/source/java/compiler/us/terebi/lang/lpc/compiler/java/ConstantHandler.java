@@ -18,7 +18,6 @@
 
 package us.terebi.lang.lpc.compiler.java;
 
-import us.terebi.lang.lpc.compiler.java.context.CompileContext;
 import us.terebi.lang.lpc.parser.ast.ASTConstant;
 import us.terebi.lang.lpc.parser.ast.ASTUtil;
 import us.terebi.lang.lpc.parser.ast.BaseASTVisitor;
@@ -34,14 +33,6 @@ import us.terebi.util.io.CharStream;
  */
 public class ConstantHandler extends BaseASTVisitor implements ParserVisitor
 {
-    @SuppressWarnings("unused")
-    private final CompileContext _context;
-
-    public ConstantHandler(CompileContext context)
-    {
-        _context = context;
-    }
-
     public Object visit(ASTConstant node, Object data)
     {
         Object value = null;
@@ -93,7 +84,7 @@ public class ConstantHandler extends BaseASTVisitor implements ParserVisitor
         return value;
     }
 
-    private StringBuilder readLpcString(ASTConstant node)
+    private CharSequence readLpcString(ASTConstant node)
     {
         StringBuilder buf = new StringBuilder();
         for (Token stringToken : ASTUtil.getTokens(node))
@@ -108,7 +99,18 @@ public class ConstantHandler extends BaseASTVisitor implements ParserVisitor
         return buf;
     }
 
-    private char readLpcChar(CharStream text)
+    public static CharSequence readLpcString(String str)
+    {
+        StringBuilder buf = new StringBuilder();
+        CharStream stream = new CharStream(str);
+        while (!stream.eof())
+        {
+            buf.append(readLpcChar(stream));
+        }
+        return buf;
+    }
+
+    private static char readLpcChar(CharStream text)
     {
         int ch = readChar(text);
 
@@ -171,7 +173,7 @@ public class ConstantHandler extends BaseASTVisitor implements ParserVisitor
         }
     }
 
-    private char readChar(CharStream stream)
+    private static char readChar(CharStream stream)
     {
         if (stream.eof())
         {
@@ -194,4 +196,5 @@ public class ConstantHandler extends BaseASTVisitor implements ParserVisitor
     {
         return node.jjtAccept(this, null);
     }
+
 }

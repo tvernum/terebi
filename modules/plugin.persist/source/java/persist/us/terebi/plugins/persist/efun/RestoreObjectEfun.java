@@ -40,9 +40,9 @@ import us.terebi.plugins.persist.support.ObjectSerializer;
 /**
  * @version $Revision$
  */
-public class SaveObjectEfun extends AbstractEfun
+public class RestoreObjectEfun extends AbstractEfun
 {
-    private final static Logger LOG = Logger.getLogger(SaveObjectEfun.class);
+    private final static Logger LOG = Logger.getLogger(RestoreObjectEfun.class);
 
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
@@ -71,12 +71,12 @@ public class SaveObjectEfun extends AbstractEfun
         ObjectInstance object = ThisObjectEfun.this_object(threadContext);
         try
         {
-            boolean save = new ObjectSerializer(file).save(object, flag == 1);
-            return getValue(save);
+            boolean restored = new ObjectSerializer(file).restore(object, flag == 1);
+            return getValue(restored);
         }
         catch (IOException e)
         {
-            LOG.warn("I/O error during save_object(" + arguments + ")", e);
+            LOG.warn("I/O error during restore_object(" + arguments + ")", e);
             return LpcConstants.INT.FALSE;
         }
     }

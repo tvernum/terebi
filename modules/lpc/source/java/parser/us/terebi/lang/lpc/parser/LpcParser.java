@@ -107,15 +107,6 @@ public class LpcParser
         _sourceFinder = sourceFinder;
     }
 
-    /**
-     * @deprecated Use {@link #parse(Resource)} instead
-     */
-    public ASTObjectDefinition parse(String filename) throws IOException, ParserException
-    {
-        Resource resource = getResource(filename);
-        return parse(resource);
-    }
-
     public String preprocess(Resource resource) throws IOException, LexerException
     {
         if (_sourceFinder != null)

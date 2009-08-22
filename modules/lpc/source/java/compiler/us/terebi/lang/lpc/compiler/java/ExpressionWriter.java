@@ -356,7 +356,7 @@ public class ExpressionWriter extends BaseASTVisitor implements ParserVisitor
 
     public Object visit(ASTConstant node, Object data)
     {
-        Object constant = new ConstantHandler(_context).getConstant(node);
+        Object constant = new ConstantHandler().getConstant(node);
         if (constant instanceof Number)
         {
             if (node.jjtGetFirstToken().kind == ParserConstants.HEXADECIMAL_LITERAL)
