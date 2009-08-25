@@ -21,15 +21,20 @@ package us.terebi.lang.lpc.compiler;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.apache.commons.jci.compilers.CompilationResult;
 import org.apache.commons.jci.compilers.JavaCompiler;
 import org.apache.commons.jci.compilers.JavaCompilerSettings;
+import org.apache.commons.jci.problems.CompilationProblem;
 import org.apache.commons.jci.readers.FileResourceReader;
 import org.apache.commons.jci.stores.FileResourceStore;
-import org.apache.commons.jci.stores.ResourceStore;
-import org.apache.commons.jci.stores.ResourceStoreClassLoader;
 import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
@@ -54,6 +59,13 @@ import us.terebi.util.log.LogContext;
 public class ObjectBuilder implements ObjectCompiler
 {
     private final Logger LOG = Logger.getLogger(ObjectBuilder.class);
+
+    private static final Set<String> RESERVED_WORDS = new HashSet<String>(Arrays.<String> asList("abstract", "assert", "boolean",
+            "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
+            "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface",
+            "long", "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
+            "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "void",
+            "volatile", "while"));
 
     private final ResourceFinder _sourceFinder;
     private final Compiler _compiler;
@@ -80,8 +92,22 @@ public class ObjectBuilder implements ObjectCompiler
         _workingDirectory = workingDirectory;
         _reader = new FileResourceReader(_workingDirectory);
         _store = new FileResourceStore(_workingDirectory);
-        _classLoader = new ResourceStoreClassLoader(getClass().getClassLoader(), new ResourceStore[] { _store });
+        _classLoader = getClassLoader();
         _printStats = null;
+    }
+
+    private URLClassLoader getClassLoader()
+    {
+        try
+        {
+            /*new LoggingClassLoader*/
+            return new URLClassLoader(new URL[] { _workingDirectory.toURL() }, getClass().getClassLoader());
+            // (new ResourceStoreClassLoader(getClass().getClassLoader(), new ResourceStore[] { _store }));
+        }
+        catch (MalformedURLException e)
+        {
+            throw new RuntimeException("!! Cannot File into URL !!", e);
+        }
     }
 
     public void setPrintStats(PrintStream printStats)
@@ -284,9 +310,14 @@ public class ObjectBuilder implements ObjectCompiler
             }
         }
         CompilationResult result = _javaCompiler.compile(new String[] { fileName }, _reader, _store, _classLoader, settings);
-        if (result.getErrors() != null && result.getErrors().length != 0)
+        CompilationProblem[] errors = result.getErrors();
+        if (errors != null && errors.length != 0)
         {
-            throw new CompileException(ast, "Internal Error" + ToString.toString(result.getErrors()));
+            for (CompilationProblem compilationProblem : errors)
+            {
+                LOG.info("Compile problem: " + compilationProblem);
+            }
+            throw new CompileException(ast, "Internal Error" + ToString.toString(errors));
         }
         long end = System.currentTimeMillis();
         if (_printStats != null)
@@ -330,13 +361,22 @@ public class ObjectBuilder implements ObjectCompiler
         }
 
         String cls = dropExtension(resource.getName());
-        cls.replaceAll("[^A-Za-z0-9]", "_");
+        cls = cls.replaceAll("[^A-Za-z0-9]", "_");
+        if (isJavaReservedWord(cls))
+        {
+            cls = "o_" + cls;
+        }
 
         String fileName = "lpc/" + path + '/' + cls + ".java";
         File javaFile = new File(_workingDirectory, fileName);
         javaFile.getParentFile().mkdirs();
         Output output = new Output(pkg, cls, javaFile);
         return output;
+    }
+
+    private boolean isJavaReservedWord(String cls)
+    {
+        return RESERVED_WORDS.contains(cls);
     }
 
     private String dropExtension(String path)
@@ -365,7 +405,7 @@ public class ObjectBuilder implements ObjectCompiler
     {
         return _manager;
     }
-    
+
     public ResourceFinder getSourceFinder()
     {
         return _sourceFinder;

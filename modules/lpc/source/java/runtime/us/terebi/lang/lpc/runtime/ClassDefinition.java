@@ -18,11 +18,10 @@
 
 package us.terebi.lang.lpc.runtime;
 
-import java.util.List;
 
 /**
  */
 public interface ClassDefinition extends UserTypeDefinition, MemberDefinition
 {
-    public ClassInstance newInstance(List<? extends LpcValue> arguments);
+    public ClassInstance newInstance(ObjectInstance owner);
 }

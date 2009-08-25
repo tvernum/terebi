@@ -85,23 +85,38 @@ public class CompiledField implements FieldDefinition
         return _type;
     }
 
+    public LpcReference getReference(UserTypeInstance instance)
+    {
+        Object value = getFieldValue(instance);
+        if (value instanceof LpcReference)
+        {
+            return (LpcReference) value;
+        }
+        return new FieldReference(instance, this);
+    }
+
     public LpcValue getValue(UserTypeInstance instance)
+    {
+        Object value = getFieldValue(instance);
+        if (value instanceof LpcValue)
+        {
+            return (LpcValue) value;
+        }
+        if (value instanceof LpcReference)
+        {
+            return ((LpcReference) value).get();
+        }
+        throw new InternalError("Field " + value + " is not a valid LpcValue type");
+    }
+
+    private Object getFieldValue(UserTypeInstance instance)
     {
         if (instance instanceof CompiledInstance)
         {
             CompiledInstance ci = (CompiledInstance) instance;
             try
             {
-                Object value = _field.get(ci.getImplementingObject());
-                if (value instanceof LpcValue)
-                {
-                    return (LpcValue) value;
-                }
-                if (value instanceof LpcReference)
-                {
-                    return ((LpcReference) value).get();
-                }
-                throw new InternalError("Field " + value + " is not a valid LpcValue type");
+                return _field.get(ci.getImplementingObject());
             }
             catch (LpcRuntimeException e)
             {
@@ -112,10 +127,7 @@ public class CompiledField implements FieldDefinition
                 throw new LpcRuntimeException("Internal Error - " + e.getMessage(), e);
             }
         }
-        else
-        {
-            throw new LpcRuntimeException("Internal Error - Cannot get value from instance of type " + instance.getClass());
-        }
+        throw new LpcRuntimeException("Internal Error - Cannot get value from instance of type " + instance.getClass());
     }
 
     public void initialise(UserTypeInstance instance)

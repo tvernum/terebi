@@ -45,13 +45,33 @@ public class ObjectShell implements Shell
 
     private static final Apply INPUT_HANDLER = new Apply("process_input");
     private static final Apply LOGON_HANDLER = new Apply("logon");
-    
+
     public static final String OBJECT_CONNECTION_ATTRIBUTE = "net.connection";
     public static final String OBJECT_IDLE_ATTRIBUTE = "net.idle";
     private static final String OBJECT_INPUT_HANDLER_ATTRIBUTE = "net.handler.input";
+    private static final String OBJECT_DESTRUCT_LISTENER = "net.connection.listener";
 
     private static final String PREFIX = ObjectShell.class.getName();
     private static final String CONNECTION_OBJECT_ATTRIBUTE = PREFIX + ".object";
+
+    private static final Object DESTRUCT_LISTENER = new ObjectInstance.DestructListener()
+    {
+        public void instanceDestructed(ObjectInstance instance)
+        {
+            try
+            {
+                Connection connection = getConnection(instance);
+                if (connection != null)
+                {
+                    connection.close();
+                }
+            }
+            catch (IOException e)
+            {
+                // Ignore
+            }
+        }
+    };
 
     private final ConnectionObjectFactory _factory;
     private final SystemContext _context;
@@ -67,7 +87,7 @@ public class ObjectShell implements Shell
         RuntimeContext.activate(_context);
         ObjectInstance instance = _factory.getConnectionObject(connection);
         LOG.info("New object " + instance + " for connection " + connection);
-        
+
         if (instance == null)
         {
             // @TODO
@@ -76,8 +96,9 @@ public class ObjectShell implements Shell
             return;
         }
         instance.getAttributes().set(OBJECT_CONNECTION_ATTRIBUTE, connection);
+        instance.getAttributes().set(OBJECT_DESTRUCT_LISTENER, DESTRUCT_LISTENER);
         connection.getAttributes().setAttribute(CONNECTION_OBJECT_ATTRIBUTE, instance);
-        
+
         LOGON_HANDLER.invoke(instance);
     }
 

@@ -49,8 +49,27 @@ class InternalVariable
 
     public InternalVariable(VariableReference var)
     {
-        // @TODO inherited variables
-        this(var.internalName, true, var.type);
+        this(getName(var), true, var.type);
+    }
+
+    private static String getName(VariableReference var)
+    {
+        if (var.objectPath == null)
+        {
+            return var.internalName;
+        }
+        else
+        {
+            StringBuilder builder = new StringBuilder();
+            for (String element : var.objectPath)
+            {
+                builder.append("inherit_");
+                builder.append(element);
+                builder.append(".get().");
+            }
+            builder.append(var.internalName);
+            return builder.toString();
+        }
     }
 
     public void declare(PrintWriter writer)

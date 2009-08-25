@@ -18,8 +18,15 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isClass;
+
+import us.terebi.lang.lpc.runtime.ClassInstance;
+import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ReferenceValue;
 
 /**
  * 
@@ -28,8 +35,21 @@ public class ClassSupport
 {
     public static LpcReference getField(LpcValue value, String fieldName)
     {
-        // @TODO Auto-generated method stub
-        throw new UnsupportedOperationException("getField - Not implemented");
+        if (isClass(value))
+        {
+            ClassInstance cls = value.asClass();
+            FieldDefinition field = cls.getDefinition().getFields().get(fieldName);
+            if (field == null)
+            {
+                // @TODO What is the right sematics here ?
+                return new ReferenceValue(NilValue.INSTANCE);
+            }
+            return field.getReference(cls);
+        }
+        else
+        {
+            throw new LpcRuntimeException("LHS of field reference (" + value + " -> " + fieldName + ") is not a class");
+        }
     }
 
 }

@@ -35,6 +35,7 @@ import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.MemberDefinition;
+import us.terebi.lang.lpc.runtime.jvm.LpcClass;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
 
@@ -51,7 +52,6 @@ public class ClassWriter extends MemberWriter implements ParserVisitor
     @SuppressWarnings("unchecked")
     public Object visit(ASTClassBody node, Object data)
     {
-
         ASTType type = getType();
         Token token = type.jjtGetFirstToken();
         assert (token.kind == ParserConstants.CLASS);
@@ -74,7 +74,9 @@ public class ClassWriter extends MemberWriter implements ParserVisitor
 
         writer.print("public class cls_");
         writer.print(className);
-        writer.println(" extends LpcClassObject {");
+        writer.print(" extends " );
+        writer.print(LpcClass.class.getName());
+        writer.println(" {");
 
         writer.print("public cls_");
         writer.print(className);

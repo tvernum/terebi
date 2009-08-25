@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.compiler;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 
 
@@ -27,7 +28,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 /**
  * 
  */
-public interface CompilerObjectManager extends ObjectManager
+public interface CompilerObjectManager extends ObjectManager, ObjectInstance.DestructListener
 {
     public CompiledObjectDefinition findObject(String name);
     public void registerObject(CompiledObjectDefinition definition);

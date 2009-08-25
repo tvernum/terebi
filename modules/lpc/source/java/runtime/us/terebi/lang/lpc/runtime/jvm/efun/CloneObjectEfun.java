@@ -19,7 +19,6 @@
 package us.terebi.lang.lpc.runtime.jvm.efun;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
@@ -81,7 +80,7 @@ public class CloneObjectEfun extends AbstractEfun implements FunctionSignature, 
     private LpcValue newClass(ClassReference ref)
     {
         ClassDefinition definition = ref.getClassDefinition();
-        ClassInstance instance = definition.newInstance(Collections.<LpcValue> emptyList());
+        ClassInstance instance = definition.newInstance(ref.getOwner());
         return new ClassValue(instance);
     }
 

@@ -54,6 +54,8 @@ public class FunctionalTest
         list.addAll(getTests("varargs.c", builder));
         list.addAll(getTests("mapping.c", builder));
         list.addAll(getTests("array.c", builder));
+        list.addAll(getTests("class.c", builder));
+        list.addAll(getTests("inherit1.c", builder));
         list.addAll(getTests("sprintf.c", builder));
 
         return list;
@@ -83,6 +85,7 @@ public class FunctionalTest
                 {
                     throw e;
                 }
+
                 public String toString()
                 {
                     return file;

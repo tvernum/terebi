@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
@@ -208,6 +209,11 @@ public class TelnetChannelConnection implements Connection
 
     public synchronized void readInput() throws NetException
     {
+        if (!_channel.isConnected())
+        {
+            return;
+        }
+
         InputInfo info = new InputData();
 
         try
@@ -225,6 +231,13 @@ public class TelnetChannelConnection implements Connection
             if (userBuffer.hasRemaining())
             {
                 _shell.inputReceived(userBuffer, info, this);
+            }
+        }
+        catch (ClosedChannelException e)
+        {
+            if (_selectionKey != null)
+            {
+                _selectionKey.cancel();
             }
         }
         catch (IOException e)
@@ -383,6 +396,11 @@ public class TelnetChannelConnection implements Connection
             _writer = new PrintWriter(getOutputStream());
         }
         return _writer;
+    }
+
+    public boolean isOpen()
+    {
+        return _channel.isConnected() && _channel.isOpen();
     }
 
 }

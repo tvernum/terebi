@@ -46,28 +46,28 @@ public class LiteralParserTest
     @Test
     public void parseInteger() throws Exception
     {
-        LpcValue value = new LiteralParser(new ClassLookup()).parse("45");
+        LpcValue value = new LiteralParser(null).parse("45");
         Assert.assertEquals(new IntValue(45), value);
     }
 
     @Test
     public void parseFloat() throws Exception
     {
-        LpcValue value = new LiteralParser(new ClassLookup()).parse("6.7");
+        LpcValue value = new LiteralParser(null).parse("6.7");
         Assert.assertEquals(new FloatValue(6.7), value);
     }
 
     @Test
     public void parseString() throws Exception
     {
-        LpcValue value = new LiteralParser(new ClassLookup()).parse("\"don\\'t\"");
+        LpcValue value = new LiteralParser(null).parse("\"don\\'t\"");
         Assert.assertEquals(new StringValue("don't"), value);
     }
 
     @Test
     public void parseArray() throws Exception
     {
-        LpcValue value = new LiteralParser(new ClassLookup()).parse("({ 1, 1.1, \"1.2\" })");
+        LpcValue value = new LiteralParser(null).parse("({ 1, 1.1, \"1.2\" })");
         Assert.assertTrue(MiscSupport.isArray(value));
         Assert.assertEquals(Types.MIXED_ARRAY, value.getActualType());
         Assert.assertEquals(new IntValue(1), value.asList().get(0));
@@ -78,7 +78,7 @@ public class LiteralParserTest
     @Test
     public void parseMapping() throws Exception
     {
-        LpcValue value = new LiteralParser(new ClassLookup()).parse("([ \"a\" : 1 , \"b\" : 2 ])");
+        LpcValue value = new LiteralParser(null).parse("([ \"a\" : 1 , \"b\" : 2 ])");
         Assert.assertTrue(MiscSupport.isMapping(value));
         Assert.assertEquals(2, value.asMap().size());
         Assert.assertEquals(new IntValue(1), value.asMap().get(new StringValue("a")));
@@ -89,7 +89,7 @@ public class LiteralParserTest
     public void parseClass() throws Exception
     {
         ClassLookup lookup = getClassLookup();
-        LpcValue value = new LiteralParser(lookup).parse("($ Foo : bar = 7 , baz = \"xyzzy\" $)");
+        LpcValue value = new LiteralParser(null, lookup).parse("($ Foo : bar = 7 , baz = \"xyzzy\" $)");
         Assert.assertTrue(MiscSupport.isClass(value));
         ClassInstance cls = value.asClass();
         Map<FieldDefinition, LpcValue> fields = cls.getFieldValues();
@@ -105,7 +105,7 @@ public class LiteralParserTest
     {
         try
         {
-            new LiteralParser(new ClassLookup()).parse("({ 1+1 })");
+            new LiteralParser(null).parse("({ 1+1 })");
             Assert.fail("Addition should not be parsed correctly by literal parser");
         }
         catch (ParseException e)

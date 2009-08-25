@@ -37,9 +37,8 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.LpcType.Kind;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
-import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
-import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
@@ -124,6 +123,11 @@ public class LpcObject
     {
         return Types.getType(Kind.CLASS, cls, depth);
     }
+    
+    protected LpcType withType(Class<? extends LpcClass> cls, int depth)
+    {
+        return withType(classDefinition(cls), depth);
+    }
 
     protected static DynamicClassDefinition createClass(String name, Set< ? extends Modifier> modifiers)
     {
@@ -189,20 +193,12 @@ public class LpcObject
 
     protected LpcValue classReference(Class< ? extends LpcClass> cls)
     {
-        return new ClassReference(classDefinition(cls));
+        return new ClassReference(classDefinition(cls), getObjectInstance());
     }
 
-    protected ClassDefinition classDefinition(Class< ? extends LpcClass> cls)
+    protected  ClassDefinition classDefinition(Class< ? extends LpcClass> cls)
     {
         // @TODO Cache these...
-        try
-        {
-            LpcClass newInstance = cls.newInstance();
-            return newInstance.getClassDefinition();
-        }
-        catch (Exception e)
-        {
-            throw new LpcRuntimeException("Internal Error - Cannot instantiate " + cls);
-        }
+        return LpcClass.getClassDefinition(cls, getObjectDefinition());
     }
 }

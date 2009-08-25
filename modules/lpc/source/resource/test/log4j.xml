@@ -11,7 +11,7 @@
 	</appender>
 
     <logger name="us.terebi.lang.lpc" additivity="true">
-        <level value="DEBUG" />
+        <level value="INFO" />
     </logger>
 
 	<root>

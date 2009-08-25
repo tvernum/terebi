@@ -18,13 +18,19 @@
 
 package us.terebi.lang.lpc.runtime.jvm;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
+import us.terebi.lang.lpc.compiler.java.context.CompiledClass;
+import us.terebi.lang.lpc.compiler.java.context.CompiledClassInstance;
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.object.CompiledField;
 import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
+import us.terebi.util.Factory;
 
 /**
  * 
@@ -59,7 +65,7 @@ public class LpcClass
         return getClassDefinition(cls, declaring);
     }
 
-    public static ClassDefinition getClassDefinition(Class< ? extends LpcClass> cls, ObjectDefinition declaring)
+    public static ClassDefinition getClassDefinition(final Class< ? extends LpcClass> cls, ObjectDefinition declaring)
     {
         // @TODO Cache these by class (weak hash map ?)
         LpcMember annotation = cls.getAnnotation(LpcMember.class);
@@ -67,7 +73,7 @@ public class LpcClass
         {
             throw new LpcRuntimeException("Class object " + cls + " is not annotated with " + LpcMember.class.getSimpleName());
         }
-        DynamicClassDefinition definition = new DynamicClassDefinition(annotation.name(), annotation.modifiers(), declaring);
+        final DynamicClassDefinition definition = new DynamicClassDefinition(annotation.name(), annotation.modifiers(), declaring);
 
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields)
@@ -77,6 +83,32 @@ public class LpcClass
                 definition.addField(new CompiledField(definition, field));
             }
         }
+
+        Factory<CompiledClassInstance> factory = new Factory<CompiledClassInstance>()
+        {
+            public CompiledClassInstance create(Object... arguments)
+            {
+                ObjectInstance owner = (ObjectInstance) arguments[0];
+                CompiledObjectInstance coi = (CompiledObjectInstance) owner;
+                Object io = coi.getImplementingObject();
+                try
+                {
+                    Constructor< ? extends LpcClass> constructor = cls.getConstructor(io.getClass());
+                    LpcClass lpc = constructor.newInstance(io);
+                    return new CompiledClass(definition, lpc);
+                }
+                catch (Exception e)
+                {
+                    throw new LpcRuntimeException("Cannot create class instance", e);
+                }
+            }
+        };
+        definition.setFactory(factory);
         return definition;
     }
+
+    //    public static <C extends LpcClass> C create(Class< ? extends C> type, ObjectInstance owner)
+    //    {
+    //        System.err.println("####" + type.getConstructors());
+    //    }
 }

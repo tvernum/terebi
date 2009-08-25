@@ -1,6 +1,5 @@
 /* ------------------------------------------------------------------------
- * $Id$
- * Copyright 2008 Tim Vernum
+ * Copyright 2009 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,24 +15,29 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime;
+package us.terebi.util.collection;
 
+import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 /**
+ * 
  */
-public interface ObjectInstance extends UserTypeInstance
+public interface MultiMap<K,V>
 {
-    public interface DestructListener
-    {
-        public void instanceDestructed(ObjectInstance instance);
-    }
+    public Map<K,? extends Collection<V>> toMap();
 
-    public ObjectDefinition getDefinition();
-    public Map<String, ? extends ObjectInstance> getInheritedObjects();
-    public long getId();
-    public AttributeMap getAttributes();
-    public String getCanonicalName();
-    public void destruct();
-    public boolean isDestructed();
+    public boolean contains(K key);
+    public boolean contains(K key, V value);
+    
+    public Collection<V> get(K key);
+    public void add(K key, V value);
+    public void addAll(K key, Collection<? extends V> values);
+    public void remove(K key, V value);
+    public void removeAll(K key, Collection<? extends V> values);
+    public void clear(K key);
+    public void set(K key, Collection<? extends V> values);
+    
+    public Set<K> keys();
 }

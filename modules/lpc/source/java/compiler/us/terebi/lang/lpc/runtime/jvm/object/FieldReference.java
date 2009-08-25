@@ -1,5 +1,4 @@
 /* ------------------------------------------------------------------------
- * $Id$
  * Copyright 2009 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,24 +15,46 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.compiler.java.context;
+package us.terebi.lang.lpc.runtime.jvm.object;
 
-import java.util.List;
-import java.util.Map;
-
-import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
+import us.terebi.lang.lpc.runtime.FieldDefinition;
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.ObjectDefinition;
-import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.UserTypeInstance;
+import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 
 /**
  * 
  */
-public interface CompiledObjectDefinition extends ObjectDefinition, ObjectInstance.DestructListener
+public class FieldReference implements LpcReference
 {
-    public Class<?> getImplementationClass(); 
-    public CompiledObjectInstance getMasterInstance();
-    public CompiledObjectInstance newInstance(List<? extends LpcValue> arguments);
-    public CompiledObjectInstance getInheritableInstance();
-    public Map<String, ? extends CompiledMethodDefinition> getMethods();
+    private final UserTypeInstance _instance;
+    private final FieldDefinition _field;
+
+    public FieldReference(UserTypeInstance instance, FieldDefinition field)
+    {
+        _instance = instance;
+        _field = field;
+    }
+
+    public LpcValue get()
+    {
+        return _field.getValue(_instance);
+    }
+
+    public LpcType getType()
+    {
+        return _field.getType();
+    }
+
+    public boolean isSet()
+    {
+        return _field.getValue(_instance) != null;
+    }
+
+    public void set(LpcValue value)
+    {
+        _field.setValue(_instance, value);
+    }
+
 }

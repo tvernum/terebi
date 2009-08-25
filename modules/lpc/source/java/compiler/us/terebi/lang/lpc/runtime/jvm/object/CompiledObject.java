@@ -43,24 +43,47 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
     private final Destructable<T> _object;
     private final Map<String, ? extends ObjectInstance> _parents;
     private final AttributeMap _attributes;
+    private boolean _destructed;
 
-    public CompiledObject(CompiledObjectDefinition definition, long id, T object,
-            Map<String, ? extends ObjectInstance> parents)
+    public CompiledObject(CompiledObjectDefinition definition, long id, T object, Map<String, ? extends ObjectInstance> parents)
     {
         _definition = definition;
         _id = id;
         _object = new Destructable<T>(object);
         _parents = Collections.unmodifiableMap(parents);
         _attributes = new Attributes();
+        _destructed = false;
     }
 
     public void destruct()
     {
+        if (_destructed)
+        {
+            return;
+        }
+        _destructed = true;
+
+        for (Object object : _attributes.asMap().values())
+        {
+            if (object instanceof DestructListener)
+            {
+                ((DestructListener) object).instanceDestructed(this);
+            }
+        }
+        _definition.instanceDestructed(this);
         _attributes.asMap().clear();
-        _parents.clear();
+        for (ObjectInstance parent : _parents.values())
+        {
+            parent.destruct();
+        }
         _object.destroy();
     }
-    
+
+    public boolean isDestructed()
+    {
+        return _destructed;
+    }
+
     public CompiledObjectDefinition getDefinition()
     {
         return _definition;
@@ -108,7 +131,7 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
         }
         return values;
     }
-    
+
     public String toString()
     {
         return getCanonicalName();

@@ -18,6 +18,8 @@
 
 package us.terebi.lang.lpc.runtime;
 
+import us.terebi.lang.lpc.runtime.jvm.LpcReference;
+
 
 
 /**
@@ -27,6 +29,7 @@ public interface FieldDefinition extends MemberDefinition
 {
     public LpcType getType();
     
+    public LpcReference getReference(UserTypeInstance instance);
     public LpcValue getValue(UserTypeInstance instance);
     public void setValue(UserTypeInstance instance, LpcValue value);
     public void initialise(UserTypeInstance instance);

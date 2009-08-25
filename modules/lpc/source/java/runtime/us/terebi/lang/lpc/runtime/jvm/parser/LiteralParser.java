@@ -19,7 +19,6 @@ package us.terebi.lang.lpc.runtime.jvm.parser;
 
 import java.io.StringReader;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +45,7 @@ import us.terebi.lang.lpc.runtime.ClassInstance;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
@@ -60,10 +60,17 @@ import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
  */
 public class LiteralParser extends BaseASTVisitor
 {
+    private final ObjectInstance _owner;
     private final ClassLookup _lookup;
 
-    public LiteralParser(ClassLookup lookup)
+    public LiteralParser(ObjectInstance owner)
     {
+        this(owner, new ClassLookup(owner));
+    }
+
+    public LiteralParser(ObjectInstance owner, ClassLookup lookup)
+    {
+        _owner = owner;
         _lookup = lookup;
     }
 
@@ -101,7 +108,7 @@ public class LiteralParser extends BaseASTVisitor
     {
         ASTIdentifier ident = (ASTIdentifier) node.jjtGetChild(0);
         ClassDefinition definition = _lookup.findClass(ident);
-        ClassInstance instance = definition.newInstance(Collections.<LpcValue> emptyList());
+        ClassInstance instance = definition.newInstance(_owner);
         for (int i = 1; i < node.jjtGetNumChildren(); i++)
         {
             Node child = node.jjtGetChild(i);

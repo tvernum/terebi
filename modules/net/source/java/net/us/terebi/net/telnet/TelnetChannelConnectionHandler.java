@@ -172,6 +172,10 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
             {
                 public void run()
                 {
+                    if (!connection.isOpen())
+                    {
+                        return;
+                    }
                     key.interestOps(SelectionKey.OP_READ);
                     readConnection(connection);
                 }

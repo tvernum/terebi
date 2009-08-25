@@ -27,6 +27,7 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.UserTypeDefinition;
 import us.terebi.lang.lpc.runtime.UserTypeInstance;
+import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 
 public class CompileTimeField implements FieldDefinition
 {
@@ -44,6 +45,11 @@ public class CompileTimeField implements FieldDefinition
     public LpcType getType()
     {
         return _fieldType;
+    }
+
+    public LpcReference getReference(UserTypeInstance instance)
+    {
+        throw new UnsupportedOperationException("getReference - Not implemented");
     }
 
     public LpcValue getValue(UserTypeInstance instance)
@@ -80,5 +86,4 @@ public class CompileTimeField implements FieldDefinition
     {
         return _name;
     }
-
 }

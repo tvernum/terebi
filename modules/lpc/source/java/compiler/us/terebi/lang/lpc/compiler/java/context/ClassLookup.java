@@ -49,8 +49,11 @@ public class ClassLookup
     public ClassLookup(ObjectInstance object)
     {
         this();
-        addInherits(object.getDefinition().getInheritedObjects());
-        defineClasses(object.getDefinition().getDefinedClasses().values());
+        if (object != null)
+        {
+            addInherits(object.getDefinition().getInheritedObjects());
+            defineClasses(object.getDefinition().getDefinedClasses().values());
+        }
     }
 
     public ClassDefinition findClass(ASTIdentifier classNode)

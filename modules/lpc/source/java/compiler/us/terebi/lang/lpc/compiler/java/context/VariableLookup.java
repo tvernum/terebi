@@ -17,16 +17,21 @@
 
 package us.terebi.lang.lpc.compiler.java.context;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
+import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.util.collection.ArrayStack;
+import us.terebi.util.collection.MultiHashMap;
+import us.terebi.util.collection.MultiMap;
 import us.terebi.util.collection.Stack;
 
 /**
@@ -82,11 +87,13 @@ public class VariableLookup
     }
 
     private int _internalVariableCount;
+    private MultiMap<String, VariableReference> _inherited;
     private Stack<Map<String, VariableReference>> _stack;
 
     public VariableLookup()
     {
         _internalVariableCount = 0;
+        _inherited = new MultiHashMap<String, VariableReference>();
         _stack = new ArrayStack<Map<String, VariableReference>>();
     }
 
@@ -95,17 +102,17 @@ public class VariableLookup
         return "_lpc_v" + (++_internalVariableCount);
     }
 
-    public void addInherit(@SuppressWarnings("unused")
-    String name, @SuppressWarnings("unused")
-    ObjectDefinition parent)
+    public void addInherit(String name, ObjectDefinition parent)
     {
-        // @TODO Auto-generated method stub
+        for (FieldDefinition field : parent.getFields().values())
+        {
+            _inherited.add(field.getName(), VariableReference.field(field.getName(), field.getType(), parent, Arrays.asList(name)));
+        }
     }
 
     public void pushScope()
     {
         HashMap<String, VariableReference> frame = new HashMap<String, VariableReference>();
-        //  System.err.println("Adding frame " + frame);
         _stack.push(frame);
     }
 
@@ -113,7 +120,6 @@ public class VariableLookup
     {
         @SuppressWarnings("unused")
         Map<String, VariableReference> frame = _stack.pop();
-        //  System.err.println("Dropping frame " + frame);
     }
 
     public VariableReference getVariableInFrame(String name)
@@ -131,8 +137,30 @@ public class VariableLookup
                 return var;
             }
         }
-        // @TODO inherited ?
-        return null;
+        Collection<VariableReference> inherit = _inherited.get(name);
+        if (inherit == null)
+        {
+            return null;
+        }
+        switch (inherit.size())
+        {
+            case 0:
+                return null;
+
+            case 1:
+                return inherit.iterator().next();
+
+            default:
+                {
+                    StringBuilder where = new StringBuilder();
+                    for (VariableReference var : inherit)
+                    {
+                        where.append(var.object.getName());
+                        where.append(',');
+                    }
+                    throw new LookupException("The inherit variable " + name + " exists in " + where);
+                }
+        }
     }
 
     public VariableReference declareLocal(String name, LpcType type)

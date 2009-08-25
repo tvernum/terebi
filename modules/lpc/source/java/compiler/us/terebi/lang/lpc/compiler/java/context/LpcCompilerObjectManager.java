@@ -64,10 +64,15 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         CompiledObjectDefinition definition = _definitions.get(normalise(name));
         if (definition == null && _compiler != null)
         {
-            definition = _compiler.compile(name);
+            definition = _compiler.compile(filename(name));
             registerObject(definition);
         }
         return definition;
+    }
+
+    private String filename(String name)
+    {
+        return normalise(name) + ".c";
     }
 
     public void registerObject(CompiledObjectDefinition object)
@@ -193,4 +198,10 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         }
         return findObject(_sefun).getMasterInstance();
     }
+
+    public void instanceDestructed(ObjectInstance instance)
+    {
+        _objects.values().remove(instance);
+    }
+
 }

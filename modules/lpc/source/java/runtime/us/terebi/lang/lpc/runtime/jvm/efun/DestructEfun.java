@@ -26,6 +26,7 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -48,7 +49,8 @@ public class DestructEfun extends AbstractEfun implements FunctionSignature, Cal
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
+        ObjectInstance instance = arguments.get(0).asObject();
+        instance.destruct();
         return VoidValue.INSTANCE;
     }
 

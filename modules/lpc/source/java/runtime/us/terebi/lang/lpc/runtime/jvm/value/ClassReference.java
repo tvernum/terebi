@@ -21,6 +21,7 @@ package us.terebi.lang.lpc.runtime.jvm.value;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ExtensionType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 
 /**
  * 
@@ -36,11 +37,13 @@ public class ClassReference extends AbstractExtension
     };
 
     private final ClassDefinition _definition;
+    private final ObjectInstance _owner;
 
-    public ClassReference(ClassDefinition definition)
+    public ClassReference(ClassDefinition definition, ObjectInstance owner)
     {
         super(TYPE);
         _definition = definition;
+        _owner = owner;
     }
 
     protected CharSequence getDescription()
@@ -68,6 +71,11 @@ public class ClassReference extends AbstractExtension
     public ClassDefinition getClassDefinition()
     {
         return _definition;
+    }
+
+    public ObjectInstance getOwner()
+    {
+        return _owner;
     }
 
     public CharSequence debugInfo()

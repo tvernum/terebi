@@ -22,7 +22,7 @@ public class clazz extends LpcObject
 
 /* Class huh (Line:7) */
     @us.terebi.lang.lpc.runtime.jvm.LpcMember(name="huh", modifiers={us.terebi.lang.lpc.runtime.MemberDefinition.Modifier.PRIVATE})
-    public class cls_huh extends LpcClassObject
+    public class cls_huh extends us.terebi.lang.lpc.runtime.jvm.LpcClass
     {
         public cls_huh()
         {

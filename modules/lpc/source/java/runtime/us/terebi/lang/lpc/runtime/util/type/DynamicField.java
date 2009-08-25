@@ -25,6 +25,8 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.UserTypeDefinition;
 import us.terebi.lang.lpc.runtime.UserTypeInstance;
+import us.terebi.lang.lpc.runtime.jvm.LpcReference;
+import us.terebi.lang.lpc.runtime.jvm.object.FieldReference;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 
 /**
@@ -56,6 +58,11 @@ public class DynamicField implements FieldDefinition
     public LpcType getType()
     {
         return _type;
+    }
+
+    public LpcReference getReference(UserTypeInstance instance)
+    {
+        return new FieldReference(instance, this);
     }
 
     public LpcValue getValue(UserTypeInstance instance)

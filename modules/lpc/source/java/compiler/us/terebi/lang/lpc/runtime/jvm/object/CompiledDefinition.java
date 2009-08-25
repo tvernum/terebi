@@ -57,6 +57,7 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
 
     private static final Apply CREATE = new Apply("create");
 
+    private final CompilerObjectManager _manager;
     private final ScopeLookup _lookup;
     private final Class< ? extends T> _implementation;
     private final Map<String, CompiledObjectDefinition> _inherited;
@@ -69,6 +70,7 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
 
     public CompiledDefinition(CompilerObjectManager manager, ScopeLookup lookup, String name, Class< ? extends T> implementation)
     {
+        _manager = manager;
         _lookup = lookup;
         _name = name;
         _implementation = implementation;
@@ -285,5 +287,14 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
     public String toString()
     {
         return getClass().getSimpleName() + "{" + _name + ":" + _implementation + "}";
+    }
+
+    public void instanceDestructed(ObjectInstance instance)
+    {
+        if (instance == _master)
+        {
+            _master = null;
+        }
+        _manager.instanceDestructed(instance);
     }
 }

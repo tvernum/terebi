@@ -37,7 +37,7 @@ void new_password(string input, int count)
     }
 }
 
-void read_password(string input)
+void read_password(string input, int count)
 {
     if( _password == input) 
     {
@@ -46,8 +46,13 @@ void read_password(string input)
     else
     {
         write("Incorrect password for " + _user + "\n");
+        if(count >= 3)
+        {
+            destruct(this_object());
+            return;
+        }
         write("Password: ");
-        efun::input_to( "read_password", INPUT_NO_ESCAPE | INPUT_NO_ECHO );
+        efun::input_to( "read_password", INPUT_NO_ESCAPE | INPUT_NO_ECHO , count+1 );
     }
 }
 
@@ -66,7 +71,7 @@ public void read_user(string input)
     {
         restore_object(save_file, 1);
         write("Password: ");
-        efun::input_to( "read_password", INPUT_NO_ESCAPE | INPUT_NO_ECHO );
+        efun::input_to( "read_password", INPUT_NO_ESCAPE | INPUT_NO_ECHO, 0 );
     }
     else
     {
