@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   id="svg2457"
+   sodipodi:version="0.32"
+   inkscape:version="0.46"
+   width="256"
+   height="256"
+   version="1.0"
+   sodipodi:docname="terebi-orange-globe.svg"
+   inkscape:output_extension="org.inkscape.output.svg.inkscape"
+   inkscape:export-filename="/Users/tim/Desktop/icons/Favs/terebi-orange-globe.png"
+   inkscape:export-xdpi="90"
+   inkscape:export-ydpi="90">
+  <metadata
+     id="metadata2462">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs2460">
+    <linearGradient
+       id="linearGradient3308">
+      <stop
+         id="stop3310"
+         offset="0"
+         style="stop-color:#a88639;stop-opacity:1;" />
+      <stop
+         style="stop-color:#ecb847;stop-opacity:1;"
+         offset="0.29999989"
+         id="stop3312" />
+      <stop
+         id="stop3314"
+         offset="1"
+         style="stop-color:#dfa71c;stop-opacity:0;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3296">
+      <stop
+         id="stop3298"
+         offset="0"
+         style="stop-color:#a88639;stop-opacity:1;" />
+      <stop
+         style="stop-color:#ecb847;stop-opacity:1;"
+         offset="0.51835537"
+         id="stop3300" />
+      <stop
+         id="stop3302"
+         offset="1"
+         style="stop-color:#dfa71c;stop-opacity:0;" />
+    </linearGradient>
+    <linearGradient
+       id="linearGradient3278">
+      <stop
+         style="stop-color:#a88639;stop-opacity:1;"
+         offset="0"
+         id="stop3280" />
+      <stop
+         id="stop3288"
+         offset="0.40000001"
+         style="stop-color:#ecb847;stop-opacity:1;" />
+      <stop
+         style="stop-color:#dfa71c;stop-opacity:0;"
+         offset="1"
+         id="stop3282" />
+    </linearGradient>
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective2464" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3278"
+       id="linearGradient3286"
+       x1="192.71616"
+       y1="67.402603"
+       x2="169.38223"
+       y2="90.736526"
+       gradientUnits="userSpaceOnUse" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3296"
+       id="linearGradient3294"
+       gradientUnits="userSpaceOnUse"
+       x1="175.25308"
+       y1="84.865677"
+       x2="170.12898"
+       y2="89.989777" />
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient3308"
+       id="linearGradient3306"
+       gradientUnits="userSpaceOnUse"
+       x1="181.67415"
+       y1="78.444618"
+       x2="169.35977"
+       y2="90.758995" />
+  </defs>
+  <sodipodi:namedview
+     inkscape:window-height="822"
+     inkscape:window-width="1440"
+     inkscape:pageshadow="2"
+     inkscape:pageopacity="0.0"
+     guidetolerance="10.0"
+     gridtolerance="10.0"
+     objecttolerance="10.0"
+     borderopacity="1.0"
+     bordercolor="#666666"
+     pagecolor="#ffffff"
+     id="base"
+     showgrid="false"
+     inkscape:zoom="3.4335938"
+     inkscape:cx="127.4543"
+     inkscape:cy="136.34952"
+     inkscape:window-x="0"
+     inkscape:window-y="22"
+     inkscape:current-layer="svg2457" />
+  <image
+     xlink:href="Orange-globe.png"
+     sodipodi:absref="/Users/tim/Desktop/icons/Favs/Orange-globe.png"
+     width="256"
+     height="256"
+     id="image2466"
+     x="0"
+     y="0" />
+  <path
+     sodipodi:type="arc"
+     style="fill:none;fill-opacity:1;stroke:url(#linearGradient3306);stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     id="path3276"
+     sodipodi:cx="128.09332"
+     sodipodi:cy="127.90668"
+     sodipodi:rx="74.534851"
+     sodipodi:ry="74.534851"
+     d="M 202.62817,127.90668 A 74.534851,74.534851 0 1 1 53.558472,127.90668 A 74.534851,74.534851 0 1 1 202.62817,127.90668 z"
+     transform="translate(2,-6)" />
+  <path
+     transform="translate(4,-8)"
+     d="M 191.11636,127.90668 A 63.023033,63.023033 0 1 1 65.07029,127.90668 A 63.023033,63.023033 0 1 1 191.11636,127.90668 z"
+     sodipodi:ry="63.023033"
+     sodipodi:rx="63.023033"
+     sodipodi:cy="127.90668"
+     sodipodi:cx="128.09332"
+     id="path3290"
+     style="fill:none;fill-opacity:1;stroke:url(#linearGradient3294);stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     sodipodi:type="arc" />
+  <path
+     transform="translate(0,-2)"
+     d="M 216.55522,127.90668 A 88.461899,88.461899 0 1 1 39.631424,127.90668 A 88.461899,88.461899 0 1 1 216.55522,127.90668 z"
+     sodipodi:ry="88.461899"
+     sodipodi:rx="88.461899"
+     sodipodi:cy="127.90668"
+     sodipodi:cx="128.09332"
+     id="path3304"
+     style="fill:none;fill-opacity:1;stroke:url(#linearGradient3286);stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     sodipodi:type="arc" />
+  <path
+     transform="matrix(-1,0,0,-1,264.18665,255.81335)"
+     d="M 193.21179,124.35655 A 65.215172,65.215172 0 1 1 144.97227,64.913664"
+     sodipodi:ry="65.215172"
+     sodipodi:rx="65.215172"
+     sodipodi:cy="127.90668"
+     sodipodi:cx="128.09332"
+     id="path3324"
+     style="fill:none;fill-opacity:1;stroke:none;stroke-width:3;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+     sodipodi:type="arc"
+     sodipodi:start="6.2287212"
+     sodipodi:end="11.257374"
+     sodipodi:open="true" />
+  <text
+     xml:space="preserve"
+     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#43310e;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1;font-family:BlairMdITC TT;-inkscape-font-specification:BlairMdITC TT"
+     id="text3338"
+     sodipodi:linespacing="125%"
+     transform="translate(-8,-2)"><textPath
+       xlink:href="#path3324"
+       id="textPath3344"><tspan
+   id="tspan3340"
+   style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#43310e;fill-opacity:1;font-family:BlairMdITC TT;-inkscape-font-specification:BlairMdITC TT"><tspan
+     id="tspan3342"
+     y="63.064583"
+     x="45.15625"
+     style="font-size:20px;font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;text-align:start;line-height:125%;writing-mode:lr-tb;text-anchor:start;fill:#43310e;fill-opacity:1;font-family:BlairMdITC TT;-inkscape-font-specification:BlairMdITC TT">Terebi</tspan></tspan></textPath></text>
+</svg>
