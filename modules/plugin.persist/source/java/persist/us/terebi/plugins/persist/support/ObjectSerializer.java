@@ -203,7 +203,7 @@ public class ObjectSerializer
 
         ClassLookup lookup = new ClassLookup(object);
 
-        LiteralParser parser = new LiteralParser(lookup);
+        LiteralParser parser = new LiteralParser(object);
         for (;;)
         {
             String line = reader.readLine();
