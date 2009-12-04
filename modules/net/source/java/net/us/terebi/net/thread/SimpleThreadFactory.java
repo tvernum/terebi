@@ -19,11 +19,15 @@ package us.terebi.net.thread;
 
 import java.util.concurrent.ThreadFactory;
 
+import org.apache.log4j.Logger;
+
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
  */
 public class SimpleThreadFactory implements ThreadFactory
 {
+    private final Logger LOG = Logger.getLogger(SimpleThreadFactory.class);
+
     private String _prefix;
     private int _id;
     private int _priority;
@@ -53,6 +57,10 @@ public class SimpleThreadFactory implements ThreadFactory
         Thread thread = new Thread(r, name);
         thread.setPriority(_priority);
         thread.setDaemon(_daemon);
+        if (LOG.isDebugEnabled())
+        {
+            LOG.info("New thread " + thread);
+        }
         return thread;
     }
 

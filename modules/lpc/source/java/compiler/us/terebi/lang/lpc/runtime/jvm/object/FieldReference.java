@@ -52,9 +52,10 @@ public class FieldReference implements LpcReference
         return _field.getValue(_instance) != null;
     }
 
-    public void set(LpcValue value)
+    public LpcValue set(LpcValue value)
     {
         _field.setValue(_instance, value);
+        return value;
     }
 
 }

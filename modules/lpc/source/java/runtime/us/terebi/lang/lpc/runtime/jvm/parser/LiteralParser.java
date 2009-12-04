@@ -23,8 +23,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import us.terebi.lang.lpc.compiler.java.ConstantHandler;
 import us.terebi.lang.lpc.compiler.java.context.ClassLookup;
+import us.terebi.lang.lpc.compiler.util.ConstantHandler;
+import us.terebi.lang.lpc.compiler.util.MathLength;
 import us.terebi.lang.lpc.parser.ast.ASTArrayElement;
 import us.terebi.lang.lpc.parser.ast.ASTArrayLiteral;
 import us.terebi.lang.lpc.parser.ast.ASTClassElement;
@@ -34,12 +35,13 @@ import us.terebi.lang.lpc.parser.ast.ASTIdentifier;
 import us.terebi.lang.lpc.parser.ast.ASTLiteralValue;
 import us.terebi.lang.lpc.parser.ast.ASTMappingElement;
 import us.terebi.lang.lpc.parser.ast.ASTMappingLiteral;
-import us.terebi.lang.lpc.parser.ast.ASTUtil;
-import us.terebi.lang.lpc.parser.ast.BaseASTVisitor;
 import us.terebi.lang.lpc.parser.ast.Node;
 import us.terebi.lang.lpc.parser.ast.SimpleNode;
+import us.terebi.lang.lpc.parser.ast.TokenNode;
 import us.terebi.lang.lpc.parser.jj.ParseException;
 import us.terebi.lang.lpc.parser.jj.Parser;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
+import us.terebi.lang.lpc.parser.util.BaseASTVisitor;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ClassInstance;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
@@ -90,7 +92,7 @@ public class LiteralParser extends BaseASTVisitor
     public ArrayValue visit(ASTArrayLiteral node, Object data)
     {
         List<LpcValue> list = new ArrayList<LpcValue>(node.jjtGetNumChildren());
-        for (SimpleNode child : ASTUtil.children(node))
+        for (TokenNode child : ASTUtil.children(node))
         {
             LpcValue value = (LpcValue) child.jjtAccept(this, data);
             list.add(value);
@@ -133,7 +135,7 @@ public class LiteralParser extends BaseASTVisitor
 
     public Object visit(ASTConstant node, Object data)
     {
-        Object constant = new ConstantHandler().getConstant(node);
+        Object constant = new ConstantHandler().getConstant(node, MathLength.MATH_64_BIT);
         if (constant instanceof Long)
         {
             Long num = (Long) constant;
@@ -160,7 +162,7 @@ public class LiteralParser extends BaseASTVisitor
     public MappingValue visit(ASTMappingLiteral node, Object data)
     {
         Map<LpcValue, LpcValue> map = new HashMap<LpcValue, LpcValue>(node.jjtGetNumChildren());
-        for (SimpleNode child : ASTUtil.children(node))
+        for (TokenNode child : ASTUtil.children(node))
         {
             child.jjtAccept(this, map);
         }

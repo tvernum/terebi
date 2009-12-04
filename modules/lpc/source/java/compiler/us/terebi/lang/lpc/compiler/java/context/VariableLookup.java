@@ -17,18 +17,26 @@
 
 package us.terebi.lang.lpc.compiler.java.context;
 
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.adjective.stout.core.UnresolvedType;
+import org.adjective.stout.impl.ParameterisedClassImpl;
+import org.adjective.stout.operation.Expression;
+import org.adjective.stout.operation.ThisExpression;
+import org.adjective.stout.operation.VM;
+
+import us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.util.Pair;
 import us.terebi.util.collection.ArrayStack;
 import us.terebi.util.collection.MultiHashMap;
 import us.terebi.util.collection.MultiMap;
@@ -37,58 +45,184 @@ import us.terebi.util.collection.Stack;
 /**
  * 
  */
-public class VariableLookup
+public class VariableLookup implements VariableResolver
 {
-    public enum Kind
+    public static class ObjectPath
     {
-        FIELD, PARAMETER, REF, LOCAL;
-    }
+        enum Type
+        {
+            INHERIT, FIELD, ENCLOSING;
+        }
 
-    public static class VariableReference
-    {
-        public final Kind kind;
-        public final String name;
+        public final String lpcName;
         public final String internalName;
-        public final LpcType type;
-        public final ObjectDefinition object;
-        public final String[] objectPath;
+        public final Type type;
+        public final ObjectDefinition definition;
 
-        private VariableReference(Kind k, String n, String internal, LpcType t, ObjectDefinition o, String[] path)
+        @SuppressWarnings("hiding")
+        private ObjectPath(String lpcName, String internalName, Type type, ObjectDefinition definition)
         {
-            kind = k;
-            name = n;
-            internalName = internal;
-            type = t;
-            object = o;
-            objectPath = path;
-        }
-
-        public static VariableReference field(String name, LpcType type, ObjectDefinition o, List<String> objectPath)
-        {
-            String[] path = (objectPath == null ? null : objectPath.toArray(new String[objectPath.size()]));
-            return new VariableReference(Kind.FIELD, name, "_f_" + name, type, o, path);
-        }
-
-        public static VariableReference parameter(String name, ArgumentSemantics semantics, LpcType type)
-        {
-            return new VariableReference(semantics == ArgumentSemantics.BY_VALUE ? Kind.PARAMETER : Kind.REF, name, "_p_" + name,
-                    type, null, null);
-        }
-
-        public static VariableReference local(String name, LpcType type)
-        {
-            return new VariableReference(Kind.LOCAL, name, "_l_" + name, type, null, null);
+            this.lpcName = lpcName;
+            this.internalName = internalName;
+            this.type = type;
+            this.definition = definition;
         }
 
         public String toString()
         {
-            return getClass().getSimpleName() + "{" + kind + " " + type + " " + name + "(" + internalName + ")}";
+            return lpcName;
+        }
+
+        public static Pair<Expression, UnresolvedType> findTarget(VariableLookup.ObjectPath[] path)
+        {
+            Expression target = ThisExpression.INSTANCE;
+            UnresolvedType type = null;
+
+            for (VariableLookup.ObjectPath step : path)
+            {
+                if (step.type == Type.INHERIT)
+                {
+                    Expression inherited = VM.Expression.getField(target, type, "inherit_" + step.internalName,
+                            ByteCodeConstants.INHERITED_OBJECT_TYPE);
+                    target = VM.Expression.callMethod(inherited, ByteCodeConstants.INHERITED_OBJECT_TYPE, ByteCodeConstants.INHERITED_OBJECT_GET);
+                }
+                else
+                {
+                    throw new UnsupportedOperationException("findTarget(" + step.type + ") - Not implemented");
+                }
+                if (!(step.definition instanceof CompiledObjectDefinition))
+                {
+                    throw new UnsupportedOperationException("Calls to non compiled methods are not yet implemented");
+                }
+                CompiledObjectDefinition definition = (CompiledObjectDefinition) step.definition;
+                type = new ParameterisedClassImpl(definition.getImplementationClass());
+                target = VM.Expression.cast(type, target);
+            }
+
+            return new Pair<Expression, UnresolvedType>(target, type);
+        }
+
+        public static ObjectPath inherit(String scope, ObjectDefinition object)
+        {
+            return new ObjectPath(scope, scope, Type.INHERIT, object);
+        }
+
+        public static ObjectPath enclosing(String name, ObjectDefinition object)
+        {
+            return new ObjectPath("", name, Type.ENCLOSING, object);
         }
     }
 
+    public static class VariableReference implements VariableResolution
+    {
+        private static final ObjectPath[] EMPTY_PATH = new ObjectPath[0];
+
+        public final VariableResolution.Kind kind;
+        public final String name;
+        public final String _internalName;
+        public final LpcType type;
+        public final ObjectPath[] objectPath;
+
+        private VariableReference(VariableResolution.Kind k, String n, String internal, LpcType t, ObjectPath[] path)
+        {
+            kind = k;
+            name = n;
+            _internalName = internal;
+            type = t;
+            objectPath = (path == null ? EMPTY_PATH : path);
+        }
+
+        public static VariableReference field(String name, String internalName, LpcType type, List<ObjectPath> objectPath)
+        {
+            ObjectPath[] path = (objectPath == null ? null : objectPath.toArray(new ObjectPath[objectPath.size()]));
+            if (internalName == null)
+            {
+                internalName = name;
+            }
+            return new VariableReference(VariableResolution.Kind.FIELD, name, internalName, type, path);
+        }
+
+        public static VariableReference parameter(String name, ArgumentSemantics semantics, LpcType type)
+        {
+            Kind kind = semantics == ArgumentSemantics.BY_VALUE ? VariableResolution.Kind.PARAMETER : VariableResolution.Kind.REF;
+            return new VariableReference(kind, name, name, type, null);
+        }
+
+        public static VariableReference local(String name, LpcType type)
+        {
+            return new VariableReference(VariableResolution.Kind.LOCAL, name, name, type, null);
+        }
+
+        public static VariableReference enclosing(String name, String internalName, LpcType type)
+        {
+            return new VariableReference(Kind.ENCLOSING, name, internalName, type, null);
+        }
+
+        public static VariableReference internal(String name, LpcType type)
+        {
+            return new VariableReference(Kind.INTERNAL, name, name, type, null);
+        }
+
+
+        public static VariableReference enclosed(VariableReference ref, ObjectDefinition enclosingObject, String enclosingPath)
+        {
+            ObjectPath[] path = new ObjectPath[1 + (ref.objectPath == null ? 0 : ref.objectPath.length)];
+            path[0] = ObjectPath.enclosing(enclosingPath, enclosingObject);
+            if (path.length > 1)
+            {
+                System.arraycopy(ref.objectPath, 0, path, 1, ref.objectPath.length);
+            }
+            return new VariableReference(ref.kind, ref.name, ref._internalName, ref.type, path);
+        }
+
+        public String toString()
+        {
+            return getClass().getSimpleName() + "{" + kind + " " + type + " " + name + "(" + _internalName + ")}";
+        }
+
+        public Expression access()
+        {
+            if (kind == VariableResolution.Kind.FIELD)
+            {
+                Pair<Expression, UnresolvedType> target = ObjectPath.findTarget(objectPath);
+                return VM.Expression.getField(target.getFirst(), target.getSecond(), _internalName, ByteCodeConstants.LPC_FIELD);
+            }
+            else if (kind == VariableResolution.Kind.ENCLOSING)
+            {
+                Pair<Expression, UnresolvedType> target = ObjectPath.findTarget(objectPath);
+                return VM.Expression.getField(target.getFirst(), target.getSecond(), _internalName, ByteCodeConstants.LPC_REFERENCE);
+            }
+            else
+            {
+                return VM.Expression.variable(_internalName);
+            }
+        }
+
+        public String internalName()
+        {
+            return _internalName;
+        }
+
+        public String lpcName()
+        {
+            return name;
+        }
+
+        public LpcType type()
+        {
+            return type;
+        }
+
+        public VariableResolution.Kind kind()
+        {
+            return kind;
+        }
+
+    }
+
     private int _internalVariableCount;
-    private MultiMap<String, VariableReference> _inherited;
-    private Stack<Map<String, VariableReference>> _stack;
+    private final MultiMap<String, VariableReference> _inherited;
+    private final Stack<Map<String, VariableReference>> _stack;
 
     public VariableLookup()
     {
@@ -99,14 +233,15 @@ public class VariableLookup
 
     public String allocateInternalVariableName()
     {
-        return "_lpc_v" + (++_internalVariableCount);
+        return "lpc$" + (++_internalVariableCount);
     }
 
     public void addInherit(String name, ObjectDefinition parent)
     {
         for (FieldDefinition field : parent.getFields().values())
         {
-            _inherited.add(field.getName(), VariableReference.field(field.getName(), field.getType(), parent, Arrays.asList(name)));
+            List<ObjectPath> path = Collections.singletonList(ObjectPath.inherit(name, parent));
+            _inherited.add(field.getName(), VariableReference.field(field.getName(), null, field.getType(), path));
         }
     }
 
@@ -138,29 +273,30 @@ public class VariableLookup
             }
         }
         Collection<VariableReference> inherit = _inherited.get(name);
-        if (inherit == null)
+        if (inherit != null)
         {
-            return null;
-        }
-        switch (inherit.size())
-        {
-            case 0:
-                return null;
+            switch (inherit.size())
+            {
+                case 0:
+                    break;
 
-            case 1:
-                return inherit.iterator().next();
+                case 1:
+                    return inherit.iterator().next();
 
-            default:
-                {
-                    StringBuilder where = new StringBuilder();
-                    for (VariableReference var : inherit)
+                default:
                     {
-                        where.append(var.object.getName());
-                        where.append(',');
+                        StringBuilder where = new StringBuilder();
+                        for (VariableReference var : inherit)
+                        {
+                            where.append(var.objectPath[0].lpcName);
+                            where.append(',');
+                        }
+                        throw new LookupException("The inherited variable " + name + " exists in " + where);
                     }
-                    throw new LookupException("The inherit variable " + name + " exists in " + where);
-                }
+            }
         }
+
+        return null;
     }
 
     public VariableReference declareLocal(String name, LpcType type)
@@ -186,9 +322,15 @@ public class VariableLookup
         return vars;
     }
 
-    public VariableReference declareField(String name, LpcType type)
+    public VariableResolution declareField(String name, LpcType type)
     {
-        VariableReference var = VariableReference.field(name, type, null, null);
+        VariableReference var = VariableReference.field(name, null, type, null);
+        return store(name, var);
+    }
+
+    public VariableReference declareField(String name, String internalName, LpcType type)
+    {
+        VariableReference var = VariableReference.field(name, internalName, type, null);
         return store(name, var);
     }
 
@@ -202,6 +344,18 @@ public class VariableLookup
         //        System.err.println("Storing " + name + "(" + var + ") in frame " + frame);
         frame.put(name, var);
         return var;
+    }
+
+    public VariableResolution declareEnclosing(String name, String internalName, LpcType type)
+    {
+        VariableReference var = VariableReference.enclosing(name, internalName, type);
+        return store(name, var);
+    }
+
+    public VariableResolution declareInternal(String name, LpcType type)
+    {
+        VariableReference var = VariableReference.internal(name, type);
+        return store(name, var);
     }
 
 }

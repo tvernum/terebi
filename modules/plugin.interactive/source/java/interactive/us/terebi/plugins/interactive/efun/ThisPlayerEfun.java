@@ -87,7 +87,7 @@ public class ThisPlayerEfun extends AbstractEfun
 
     private static boolean isUser(ObjectInstance instance)
     {
-        return instance.getAttributes().get(ObjectShell.OBJECT_CONNECTION_ATTRIBUTE) != null;
+        return ObjectShell.isConnectionObject(instance);
     }
 
 }

@@ -126,7 +126,9 @@ public int c3()
 
 public int c65535()
 {
+#pragma math=32
     return ~(0xffff0000);
+#pragma math=64
 }
 
 public int e0()
@@ -147,9 +149,13 @@ public int e0()
  */
 public int d3()
 {
+#pragma math=32
+    int j = 0xFFFFFFF0 ;
     int i = 0x345edc;
-    return ~(i ^ ( (~i) & 0xFFFFFFF0 ) );
-    // ~ ( 0xFFFFFc )
+    return ~(i ^ ( (~i) & j ) );
+    // ~ ( 0x345edc ^ ( 0xFFcba123 & 0xFFFFFFF0 ) )
+    // ~ ( 0x345edc ^ 0xFFcba120 )
+    // ~ ( 0xFFFFFFFc )
     // = 3
+#pragma math=64
 }
-

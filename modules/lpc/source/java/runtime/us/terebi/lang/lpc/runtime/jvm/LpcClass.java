@@ -35,7 +35,7 @@ import us.terebi.util.Factory;
 /**
  * 
  */
-public class LpcClass
+public class LpcClass extends LpcRuntimeSupport
 {
     private final ObjectDefinition _declaring;
     private ClassDefinition _definition;
@@ -58,6 +58,11 @@ public class LpcClass
         return _definition;
     }
 
+    public ObjectDefinition getDeclaringObject()
+    {
+        return _declaring;
+    }
+    
     private ClassDefinition loadDefinition()
     {
         Class< ? extends LpcClass> cls = getClass();
@@ -90,11 +95,10 @@ public class LpcClass
             {
                 ObjectInstance owner = (ObjectInstance) arguments[0];
                 CompiledObjectInstance coi = (CompiledObjectInstance) owner;
-                Object io = coi.getImplementingObject();
                 try
                 {
-                    Constructor< ? extends LpcClass> constructor = cls.getConstructor(io.getClass());
-                    LpcClass lpc = constructor.newInstance(io);
+                    Constructor< ? extends LpcClass> constructor = cls.getConstructor(ObjectDefinition.class);
+                    LpcClass lpc = constructor.newInstance(coi.getDefinition());
                     return new CompiledClass(definition, lpc);
                 }
                 catch (Exception e)

@@ -35,6 +35,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -71,12 +72,12 @@ public class MethodTestCase implements Callable<Object>
 
     private void testMethod(CompiledMethodDefinition method) throws Exception
     {
-        ObjectInstance instance = method.getDeclaringType().newInstance(Collections.<LpcValue>emptyList());
+        ObjectInstance instance = method.getDeclaringType().newInstance(Collections.<LpcValue> emptyList());
         List< ? extends LpcValue> arguments = Collections.emptyList();
-        LpcValue result = execute(method, instance, arguments);
-
         String name = method.getName();
 
+        LpcValue result = execute(method, instance, arguments);
+        
         Matcher matcher = STRING_REGEX.matcher(name);
         if (matcher.matches())
         {
@@ -120,6 +121,7 @@ public class MethodTestCase implements Callable<Object>
             else
             {
                 Integer expectedValue = Integer.parseInt(number);
+                assertEquals(result.debugInfo() + " is not an int", Types.INT, result.getActualType());
                 assertEquals(expectedValue.longValue(), result.asLong());
             }
             return;
@@ -138,14 +140,19 @@ public class MethodTestCase implements Callable<Object>
             CallStack stack = thread.callStack();
             stack.pushFrame(Origin.APPLY, instance);
 
-            LpcValue result = method.execute(instance, arguments);
+            LpcValue result;
+            try
+            {
+                result = method.execute(instance, arguments);
 
-            MajorFrame frame = stack.peekFrame(0);
-            assertEquals(instance, frame.instance);
-            assertEquals(Origin.APPLY, frame.origin);
-
-            stack.popFrame();
-
+                MajorFrame frame = stack.peekFrame(0);
+                assertEquals(instance, frame.instance);
+                assertEquals(Origin.APPLY, frame.origin);
+            }
+            finally
+            {
+                stack.popFrame();
+            }
             assertEquals(0, stack.size());
 
             return result;

@@ -24,6 +24,8 @@ import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.plugins.interactive.efun.InputToEfun;
 import us.terebi.plugins.interactive.efun.InteractiveEfun;
+import us.terebi.plugins.interactive.efun.ReceiveEfun;
+import us.terebi.plugins.interactive.efun.TellObjectEfun;
 import us.terebi.plugins.interactive.efun.ThisPlayerEfun;
 import us.terebi.plugins.interactive.efun.WriteEfun;
 
@@ -34,16 +36,18 @@ public class InteractivePlugin implements Plugin
 {
     public void init(SystemContext context)
     {
+        // No-op
+    }
+
+    public void load(Config config, SystemContext context)
+    {
         Efuns efuns = context.efuns();
         efuns.define("interactive", new InteractiveEfun());
         efuns.define("this_player", new ThisPlayerEfun());
         efuns.define("write", new WriteEfun());
         efuns.define("input_to", new InputToEfun());
-    }
-
-    public void load(Config config, SystemContext context)
-    {
-        // No-op
+        efuns.define("tell_object", new TellObjectEfun(config.getBoolean("plugin.interactive.catch_tell", false)));
+        efuns.define("receive", new ReceiveEfun());
     }
 
     public void run(SystemContext context)

@@ -12,7 +12,7 @@ int var1()
     return strlen(public_var) > 0;
 }
 
-int state9()
+public int state9()
 {
     int a, b;
     set_int(12);

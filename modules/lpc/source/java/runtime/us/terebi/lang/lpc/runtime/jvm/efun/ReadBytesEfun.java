@@ -44,7 +44,7 @@ public class ReadBytesEfun extends AbstractEfun implements FunctionSignature, Ca
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

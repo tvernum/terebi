@@ -26,5 +26,5 @@ import java.io.IOException;
  */
 public interface Compiler
 {
-    public void compile(ObjectSource source, ObjectOutput output) throws IOException;
+    public void compile(ObjectSource source, ClassName name, ClassStore store) throws IOException;
 }

@@ -65,11 +65,12 @@ public class MappingElement implements LpcReference
         return true;
     }
 
-    public void set(LpcValue value)
+    public LpcValue set(LpcValue value)
     {
         Map<LpcValue, LpcValue> map = _element.get().asMap();
         map.put(_index, value);
         // @TODO what if "value" is NIL ?
+        return value;
     }
 
 }

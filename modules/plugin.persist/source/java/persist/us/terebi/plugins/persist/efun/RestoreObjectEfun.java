@@ -52,7 +52,7 @@ public class RestoreObjectEfun extends AbstractEfun
         );
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

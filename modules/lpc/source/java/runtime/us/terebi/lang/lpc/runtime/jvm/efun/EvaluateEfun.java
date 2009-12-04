@@ -44,7 +44,7 @@ public class EvaluateEfun extends AbstractEfun implements FunctionSignature, Cal
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

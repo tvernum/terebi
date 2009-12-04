@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime.jvm.object;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Collections;
@@ -26,6 +27,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
@@ -225,6 +227,7 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
                 definition);
         try
         {
+            field.setAccessible(true);
             field.set(object, inherited);
         }
         catch (Exception e)
@@ -238,7 +241,8 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
     {
         try
         {
-            return _implementation.newInstance();
+            Constructor< ? extends T> constructor = _implementation.getConstructor(CompiledObjectDefinition.class);
+            return constructor.newInstance(this);
         }
         catch (LpcRuntimeException e)
         {
@@ -296,5 +300,10 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
             _master = null;
         }
         _manager.instanceDestructed(instance);
+    }
+
+    public String getBaseName()
+    {
+        return FilenameUtils.getBaseName(getName());
     }
 }

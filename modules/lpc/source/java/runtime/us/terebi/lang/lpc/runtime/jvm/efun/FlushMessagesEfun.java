@@ -40,7 +40,7 @@ public class FlushMessagesEfun extends AbstractEfun implements FunctionSignature
         return Collections.singletonList(new ArgumentSpec("user", Types.OBJECT));
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

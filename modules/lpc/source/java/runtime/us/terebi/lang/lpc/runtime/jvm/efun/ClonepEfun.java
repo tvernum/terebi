@@ -43,7 +43,7 @@ public class ClonepEfun extends AbstractEfun implements FunctionSignature, Calla
         return Collections.singletonList(new ArgumentSpec("arg", Types.MIXED));
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

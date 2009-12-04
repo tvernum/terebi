@@ -136,7 +136,10 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         {
             try
             {
-                LOG.debug("Selecting " + _selector.keys());
+                if (LOG.isDebugEnabled())
+                {
+                    LOG.debug("Selecting " + _selector + " : " + _selector.keys());
+                }
                 _selector.select(12500);
                 readConnections(_selector.selectedKeys());
             }
@@ -154,6 +157,35 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         }
     }
 
+    private final class ConnectionReader implements Runnable
+    {
+        private final SelectionKey _key;
+        private final TelnetChannelConnection _connection;
+
+        ConnectionReader(SelectionKey key, TelnetChannelConnection connection)
+        {
+            _key = key;
+            _connection = connection;
+        }
+
+        public void run()
+        {
+            if (!_connection.isOpen())
+            {
+                _key.interestOps(0);
+                return;
+            }
+            _key.interestOps(SelectionKey.OP_READ);
+            readConnection(_connection);
+        }
+
+        @Override
+        public String toString()
+        {
+            return TelnetChannelConnectionHandler.class.getSimpleName() + "$" + getClass().getSimpleName() + "{" + _key + "}";
+        }
+    }
+
     private void readConnections(Set<SelectionKey> keys)
     {
         LOG.debug("Processing keys " + keys);
@@ -168,19 +200,16 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
             Object attachment = key.attachment();
             assert attachment instanceof TelnetChannelConnection;
             final TelnetChannelConnection connection = (TelnetChannelConnection) attachment;
-            Runnable runnable = new Runnable()
+            LOG.info("Connection " + connection + " is " + (connection.isOpen() ? "" : "not ") + "open");
+            if (connection.isOpen())
             {
-                public void run()
-                {
-                    if (!connection.isOpen())
-                    {
-                        return;
-                    }
-                    key.interestOps(SelectionKey.OP_READ);
-                    readConnection(connection);
-                }
-            };
-            _executor.execute(runnable);
+                Runnable runnable = new ConnectionReader(key, connection);
+                _executor.execute(runnable);
+            }
+            else
+            {
+                key.cancel();
+            }
         }
     }
 
@@ -195,6 +224,7 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         {
             LOG.info("Net exception from connection " + connection, e);
         }
+        _selector.wakeup();
     }
 
     public void newConnection(SocketChannel socket, ChannelListener listener) throws NetException
@@ -221,5 +251,11 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         {
             throw new NetException("Unexpected I/O Exception on " + socket, e);
         }
+    }
+
+    @Override
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + _threadFactory + ";" + _shell + "}";
     }
 }

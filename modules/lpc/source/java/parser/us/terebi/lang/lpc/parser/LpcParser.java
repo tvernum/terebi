@@ -65,6 +65,7 @@ public class LpcParser
     {
         _preprocessor = new Preprocessor();
         _preprocessor.addFeature(Feature.LINEMARKERS);
+        _preprocessor.addFeature(Feature.PRAGMAS);
         _sourceFinder = new FileFinder(new File("/"));
     }
 
@@ -159,7 +160,9 @@ public class LpcParser
         parser.setDebug(_debug);
         try
         {
-            return parser.ObjectDefinition();
+            ASTObjectDefinition ast = parser.ObjectDefinition();
+            new PragmaResolver().resolve(ast);
+            return ast;
         }
         catch (ParseException pe)
         {

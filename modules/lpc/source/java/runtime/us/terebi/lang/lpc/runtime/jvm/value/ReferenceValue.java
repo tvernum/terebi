@@ -83,15 +83,15 @@ public class ReferenceValue implements LpcReference, LpcValue, LpcReferenceValue
 
     }
 
-    public void set(LpcValue value)
+    public LpcValue set(LpcValue value)
     {
         if (_reference == null)
         {
-            _value = value;
+            return _value = value;
         }
         else
         {
-            _reference.set(value);
+            return _reference.set(value);
         }
     }
 

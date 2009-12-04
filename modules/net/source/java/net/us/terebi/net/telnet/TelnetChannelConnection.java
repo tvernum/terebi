@@ -17,6 +17,8 @@
 
 package us.terebi.net.telnet;
 
+import java.io.Closeable;
+import java.io.Flushable;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
@@ -162,23 +164,46 @@ public class TelnetChannelConnection implements Connection
         return _shell;
     }
 
-    public void close() throws IOException
+    public void close()
     {
-        if (_writer != null)
-        {
-            _writer.flush();
-        }
-        if (_stream != null)
-        {
-            _stream.flush();
-        }
+        flush(_writer);
+        flush(_stream);
         if (_selectionKey != null)
         {
             _selectionKey.cancel();
         }
-        if (_channel != null)
+        close(_channel);
+    }
+
+    private void close(Closeable closeable)
+    {
+        if (closeable == null)
         {
-            _channel.close();
+            return;
+        }
+        try
+        {
+            closeable.close();
+        }
+        catch (IOException e)
+        {
+            // Ignore
+        }
+    }
+
+    private void flush(Flushable closeable)
+    {
+        if (closeable == null)
+        {
+            return;
+        }
+        try
+        {
+            closeable.flush();
+        }
+        catch (IOException e)
+        {
+            // Ignore
         }
     }
 
@@ -235,13 +260,11 @@ public class TelnetChannelConnection implements Connection
         }
         catch (ClosedChannelException e)
         {
-            if (_selectionKey != null)
-            {
-                _selectionKey.cancel();
-            }
+            close();
         }
         catch (IOException e)
         {
+            close();
             throw new NetException(e);
         }
     }

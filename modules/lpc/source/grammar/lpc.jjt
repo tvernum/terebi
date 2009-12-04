@@ -12,6 +12,7 @@
 options 
 {
     MULTI=true;
+    BUILD_NODE_FILES=false;
     NODE_PACKAGE="us.terebi.lang.lpc.parser.ast";
     NODE_SCOPE_HOOK=true;
     STATIC=false;
@@ -27,7 +28,7 @@ package us.terebi.lang.lpc.parser.jj ;
 import java.util.*;
 import java.io.*;
 import us.terebi.lang.lpc.parser.*;
-import us.terebi.lang.lpc.parser.ast.ASTUtil;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 
 public class Parser 
 {
@@ -111,7 +112,14 @@ SKIP : { " " | "\t" | "\n" | "\r"
     	ParserState.getState().getLineMapping().mapFile( matchedToken.beginLine, image.toString().trim() );
     }
 }
-<LINE_DIRECTIVE> SKIP: { "\n" : DEFAULT }
+
+SPECIAL_TOKEN: {
+    <"#" ([" ","\t"])* "pragma"> : PRAGMA_DIRECTIVE
+}
+<PRAGMA_DIRECTIVE> SPECIAL_TOKEN: {
+    <PRAGMA_ARGUMENT : (~["\n"])+> 
+}
+<LINE_DIRECTIVE,PRAGMA_DIRECTIVE> SKIP: { "\n" : DEFAULT }
 <LINE_DIRECTIVE> MORE: {  "\\\n" | "\\\r\n" | < ~[] > }
 
 TOKEN : {
@@ -250,7 +258,6 @@ void Declaration() : { }
 	|
 		Method()	    
 	)
-	
 }
 
 void ArrayStar() : { }
@@ -366,18 +373,20 @@ void Statement() #void : {}
 {
         LOOKAHEAD(2) Label() 
     |
-    	LOOKAHEAD(2)
-        VariableOrExpression() <SEMI>
-    |
-        StatementBlock()
-    |
-        ConditionalStatement()
-    |
-        LoopStatement()
-    |
-        ControlStatement()
-    |
-        NoOpStatement()
+    (
+	    	LOOKAHEAD(2)
+	        VariableOrExpression() <SEMI>
+	    |
+	        StatementBlock()
+	    |
+	        ConditionalStatement()
+	    |
+	        LoopStatement()
+	    |
+	        ControlStatement()
+	    |
+	        NoOpStatement()
+	)
 }
 
 void NoOpStatement() : {}
@@ -737,7 +746,10 @@ void ArgumentExpression() : {}
 {
 	SimpleExpression() [ ElementExpander() ]
 	|
-	<REF> Identifier()
+	(
+		<REF>
+		ScopedIdentifier()
+ 	) #VariableReference
 	|
 	ClassType()
 }

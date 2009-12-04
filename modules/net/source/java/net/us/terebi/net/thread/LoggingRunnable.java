@@ -37,7 +37,7 @@ public class LoggingRunnable implements Runnable
     {
         if (LOG.isDebugEnabled())
         {
-            LOG.info("Starting " + _delegate);
+            LOG.debug("Starting " + _delegate);
         }
         try
         {
@@ -47,7 +47,7 @@ public class LoggingRunnable implements Runnable
         {
             if (LOG.isDebugEnabled())
             {
-                LOG.info("Finished " + _delegate);
+                LOG.debug("Finished " + _delegate);
             }
         }
     }

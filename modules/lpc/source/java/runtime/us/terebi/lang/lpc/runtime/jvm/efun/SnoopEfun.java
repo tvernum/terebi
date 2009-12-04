@@ -42,7 +42,7 @@ public class SnoopEfun extends AbstractEfun implements FunctionSignature, Callab
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

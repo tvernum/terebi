@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
-import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;

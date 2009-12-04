@@ -44,7 +44,7 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
         return Collections.singletonList(new ArgumentSpec("arguments", Types.INT));
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

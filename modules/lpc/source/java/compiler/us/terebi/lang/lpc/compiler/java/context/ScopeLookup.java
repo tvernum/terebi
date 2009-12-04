@@ -31,7 +31,7 @@ public interface ScopeLookup
     public CompilerObjectManager objectManager();
 
     public FunctionLookup functions();
-    public VariableLookup variables();
+    public VariableResolver variables();
     public ClassLookup classes();
 
     public void addInherit(String name, ObjectDefinition parent);

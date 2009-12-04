@@ -20,8 +20,7 @@ package us.terebi.lang.lpc.preprocessor;
 /**
  * Features of the Preprocessor, which may be enabled or disabled.
  */
-public enum Feature {
-	DIGRAPHS,
-	TRIGRAPHS,
-	LINEMARKERS,
+public enum Feature
+{
+    DIGRAPHS, TRIGRAPHS, LINEMARKERS, PRAGMAS,
 }

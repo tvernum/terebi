@@ -49,7 +49,7 @@ public class ReplaceStringEfun extends AbstractEfun implements FunctionSignature
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

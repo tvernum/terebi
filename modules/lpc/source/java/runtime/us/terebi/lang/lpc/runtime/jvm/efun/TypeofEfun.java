@@ -40,7 +40,7 @@ public class TypeofEfun extends AbstractEfun implements FunctionSignature, Calla
         return Collections.singletonList(new ArgumentSpec("var", Types.MIXED));
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return false;
     }

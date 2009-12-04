@@ -21,9 +21,7 @@ package us.terebi.lang.lpc.compiler;
 import java.io.File;
 import java.io.IOException;
 
-import org.apache.commons.jci.compilers.JavaCompilerFactory;
-
-import us.terebi.lang.lpc.compiler.java.JavaCompiler;
+import us.terebi.lang.lpc.compiler.bytecode.ByteCodeCompiler;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
@@ -82,10 +80,9 @@ public class ObjectBuilderFactory
         {
             _manager = new LpcCompilerObjectManager();
         }
-        Compiler javaCompiler = new JavaCompiler(_efuns, _manager);
-        org.apache.commons.jci.compilers.JavaCompiler eclipseCompiler = new JavaCompilerFactory().createCompiler("eclipse");
+        Compiler javaCompiler = new ByteCodeCompiler(_manager, _efuns);
         ScopeLookup scope = new BasicScopeLookup(_manager);
-        ObjectBuilder builder = new ObjectBuilder(finder, _manager, scope, _parser, javaCompiler, eclipseCompiler, _workingDir);
+        ObjectBuilder builder = new ObjectBuilder(finder, _manager, scope, _parser, javaCompiler, _workingDir);
         for (Object object : asList(_manager, _parser, _efuns, finder))
         {
             setCompiler(object, builder);

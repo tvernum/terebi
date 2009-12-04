@@ -51,7 +51,7 @@ public class InteractiveEfun extends AbstractEfun implements FunctionSignature, 
     {
         checkArguments(arguments);
         ObjectInstance instance = arguments.get(0).asObject();
-        return getValue(ObjectShell.isConnection(instance));
+        return getValue(ObjectShell.isConnectionObject(instance));
     }
 
 }

@@ -43,7 +43,7 @@ public class CryptEfun extends AbstractEfun implements FunctionSignature, Callab
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

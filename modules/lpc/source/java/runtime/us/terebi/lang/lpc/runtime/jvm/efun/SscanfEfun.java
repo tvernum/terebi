@@ -99,7 +99,8 @@ public class SscanfEfun extends AbstractEfun implements FunctionSignature, Calla
             }
             else
             {
-                return checkCharacter(ch);
+                boolean match = checkCharacter(ch);
+                return match;
             }
         }
 
@@ -132,7 +133,7 @@ public class SscanfEfun extends AbstractEfun implements FunctionSignature, Calla
             }
 
             _vars.add(new StringValue(_str.substring(_strIndex, index)));
-            _strIndex += index;
+            _strIndex = index + search.length();
             _fmtIndex = endFormat;
             return true;
         }
@@ -210,7 +211,8 @@ public class SscanfEfun extends AbstractEfun implements FunctionSignature, Calla
 
         private boolean checkCharacter(char ch)
         {
-            return (nextString() == ch);
+            int next = nextString();
+            return (next == ch);
         }
 
         private int nextString()
@@ -249,16 +251,18 @@ public class SscanfEfun extends AbstractEfun implements FunctionSignature, Calla
         checkArguments(arguments);
         String str = arguments.get(0).asString();
         String format = arguments.get(1).asString();
+        List<LpcValue> variables = arguments.get(2).asList();
+
         List<LpcValue> values = new Scanner(format, str).scan();
 
-        int index = 2;
+        int index = 0;
         for (LpcValue value : values)
         {
-            if (index >= arguments.size())
+            if (index >= variables.size())
             {
                 break;
             }
-            LpcValue argument = arguments.get(index);
+            LpcValue argument = variables.get(index);
             checkSemantics(index, ArgumentSemantics.IMPLICIT_REFERENCE, argument);
             ((LpcReference) argument).set(value);
             index++;

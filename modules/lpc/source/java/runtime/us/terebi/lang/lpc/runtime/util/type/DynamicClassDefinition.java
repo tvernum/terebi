@@ -123,4 +123,13 @@ public class DynamicClassDefinition implements ClassDefinition
         return super.hashCode();
     }
 
+    public String toString()
+    {
+        if (_declaringType == null)
+        {
+            return _name;
+        }
+        return _declaringType.getName() + "::" + _name;
+    }
+
 }

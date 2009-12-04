@@ -21,7 +21,6 @@
         <ivy:retrieve type="jar"  />
   </target>
 
-
   <target name="jjtree" >
     <mkdir dir="${output}/grammar" />
     <mkdir dir="${output.java}/${java.parser.package}/ast" />

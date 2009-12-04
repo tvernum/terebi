@@ -17,5 +17,7 @@
 	<classpathentry kind="lib" path="lib/commons-logging-1.1.jar"/>
 	<classpathentry kind="lib" path="source/resource/test"/>
 	<classpathentry kind="lib" path="source/resource/server"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/stout"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/asm3"/>
 	<classpathentry kind="output" path="output/eclipse"/>
 </classpath>

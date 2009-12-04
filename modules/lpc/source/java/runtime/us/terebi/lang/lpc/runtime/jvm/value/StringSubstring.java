@@ -139,7 +139,7 @@ public class StringSubstring implements LpcReference
         return true;
     }
 
-    public void set(LpcValue value)
+    public LpcValue set(LpcValue value)
     {
         //      eval for ( int i=0; i<10; i++) { string s = "0123456789" ; s[5..i] = "#@!" ; write("[5.." + i + "] " + s); }
         //      [5..0] 01234#@!123456789

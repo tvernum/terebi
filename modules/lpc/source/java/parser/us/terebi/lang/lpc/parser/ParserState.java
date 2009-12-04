@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.parser;
 
+
 /**
  */
 public class ParserState extends Object
@@ -48,5 +49,4 @@ public class ParserState extends Object
     {
         return _lineMapping;
     }
-
 }

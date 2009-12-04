@@ -18,8 +18,6 @@
 
 package us.terebi.lang.lpc.compiler.java.test;
 
-import java.util.List;
-
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
@@ -80,7 +78,7 @@ public class ClassTestObject extends LpcObject
         final LpcReference _lpc_v9 = ClassSupport.getField(_l_huh.get(), "f");
         final LpcValue _lpc_v10 = new LpcFunction(getObjectInstance(), 0)
         {
-            public LpcValue execute(List< ? extends LpcValue> args)
+            public LpcValue execute(LpcValue... args)
             {
                 final LpcValue _lpc_v11 = makeValue(7);
                 return _lpc_v11;

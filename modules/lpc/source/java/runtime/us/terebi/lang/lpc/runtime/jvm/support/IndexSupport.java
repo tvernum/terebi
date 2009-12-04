@@ -39,6 +39,8 @@ public class IndexSupport
 {
     public static LpcReference index(LpcReference element, LpcValue indexValue, boolean reverse)
     {
+        assert (LpcValue.class.isInstance(indexValue));
+
         LpcValue value = element.get();
         if (isString(value))
         {
@@ -84,8 +86,7 @@ public class IndexSupport
         throw new UnsupportedOperationException("index (" + element.getActualType() + ") - Not implemented");
     }
 
-    public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endIndex,
-            boolean endReverse)
+    public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endIndex, boolean endReverse)
     {
         LpcType type = element.getType();
         if (Types.STRING.equals(type))
@@ -99,8 +100,8 @@ public class IndexSupport
         throw new UnsupportedOperationException("index (" + type + ") - Not implemented");
     }
 
-    public static LpcValue index(LpcValue element, LpcValue startIndex, boolean startReverse, LpcValue endElement,
-            boolean endReverse)
+    @SuppressWarnings("unused")
+    public static LpcValue index(LpcValue element, LpcValue startIndex, boolean startReverse, LpcValue endElement, boolean endReverse)
     {
         // @TODO Auto-generated method stub
         return null;

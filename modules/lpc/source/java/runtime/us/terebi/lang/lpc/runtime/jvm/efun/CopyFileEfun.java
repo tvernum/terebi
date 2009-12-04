@@ -43,7 +43,7 @@ public class CopyFileEfun extends AbstractEfun implements FunctionSignature, Cal
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return false;
     }

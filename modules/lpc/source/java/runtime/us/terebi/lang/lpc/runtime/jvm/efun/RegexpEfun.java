@@ -47,7 +47,7 @@ public class RegexpEfun extends AbstractEfun implements FunctionSignature, Calla
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

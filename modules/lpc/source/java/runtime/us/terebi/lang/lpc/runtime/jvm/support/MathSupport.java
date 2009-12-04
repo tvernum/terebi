@@ -37,6 +37,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMapping;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNil;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNumber;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
@@ -106,6 +107,14 @@ public class MathSupport
         if (isMapping(left) && isMapping(right))
         {
             return addMapping(left.asMap(), right.asMap());
+        }
+        if (isNumber(left) && isString(right))
+        {
+            return new StringValue(left.asString() + right.asString());
+        }
+        if (isNil(left) && isString(right))
+        {
+            return new StringValue(left.asString() + right.asString());
         }
         throw new UnsupportedOperationException("add - Not implemented for "
                 + left.getActualType()

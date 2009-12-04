@@ -55,7 +55,7 @@ public class GetDirectoryInfoEfun extends AbstractEfun implements FunctionSignat
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

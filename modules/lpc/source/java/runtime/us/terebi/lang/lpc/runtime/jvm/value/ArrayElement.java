@@ -76,11 +76,12 @@ public class ArrayElement implements LpcReference
         return true;
     }
 
-    public void set(LpcValue value)
+    public LpcValue set(LpcValue value)
     {
         List<LpcValue> list = _array.get().asList();
         int index = getIndex(list, _index);
         list.set(index, value); 
         // @TODO - is this the right semantics? (change the array, rather than the value in the variable...)
+        return value;
     }
 }

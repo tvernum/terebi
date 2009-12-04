@@ -78,7 +78,7 @@ public class StringChar implements LpcReference
         return true;
     }
 
-    public void set(LpcValue value)
+    public LpcValue set(LpcValue value)
     {
         String str = _string.get().asString();
         int index = getIndex(str, _index);
@@ -89,6 +89,7 @@ public class StringChar implements LpcReference
         char ch = (char) value.asLong();
         str = str.substring(0, index - 1) + ch + str.substring(index + 1);
         _string.set(new StringValue(str));
+        return get();
     }
 
     public String toString()

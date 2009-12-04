@@ -66,7 +66,7 @@ public class PluginController
      * Called very early in the initialisation process, before the master object or simul-efun objects are loaded.
      * The provided {@link SystemContext} will have efuns, and some attachments (such as {@link us.terebi.engine.objects.CompileOptions},
      * but will not have an object manager or master/simul-efun objects.
-     * This is the appropriate place to configure new efuns (so they can be used in the master object) and new preprocess directives
+     * This is the appropriate place to configure new efuns (so they can be used in the master object) and new preprocessor directives
      */
     public void load(SystemContext context)
     {
@@ -150,7 +150,7 @@ public class PluginController
     }
 
     /**
-     * Called during the initialisation process, after the master object or simul-efun objects are loaded.
+     * Called during the initialisation process, after the master object and simul-efun objects are loaded.
      */
     public void init(SystemContext context)
     {

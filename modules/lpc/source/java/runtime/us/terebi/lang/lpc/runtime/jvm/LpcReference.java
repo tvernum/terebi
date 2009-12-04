@@ -27,7 +27,7 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 public interface LpcReference
 {
     public LpcValue get();
-    public void set(LpcValue value);
+    public LpcValue set(LpcValue value);
     public LpcType getType();
     public boolean isSet();
 }

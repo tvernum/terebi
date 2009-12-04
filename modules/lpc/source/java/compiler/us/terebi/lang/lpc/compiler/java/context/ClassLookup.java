@@ -25,7 +25,7 @@ import java.util.Set;
 
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.parser.ast.ASTIdentifier;
-import us.terebi.lang.lpc.parser.ast.ASTUtil;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;

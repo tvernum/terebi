@@ -9,7 +9,8 @@ CONFIG="$1"
 MAIN="us.terebi.engine.Main"
 
 MODULES="engine net lpc"
-CP=`dirname $CONFIG`
+DIR=`dirname $CONFIG`
+CP=${DIR}
 
 for MODULE in ${MODULES}
 do
@@ -36,4 +37,5 @@ echo "Main = ${MAIN}"
 echo "Classpath = ${CP}"
 echo "Config = ${CONFIG}"
 
+set -x
 java -cp ${CP} ${MAIN} ${CONFIG}

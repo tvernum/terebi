@@ -74,7 +74,7 @@ public class CompileContext implements Closeable, ScopeLookup
         return _scope.objectManager();
     }
 
-    public VariableLookup variables()
+    public VariableResolver variables()
     {
         return _scope.variables();
     }

@@ -242,7 +242,7 @@ public final class Token {
 	public static final int _TOKENS = 299;
 
 	/** The position-less space token. */
-	/* pp */ static final Token	 space = new Token(WHITESPACE, -1, -1, " ");
+	/* pp */ static final Token	 SPACE = new Token(WHITESPACE, -1, -1, " ");
 
 	private static final String[] names = new String[_TOKENS];
 	private static final String[] texts = new String[_TOKENS];

@@ -25,7 +25,7 @@ import us.terebi.lang.lpc.io.FileFinder;
 import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
-import us.terebi.lang.lpc.parser.ast.ASTUtil;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 
 /**
  */

@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.runtime.jvm;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
@@ -27,10 +28,14 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.AbstractValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
+import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.lang.lpc.runtime.util.Signature;
@@ -40,6 +45,7 @@ import us.terebi.lang.lpc.runtime.util.Signature;
  */
 public abstract class LpcFunction extends AbstractValue implements LpcValue, Callable
 {
+    private final LpcRuntimeSupport _support;
     private final FunctionSignature _signature;
     private final boolean _strict;
     private ObjectInstance _owner;
@@ -59,6 +65,7 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         _signature = signature;
         _strict = true;
         _owner = owner;
+        _support = new LpcRuntimeSupport();
     }
 
     public LpcFunction(ObjectInstance owner, int argumentCount, boolean strictCount)
@@ -71,6 +78,7 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         _signature = new Signature(true, Types.MIXED, args);
         _strict = strictCount;
         _owner = owner;
+        _support = new LpcRuntimeSupport();
     }
 
     protected CharSequence getDescription()
@@ -88,27 +96,34 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         return this;
     }
 
-    public LpcValue execute(LpcValue... arguments)
+    public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        return execute(Arrays.asList(arguments));
+        return execute(toArray(arguments));
     }
 
-    public LpcValue getArg(List< ? extends LpcValue> args, int index)
+    private LpcValue[] toArray(List< ? extends LpcValue> arguments)
     {
-        if (index > args.size())
+        return arguments.toArray(new LpcValue[arguments.size()]);
+    }
+
+    public LpcValue getArg(LpcValue[] args, int index)
+    {
+        if (index > args.length)
         {
             if (_strict)
             {
-                throw new LpcRuntimeException("Insufficient number of arguments provided to function literal - argument "
-                        + index
-                        + " was expected");
+                throw new LpcRuntimeException("Insufficient number of arguments provided to function literal - argument " + index + " was expected");
             }
             else
             {
                 return NilValue.INSTANCE;
             }
         }
-        return args.get(index - 1);
+        if (index <= 0)
+        {
+            throw new InternalError("Attempt to get negative argument " + index + " in " + this);
+        }
+        return args[index - 1];
     }
 
     public Kind getKind()
@@ -141,8 +156,73 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         return _owner;
     }
 
+    public ObjectDefinition getOwnerDefinition()
+    {
+        return _owner.getDefinition();
+    }
+
     public void setOwner(ObjectInstance owner)
     {
         _owner = owner;
+    }
+
+    public LpcValue call(Callable callable, Collection< ? extends LpcValue>... args)
+    {
+        return _support.call(callable, args);
+    }
+
+    public Callable efun(String name)
+    {
+        return _support.efun(name);
+    }
+
+    public ArrayValue makeArray(LpcValue... elements)
+    {
+        return _support.makeArray(elements);
+    }
+
+    public MappingValue makeMapping(LpcValue... elements)
+    {
+        return _support.makeMapping(elements);
+    }
+
+    public LpcValue makeValue()
+    {
+        return _support.makeValue();
+    }
+
+    public LpcValue makeValue(double value)
+    {
+        return _support.makeValue(value);
+    }
+
+    public LpcValue makeValue(int value)
+    {
+        return _support.makeValue(value);
+    }
+
+    public LpcValue makeValue(long value)
+    {
+        return _support.makeValue(value);
+    }
+
+    public LpcValue makeValue(Number value)
+    {
+        return _support.makeValue(value);
+    }
+
+    public LpcValue makeValue(String value)
+    {
+        return _support.makeValue(value);
+    }
+
+    public NilValue nil()
+    {
+        return _support.nil();
+    }
+
+    public Callable simul_efun(String name)
+    {
+        return _support.simul_efun(name);
     }
 }

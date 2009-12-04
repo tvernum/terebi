@@ -122,7 +122,7 @@ public class InputToEfun extends AbstractEfun implements Efun
                 new ArgumentSpec("args", Types.MIXED, true));
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

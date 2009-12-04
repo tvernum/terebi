@@ -50,9 +50,14 @@ public class Signature implements FunctionSignature
         return _returnType;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return _varargs;
+    }
+    
+    public boolean hasUnstructuredArguments()
+    {
+        return false;
     }
 
     public String toString()

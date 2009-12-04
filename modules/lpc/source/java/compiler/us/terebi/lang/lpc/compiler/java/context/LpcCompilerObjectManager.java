@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.compiler.CompilerAware;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectCompiler;
@@ -36,6 +38,8 @@ import us.terebi.util.collection.PredicateIterator;
  */
 public class LpcCompilerObjectManager implements CompilerObjectManager, CompilerAware
 {
+    private final Logger LOG = Logger.getLogger(LpcCompilerObjectManager.class);
+    
     private final Map<String, CompiledObjectDefinition> _definitions;
     private final Map<ObjectId, CompiledObjectInstance> _objects;
     private ObjectCompiler _compiler;
@@ -77,7 +81,9 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
 
     public void registerObject(CompiledObjectDefinition object)
     {
-        _definitions.put(normalise(object.getName()), object);
+        LOG.info("Loaded " + object);
+        String name = normalise(object.getName());
+        _definitions.put(name, object);
         forceLoad(object);
     }
 

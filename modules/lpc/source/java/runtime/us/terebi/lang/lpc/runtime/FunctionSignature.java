@@ -26,6 +26,19 @@ import java.util.List;
 public interface FunctionSignature
 {
     public LpcType getReturnType();
-    public List<? extends ArgumentDefinition> getArguments();
-    public boolean isVarArgs();
+
+    /**
+     * Used primarily in function literals, this indicates that the return value of {@link #getArguments()} should, in general, be ignored,
+     * and all provided argument values should be passed directly to the {@link Callable#execute(LpcValue...) execute method} 
+     * without being restructured, or checked for type compatability
+     */
+    public boolean hasUnstructuredArguments();
+
+    public List< ? extends ArgumentDefinition> getArguments();
+
+    /** Corresponds to the <code>varargs</code> keyword in LPC.
+     * Indicates that this fuction can be called with less than the formal number of arguments
+     */
+    public boolean acceptsLessArguments();
+
 }

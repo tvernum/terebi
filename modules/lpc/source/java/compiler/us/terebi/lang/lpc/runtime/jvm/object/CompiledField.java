@@ -65,6 +65,10 @@ public class CompiledField implements FieldDefinition
         _modifiers = new HashSet<Modifier>(Arrays.asList(member.modifiers()));
 
         LpcMemberType type = _field.getAnnotation(LpcMemberType.class);
+        if (type == null)
+        {
+            throw new InternalError("Field " + field + " is not annotated with " + LpcMemberType.class.getName());
+        }
 
         ClassDefinition cls = null;
         String className = type.className();

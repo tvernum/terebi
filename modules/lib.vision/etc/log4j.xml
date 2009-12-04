@@ -35,7 +35,8 @@
     </logger>
 
     <logger name="us.terebi" additivity="true">
-        <level value="INFO" />
+        <!-- <level value="INFO" /> -->
+        <level value="DEBUG" />
         <appender-ref ref="DEBUG" />
     </logger>
 

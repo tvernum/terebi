@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.runtime.jvm.support;
 
 import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
 
+import us.terebi.lang.lpc.compiler.util.MathLength;
 import us.terebi.lang.lpc.runtime.LpcValue;
 
 /**
@@ -57,7 +58,7 @@ public class BinarySupport
         return intValue(v);
     }
 
-    public static LpcValue xor(LpcValue... values)
+    public static LpcValue xor(MathLength math, LpcValue... values)
     {
         long v = 0;
         boolean first = true;
@@ -71,14 +72,24 @@ public class BinarySupport
             else
             {
                 v ^= value.asLong();
+                if (math == MathLength.MATH_32_BIT)
+                {
+                    v &= 0xFFFFFFFFL;
+                }
             }
         }
         return intValue(v);
     }
 
-    public static LpcValue not(LpcValue value)
+    public static LpcValue not(LpcValue value, MathLength math)
     {
-        return intValue(~value.asLong());
+        long v = value.asLong();
+        v = ~v;
+        if (math == MathLength.MATH_32_BIT)
+        {
+            v &= 0xFFFFFFFFL;
+        }
+        return intValue(v);
     }
 
 }

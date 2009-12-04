@@ -90,7 +90,12 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         return null;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
+    {
+        return false;
+    }
+
+    public boolean hasUnstructuredArguments()
     {
         return false;
     }
@@ -100,22 +105,33 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         Range<Integer> argumentRange = FunctionUtil.getAllowedNumberOfArgument(this);
         if (!argumentRange.inRange(argumentValues.size()))
         {
-            throw new LpcRuntimeException(getName()
-                    + " requires "
-                    + argumentRange
-                    + " argument(s) but "
-                    + argumentValues.size()
-                    + " were provided");
+            throw new LpcRuntimeException(getName() + " requires " + argumentRange + " argument(s) but " + argumentValues.size() + " were provided");
         }
         List< ? extends ArgumentDefinition> argumentDefinitions = getSignature().getArguments();
         for (int i = 0; i < argumentDefinitions.size() && i < argumentValues.size(); i++)
         {
             ArgumentDefinition def = argumentDefinitions.get(i);
             LpcValue val = argumentValues.get(i);
-            LpcType valType = (val instanceof LpcReference) ? ((LpcReference) val).getType() : val.getActualType();
-            checkType(i + 1, def.getType(), valType);
-            checkSemantics(i + 1, def.getSemantics(), val);
+            if (def.isVarArgs())
+            {
+                checkType(i + 1, Types.MIXED_ARRAY, val.getActualType());
+                for (LpcValue element : val.asList())
+                {
+                    checkArgument(def, element, i + 1);
+                }
+            }
+            else
+            {
+                checkArgument(def, val, i + 1);
+            }
         }
+    }
+
+    private void checkArgument(ArgumentDefinition def, LpcValue val, int index)
+    {
+        LpcType valType = (val instanceof LpcReference) ? ((LpcReference) val).getType() : val.getActualType();
+        checkType(index, def.getType(), valType);
+        checkSemantics(index, def.getSemantics(), val);
     }
 
     protected void checkSemantics(int index, ArgumentSemantics semantics, LpcValue value)
@@ -124,11 +140,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         {
             if (!(value instanceof LpcReference))
             {
-                throw new LpcRuntimeException("Internal Error - expected argument "
-                        + index
-                        + " to "
-                        + getName()
-                        + " to be a reference value");
+                throw new LpcRuntimeException("Internal Error - expected argument " + index + " to " + getName() + " to be a reference value");
             }
         }
     }
@@ -143,7 +155,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         {
             return;
         }
-        if (isVarArgs() && actualType.getKind() == LpcType.Kind.NIL)
+        if (acceptsLessArguments() && actualType.getKind() == LpcType.Kind.NIL)
         {
             return;
         }

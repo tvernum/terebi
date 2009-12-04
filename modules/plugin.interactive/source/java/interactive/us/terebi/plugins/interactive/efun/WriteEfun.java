@@ -32,17 +32,23 @@ public class WriteEfun extends us.terebi.lang.lpc.runtime.jvm.efun.WriteEfun
     protected void write(String message)
     {
         ObjectInstance player = ThisPlayerEfun.this_player();
+        write(player, message);
+    }
+
+    public static boolean write(ObjectInstance player, String message)
+    {
         if (player == null)
         {
-            return;
+            return false;
         }
         Connection connection = ObjectShell.getConnection(player);
         if (connection == null)
         {
-            return;
+            return false;
         }
         PrintWriter writer = connection.getWriter();
         writer.write(message);
         writer.flush();
+        return true;
     }
 }

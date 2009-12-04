@@ -24,17 +24,8 @@ import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.Arrays;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
 
-import org.apache.commons.jci.compilers.CompilationResult;
-import org.apache.commons.jci.compilers.JavaCompiler;
-import org.apache.commons.jci.compilers.JavaCompilerSettings;
-import org.apache.commons.jci.problems.CompilationProblem;
-import org.apache.commons.jci.readers.FileResourceReader;
-import org.apache.commons.jci.stores.FileResourceStore;
 import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
@@ -50,7 +41,6 @@ import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.object.CompiledDefinition;
-import us.terebi.util.ToString;
 import us.terebi.util.log.LogContext;
 
 /**
@@ -60,53 +50,39 @@ public class ObjectBuilder implements ObjectCompiler
 {
     private final Logger LOG = Logger.getLogger(ObjectBuilder.class);
 
-    private static final Set<String> RESERVED_WORDS = new HashSet<String>(Arrays.<String> asList("abstract", "assert", "boolean",
-            "break", "byte", "case", "catch", "char", "class", "const", "continue", "default", "do", "double", "else", "extends",
-            "false", "final", "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int", "interface",
-            "long", "native", "new", "null", "package", "private", "protected", "public", "return", "short", "static",
-            "strictfp", "super", "switch", "synchronized", "this", "throw", "throws", "transient", "true", "try", "void",
-            "volatile", "while"));
-
     private final ResourceFinder _sourceFinder;
     private final Compiler _compiler;
-    private final File _workingDirectory;
-    private final JavaCompiler _javaCompiler;
     private final LpcParser _parser;
-    private final FileResourceReader _reader;
-    private final FileResourceStore _store;
     private final ClassLoader _classLoader;
     private final CompilerObjectManager _manager;
     private final ScopeLookup _scope;
-    private boolean _compileOnly;
+    private final ClassStore _store;
+
     private PrintStream _printStats;
 
-    public ObjectBuilder(ResourceFinder sourceFinder, CompilerObjectManager manager, ScopeLookup scope, LpcParser parser,
-            Compiler compiler, JavaCompiler javaCompiler, File workingDirectory)
+    public ObjectBuilder(ResourceFinder sourceFinder, CompilerObjectManager manager, ScopeLookup scope, LpcParser parser, Compiler compiler,
+            File workingDirectory)
     {
         _sourceFinder = sourceFinder;
         _manager = manager;
         _scope = scope;
         _parser = parser;
         _compiler = compiler;
-        _javaCompiler = javaCompiler;
-        _workingDirectory = workingDirectory;
-        _reader = new FileResourceReader(_workingDirectory);
-        _store = new FileResourceStore(_workingDirectory);
-        _classLoader = getClassLoader();
+        _classLoader = getClassLoader(workingDirectory);
+        _store = new FileStore(workingDirectory);
         _printStats = null;
     }
 
-    private URLClassLoader getClassLoader()
+    private URLClassLoader getClassLoader(File workingDirectory)
     {
         try
         {
             /*new LoggingClassLoader*/
-            return new URLClassLoader(new URL[] { _workingDirectory.toURL() }, getClass().getClassLoader());
-            // (new ResourceStoreClassLoader(getClass().getClassLoader(), new ResourceStore[] { _store }));
+            return new URLClassLoader(new URL[] { workingDirectory.toURL() }, getClass().getClassLoader());
         }
         catch (MalformedURLException e)
         {
-            throw new RuntimeException("!! Cannot File into URL !!", e);
+            throw new RuntimeException("!! Cannot convert File " + workingDirectory + " into URL !!", e);
         }
     }
 
@@ -135,13 +111,7 @@ public class ObjectBuilder implements ObjectCompiler
             long endAt = System.currentTimeMillis();
             if (_printStats != null)
             {
-                printStat("Compiled "
-                        + resource
-                        + " to "
-                        + definition.getImplementationClass()
-                        + " ("
-                        + (endAt - startAt)
-                        + "ms)");
+                printStat("Compiled " + resource + " to " + definition.getImplementationClass() + " (" + (endAt - startAt) + "ms)");
             }
             return definition;
         }
@@ -158,15 +128,10 @@ public class ObjectBuilder implements ObjectCompiler
         try
         {
             Source source = getSource(resource, ast);
-            Output output = getOutput(resource);
-            compile(source, output);
-            if (_compileOnly)
-            {
-                return null;
-            }
+            ClassName name = getOutputName(resource);
+            compile(source, name);
 
-            compileToByteCode(ast, output);
-            Class< ? extends LpcObject> cls = loadClass(ast, output);
+            Class< ? extends LpcObject> cls = loadClass(ast, name);
 
             CompiledDefinition<LpcObject> definition = loadObjectDefinition(resource, cls);
 
@@ -217,14 +182,7 @@ public class ObjectBuilder implements ObjectCompiler
             long end = System.currentTimeMillis();
             if (_printStats != null)
             {
-                printStat(resource.toString()
-                        + " is "
-                        + ast.toString()
-                        + " with "
-                        + ast.jjtGetNumChildren()
-                        + " children ("
-                        + (end - start)
-                        + "ms)");
+                printStat(resource.toString() + " is " + ast.toString() + " with " + ast.jjtGetNumChildren() + " children (" + (end - start) + "ms)");
             }
         }
         catch (ParserException e)
@@ -263,10 +221,10 @@ public class ObjectBuilder implements ObjectCompiler
     }
 
     @SuppressWarnings("unchecked")
-    private Class< ? extends LpcObject> loadClass(SimpleNode ast, Output output)
+    private Class< ? extends LpcObject> loadClass(SimpleNode ast, ClassName output)
     {
         long start = System.currentTimeMillis();
-        String fqn = output.getPackageName() + "." + output.getClassName();
+        String fqn = output.packageName + "." + output.className;
         try
         {
             Class< ? > cls = _classLoader.loadClass(fqn);
@@ -281,7 +239,7 @@ public class ObjectBuilder implements ObjectCompiler
         }
         catch (ClassNotFoundException e)
         {
-            throw new CompileException(ast, "Internal Error - Failed to load generated class " + fqn);
+            throw new CompileException(ast, "Internal Error - Failed to load generated class " + fqn, e);
         }
         finally
         {
@@ -293,53 +251,19 @@ public class ObjectBuilder implements ObjectCompiler
         }
     }
 
-    private void compileToByteCode(SimpleNode ast, Output output)
+    private void compile(Source source, ClassName name) throws IOException
     {
         long start = System.currentTimeMillis();
-        JavaCompilerSettings settings = _javaCompiler.createDefaultSettings();
-        settings.setSourceVersion("1.5");
-        settings.setTargetVersion("1.5");
-        String fileName = output.getFile().getAbsolutePath();
-        String root = _workingDirectory.getAbsolutePath();
-        if (fileName.startsWith(root))
-        {
-            fileName = fileName.substring(root.length());
-            if (fileName.charAt(0) == '/')
-            {
-                fileName = fileName.substring(1);
-            }
-        }
-        CompilationResult result = _javaCompiler.compile(new String[] { fileName }, _reader, _store, _classLoader, settings);
-        CompilationProblem[] errors = result.getErrors();
-        if (errors != null && errors.length != 0)
-        {
-            for (CompilationProblem compilationProblem : errors)
-            {
-                LOG.info("Compile problem: " + compilationProblem);
-            }
-            throw new CompileException(ast, "Internal Error" + ToString.toString(errors));
-        }
-        long end = System.currentTimeMillis();
-        if (_printStats != null)
-        {
-            printStat("Produced byte-code (" + (end - start) + "ms)");
-        }
-
-    }
-
-    private void compile(Source source, Output output) throws IOException
-    {
-        long start = System.currentTimeMillis();
-        _compiler.compile(source, output);
+        _compiler.compile(source, name, _store);
         long end = System.currentTimeMillis();
 
         if (LOG.isDebugEnabled())
         {
-            LOG.debug("Compiled " + source + " to " + output);
+            LOG.debug("Compiled " + source + " to " + name);
         }
         if (_printStats != null)
         {
-            printStat("Produced java output " + output + " (" + (end - start) + "ms)");
+            printStat("Produced output " + name + " (" + (end - start) + "ms)");
         }
     }
 
@@ -348,7 +272,7 @@ public class ObjectBuilder implements ObjectCompiler
         return new Source(resource.getPath(), ast);
     }
 
-    private Output getOutput(Resource resource)
+    private ClassName getOutputName(Resource resource)
     {
         String path = resource.getParentName();
         path = dropExtension(path);
@@ -362,21 +286,9 @@ public class ObjectBuilder implements ObjectCompiler
 
         String cls = dropExtension(resource.getName());
         cls = cls.replaceAll("[^A-Za-z0-9]", "_");
-        if (isJavaReservedWord(cls))
-        {
-            cls = "o_" + cls;
-        }
 
-        String fileName = "lpc/" + path + '/' + cls + ".java";
-        File javaFile = new File(_workingDirectory, fileName);
-        javaFile.getParentFile().mkdirs();
-        Output output = new Output(pkg, cls, javaFile);
-        return output;
-    }
 
-    private boolean isJavaReservedWord(String cls)
-    {
-        return RESERVED_WORDS.contains(cls);
+        return new ClassName(pkg, cls);
     }
 
     private String dropExtension(String path)
@@ -394,11 +306,6 @@ public class ObjectBuilder implements ObjectCompiler
     {
         _parser.setSourceFinder(_sourceFinder);
         return _parser.parse(resource);
-    }
-
-    public void setCompileOnly(boolean compileOnly)
-    {
-        _compileOnly = compileOnly;
     }
 
     public CompilerObjectManager getObjectManager()

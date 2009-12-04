@@ -117,7 +117,7 @@ public class ObjectShell implements Shell
         return (Connection) instance.getAttributes().get(OBJECT_CONNECTION_ATTRIBUTE);
     }
 
-    public static boolean isConnection(ObjectInstance instance)
+    public static boolean isConnectionObject(ObjectInstance instance)
     {
         return getConnection(instance) != null;
     }
@@ -170,6 +170,11 @@ public class ObjectShell implements Shell
 
     private void handleInput(ObjectInstance user, Connection connection, String line)
     {
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("Handle input for " + user);
+        }
+        
         Object attribute = user.getAttributes().get(OBJECT_INPUT_HANDLER_ATTRIBUTE);
         if (attribute != null)
         {

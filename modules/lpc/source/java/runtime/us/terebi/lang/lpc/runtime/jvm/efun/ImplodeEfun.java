@@ -51,7 +51,7 @@ public class ImplodeEfun extends AbstractEfun implements FunctionSignature, Call
         return list;
     }
 
-    public boolean isVarArgs()
+    public boolean acceptsLessArguments()
     {
         return true;
     }

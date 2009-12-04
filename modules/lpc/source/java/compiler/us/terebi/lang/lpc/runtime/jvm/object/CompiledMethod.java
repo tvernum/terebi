@@ -78,22 +78,16 @@ public class CompiledMethod implements CompiledMethodDefinition
         LpcMemberType returnAnnotation = method.getAnnotation(LpcMemberType.class);
         if (returnAnnotation == null)
         {
-            throw new LpcRuntimeException("Method "
-                    + method
-                    + " is not annotated with a return value ("
-                    + LpcMemberType.class.getSimpleName()
-                    + ")");
+            throw new LpcRuntimeException("Method " + method + " is not annotated with a return value (" + LpcMemberType.class.getSimpleName() + ")");
         }
         LpcType returnType = getType(returnAnnotation.kind(), returnAnnotation.className(), returnAnnotation.depth());
 
         ArgumentDefinition[] arguments = new ArgumentDefinition[method.getParameterTypes().length];
         for (int i = 0; i < arguments.length; i++)
         {
-            LpcParameter parameterAnnotation = AnnotationUtil.findAnnotation(LpcParameter.class,
-                    method.getParameterAnnotations()[i]);
+            LpcParameter parameterAnnotation = AnnotationUtil.findAnnotation(LpcParameter.class, method.getParameterAnnotations()[i]);
             LpcType type = getType(parameterAnnotation.kind(), parameterAnnotation.className(), parameterAnnotation.depth());
-            arguments[i] = new ArgumentSpec(parameterAnnotation.name(), type, parameterAnnotation.varargs(),
-                    parameterAnnotation.semantics());
+            arguments[i] = new ArgumentSpec(parameterAnnotation.name(), type, parameterAnnotation.varargs(), parameterAnnotation.semantics());
         }
 
         LpcMember methodAnnotation = method.getAnnotation(LpcMember.class);
@@ -145,10 +139,7 @@ public class CompiledMethod implements CompiledMethodDefinition
         }
         else
         {
-            throw new IllegalArgumentException("Object instance "
-                    + instance
-                    + " is not a "
-                    + CompiledObjectInstance.class.getSimpleName());
+            throw new IllegalArgumentException("Object instance " + instance + " is not a " + CompiledObjectInstance.class.getSimpleName());
         }
     }
 
@@ -185,10 +176,13 @@ public class CompiledMethod implements CompiledMethodDefinition
             {
                 cause = e;
             }
+            String causeName = cause.getClass().getSimpleName();
             String causeMessage = cause.getMessage();
             if (causeMessage == null)
             {
-                causeMessage = cause.getClass().getSimpleName();
+                causeMessage = causeName;
+            } else {
+                causeMessage = causeName + ":" + causeMessage;
             }
             throw new LpcRuntimeException("During method " + _method + " - " + causeMessage, cause);
         }

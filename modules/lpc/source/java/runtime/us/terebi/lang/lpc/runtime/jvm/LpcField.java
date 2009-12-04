@@ -18,7 +18,6 @@
 
 package us.terebi.lang.lpc.runtime.jvm;
 
-
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
@@ -64,8 +63,8 @@ public class LpcField implements LpcReference
         return _value != null;
     }
 
-    public void set(LpcValue value)
+    public LpcValue set(LpcValue value)
     {
-        _value = value;
+        return _value = value;
     }
 }

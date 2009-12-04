@@ -19,9 +19,9 @@
 package us.terebi.lang.lpc.compiler;
 
 import us.terebi.lang.lpc.parser.ParserException;
-import us.terebi.lang.lpc.parser.ast.ASTUtil;
-import us.terebi.lang.lpc.parser.ast.SimpleNode;
+import us.terebi.lang.lpc.parser.ast.TokenNode;
 import us.terebi.lang.lpc.parser.jj.Token;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 
 /**
  * 
@@ -37,13 +37,24 @@ public class CompileException extends RuntimeException
         _token = token;
     }
 
-    public CompileException(SimpleNode node, String message)
+    public CompileException(TokenNode node, String message)
     {
-        super(message + " [at node " + getImage(node) + "]");
+        super(getMessage(node, message));
         _token = (node == null ? null : node.jjtGetFirstToken());
     }
 
-    private static CharSequence getImage(SimpleNode node)
+    public CompileException(TokenNode node, String message, Throwable cause)
+    {
+        super(getMessage(node, message), cause);
+        _token = (node == null ? null : node.jjtGetFirstToken());
+    }
+
+    private static String getMessage(TokenNode node, String message)
+    {
+        return message + " [at node " + getImage(node) + "]";
+    }
+
+    private static CharSequence getImage(TokenNode node)
     {
         if (node == null)
         {
@@ -75,6 +86,7 @@ public class CompileException extends RuntimeException
         super(message, cause);
         _token = null;
     }
+
 
     public Token getToken()
     {

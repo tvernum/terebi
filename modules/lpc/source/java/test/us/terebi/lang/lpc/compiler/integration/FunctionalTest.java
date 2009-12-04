@@ -48,6 +48,7 @@ public class FunctionalTest
 
         list.addAll(getTests("binary.c", builder));
         list.addAll(getTests("math.c", builder));
+        list.addAll(getTests("logic.c", builder));
         list.addAll(getTests("loop.c", builder));
         list.addAll(getTests("string.c", builder));
         list.addAll(getTests("function.c", builder));
@@ -56,7 +57,9 @@ public class FunctionalTest
         list.addAll(getTests("array.c", builder));
         list.addAll(getTests("class.c", builder));
         list.addAll(getTests("inherit1.c", builder));
+        list.addAll(getTests("catch.c", builder));
         list.addAll(getTests("sprintf.c", builder));
+        list.addAll(getTests("sscanf.c", builder));
 
         return list;
     }
@@ -75,15 +78,27 @@ public class FunctionalTest
                     tests.add(new MethodTestCase(method, builder));
                 }
             }
+            if (tests.isEmpty())
+            {
+                throw new RuntimeException("No test methods found in " + definition);
+            }
             return tests;
         }
-        catch (final RuntimeException e)
+        catch (final Throwable e)
         {
             Callable<Object> failure = new Callable<Object>()
             {
                 public Object call() throws Exception
                 {
-                    throw e;
+                    if (e instanceof Exception)
+                    {
+                        throw (Exception) e;
+                    }
+                    if (e instanceof Error)
+                    {
+                        throw (Error) e;
+                    }
+                    throw new RuntimeException(e);
                 }
 
                 public String toString()

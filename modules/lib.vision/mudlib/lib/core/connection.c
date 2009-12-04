@@ -5,6 +5,7 @@
 #define USER_SAVE SAVE "users/"
 private string _user;
 private string _password;
+private string array _roles = ({ "user" });
 
 private string save_file()
 {
@@ -37,11 +38,16 @@ void new_password(string input, int count)
     }
 }
 
+string prompt()
+{
+        write( "> " );
+}
+
 void read_password(string input, int count)
 {
     if( _password == input) 
     {
-        write( "> " );
+        prompt();
     }
     else
     {
@@ -86,8 +92,58 @@ public void logon()
     efun::input_to( "read_user", INPUT_NO_ESCAPE );
 }
 
+private object find_command(string cmd)
+{
+    foreach (string role in _roles)
+    {
+        string file = CMDS + role + "/" + cmd + ".c";
+        if( file_exists( file ))
+        {
+            object o;
+            string err = catch { o = load_object(file); } ;
+            if(!err && o) 
+            {
+                return o;
+            }
+        }
+    }
+    return 0;
+}
+
 public void process_input(string input)
 {
-    write("[" + _user + "] Input: " + input + "\n");
+    string cmd = input;
+    string args = "";
+    sscanf(input, "%s %s", cmd, args);
+    object cmd_object = find_command(cmd);
+    if(cmd_object)
+    {
+        cmd_object->main(this_object(), cmd, args);
+    }
+    else
+    {
+        write("No such command '" + cmd + "'\n");
+        prompt();
+    }
+}
+
+public void receive_message(object type, object message)
+{
+    receive(  message );
+}
+
+public void catch_tell(string message)
+{
+    receive(  message );
+}
+
+public void grant_role(string role)
+{
+    _roles += ({ role }) ;
+}
+
+public void revoke_role(string role)
+{
+    _roles -= ({ role }) ;
 }
 

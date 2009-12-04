@@ -49,7 +49,7 @@ public class FunctionUtil
         {
             max = MAX_ARGS;
         }
-        if(signature.isVarArgs()) {
+        if(signature.acceptsLessArguments()) {
             min = 0;
         }
             return new Range<Integer>(min, max);
