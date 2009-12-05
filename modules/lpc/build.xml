@@ -28,8 +28,8 @@
   </target> 
 
   <target name="libs" depends="init-ivy,libs.stout" >
-        <ivy:resolve file="source/build/ivy.xml" type="jar" />
-        <ivy:retrieve type="jar"  />
+    <ivy:resolve file="source/build/ivy.xml" type="jar" />
+    <ivy:retrieve type="jar" pattern="${ivy.lib.dir}/[conf]/[artifact]-[revision].[ext]"  />
   </target>
 
   <target name="jjtree" >

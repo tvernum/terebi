@@ -33,7 +33,6 @@ import org.apache.log4j.Logger;
 
 import us.terebi.engine.objects.BehaviourOptions;
 import us.terebi.engine.objects.BehaviourOptions.SaveBehaviour;
-import us.terebi.lang.lpc.compiler.java.context.ClassLookup;
 import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.jj.ParseException;
@@ -200,8 +199,6 @@ public class ObjectSerializer
         {
             zeroNoSave(object);
         }
-
-        ClassLookup lookup = new ClassLookup(object);
 
         LiteralParser parser = new LiteralParser(object);
         for (;;)
