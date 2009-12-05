@@ -1,7 +1,11 @@
 <ivy-module version="2.0">
     <info organisation="terebi" module="net"/>
+    <configurations>
+        <conf name="server" />
+        <conf name="test" extends="server" visibility="private" />
+    </configurations>
     <dependencies>
-        <dependency org="log4j"      name="log4j"      rev="1.2.14"/>
-        <dependency org="junit"      name="junit"      rev="4.4"/>
+        <dependency org="log4j"      name="log4j"      rev="1.2.14" conf="server->default" />
+        <dependency org="junit"      name="junit"      rev="4.4"    conf="test->default" />
     </dependencies>
 </ivy-module>

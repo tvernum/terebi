@@ -17,10 +17,8 @@
   <import file="${dir.source.build}/install-ivy.xml" />
 
   <target name="libs" depends="init-ivy" >
-<!--
-        <ivy:resolve file="${dir.source.build}/ivy.xml" type="jar" />
-        <ivy:retrieve type="jar"  />
--->
+    <ivy:resolve file="${dir.source.build}/ivy.xml" type="jar" />
+    <ivy:retrieve type="jar" pattern="${ivy.lib.dir}/[conf]/[artifact]-[revision].[ext]"  />
   </target>
 
   <target name="compile" depends="compile.server, compile.test" />
@@ -47,7 +45,6 @@
   </path>
 
   <path id="build.classpath.test">
-    <fileset dir="lib/server" />
     <fileset dir="lib/test" />
   </path>
 

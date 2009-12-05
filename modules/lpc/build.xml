@@ -16,7 +16,18 @@
 
   <import file="source/build/install-ivy.xml" />
 
-  <target name="libs" depends="init-ivy" >
+  <property name="libs.stout.dir" value="lib/compiler/" />
+  <property name="libs.stout.jar" value="${libs.stout.dir}/org.adjective.stout.jar" />
+  <target name="libs.stout" depends="libs.stout.available,libs.stout.download" />
+  <target name="libs.stout.available">
+    <available property="libs.stout.available" file="${libs.stout.jar}" />
+  </target> 
+  <target name="libs.stout.download" unless="libs.stout.available">
+    <mkdir dir="${libs.stout.dir}" />
+    <get src="http://bitbucket.org/tvernum/stout/downloads/org.adjective.stout-SNAPSHOT.jar" dest="${libs.stout.jar}" usetimestamp="true" />
+  </target> 
+
+  <target name="libs" depends="init-ivy,libs.stout" >
         <ivy:resolve file="source/build/ivy.xml" type="jar" />
         <ivy:retrieve type="jar"  />
   </target>

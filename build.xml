@@ -1,0 +1,31 @@
+<project name="terebi" default="all" basedir="." >
+
+  <macrodef name="do-in-module">
+    <attribute name="module" />
+    <attribute name="target" />
+    <sequential>
+        <ant dir="modules/@{module}" target="@{target}" />
+    </sequential>
+  </macrodef>
+
+  <macrodef name="each-module">
+    <attribute name="target" />
+    <sequential>
+        <do-in-module module="lpc"                target="@{target}" />
+        <do-in-module module="net"                target="@{target}" />
+        <do-in-module module="engine"             target="@{target}" />
+        <do-in-module module="plugin.persist"     target="@{target}" />
+        <do-in-module module="plugin.interactive" target="@{target}" />
+    </sequential>
+  </macrodef>
+
+  <target name="all" >
+    <each-module target="all" /> 
+  </target>
+
+  <target name="clean" >
+    <each-module target="clean" /> 
+  </target>
+
+
+</project>

@@ -17,10 +17,8 @@
   <import file="${dir.source.build}/install-ivy.xml" />
 
   <target name="libs" depends="init-ivy" >
-<!--
-        <ivy:resolve file="${dir.source.build}/ivy.xml" type="jar" />
-        <ivy:retrieve type="jar"  />
--->
+    <ivy:resolve file="${dir.source.build}/ivy.xml" type="jar" />
+    <ivy:retrieve type="jar" pattern="${ivy.lib.dir}/[conf]/[artifact]-[revision].[ext]"  />
   </target>
 
   <target name="compile" depends="compile.engine, compile.test" />
@@ -42,14 +40,18 @@
        </sequential>
   </macrodef>
 
-  <path id="build.classpath.server">
-    <fileset dir="lib/server" />
+  <path id="build.classpath.modules">
     <pathelement location="../lpc/output/ant/classes/" />
     <pathelement location="../net/output/ant/classes/" />
   </path>
 
+  <path id="build.classpath.server">
+    <path refid="build.classpath.modules" />
+    <fileset dir="lib/server" />
+  </path>
+
   <path id="build.classpath.test">
-    <path refid="build.classpath.server" />
+    <path refid="build.classpath.modules" />
     <fileset dir="lib/test" />
   </path>
 
