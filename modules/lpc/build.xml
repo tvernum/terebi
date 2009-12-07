@@ -1,4 +1,5 @@
-<project name="lpc"  default="all" basedir="."  xmlns:ivy="antlib:org.apache.ivy.ant" >
+<!-- vim: set ft=ant ts=2 sts=2 expandtab shiftwidth=2  : -->
+<project name="terebi.lpc"  default="all" basedir="."  xmlns:ivy="antlib:org.apache.ivy.ant" >
 
   <property name="javacc.home" value="/Users/tim/Development/Libraries/javacc/javacc-4.2/"/>
 
@@ -6,10 +7,11 @@
   <property name="output.java"    location="output/ant/java"    />
   <property name="output.classes" location="output/ant/classes" />
   <property name="output.junit"   location="output/ant/junit"   />
+  <property name="output.dist"    location="output/ant/dist"   />
 
   <property name="java.parser.package" value="us/terebi/lang/lpc/parser" />
 
-  <target name="all"   description="Builds LPC parser/compiler + runs tests" depends="build, test" />
+  <target name="all"   description="Builds LPC parser/compiler + runs tests" depends="build, test, dist" />
   <target name="build" description="Builds LPC parser/compiler" depends="libs, grammar, compile " />
 
   <target name="grammar" depends="jjtree,javacc" />
@@ -51,7 +53,7 @@
         javacchome="${javacc.home}" />
   </target>
 
-  <target name="compile">
+  <target name="compile" depends="libs">
     <mkdir dir="${output.classes}" />
 
     <javac 
@@ -89,6 +91,33 @@
       <formatter type="xml" />
       <formatter type="plain" />
     </junit>
+  </target>
+
+  <target name="dist.jar" depends="grammar,compile">
+    <tstamp prefix="tstamp" >
+      <format property="date" pattern="yyyy-MM-dd" locale="en,AU"/>
+      <format property="time" pattern="HH:mm"      locale="en,AU"/>
+    </tstamp>
+    <exec executable="hg" outputproperty="hg.version" >
+      <arg value="id" />
+      <arg value="-i" />
+    </exec>
+    <mkdir dir="${output.dist}" />
+    <jar destfile="${output.dist}/${ant.project.name}.jar">
+      <manifest>
+        <attribute name="Implementation-Vendor"   value="Terebi"/>
+        <attribute name="Implementation-Title"    value="Terebi LPC Compiler"/>
+        <attribute name="Implementation-URL"      value="http://www.terebi.us/"/>
+        <!-- <attribute name="Implementation-Version" value="1.0.0beta2"/> -->
+        <attribute name="Implementation-Revision" value="${hg.version}"/>
+        <attribute name="Built-Date"              value="${tstamp.date} ${tstamp.time}"/>
+      </manifest>
+      <fileset dir="${output.classes}" />
+      <fileset dir="source/resource/server/" />
+    </jar>
+  </target>
+
+  <target name="dist" depends="dist.jar">
   </target>
 
   <target name="clean">

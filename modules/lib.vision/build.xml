@@ -1,0 +1,33 @@
+<!-- vim: set ft=ant ts=2 sts=2 expandtab shiftwidth=2  : -->
+<project name="terebi.lib.vision"  default="dist" basedir="." >
+
+  <target name="dist" depends="">
+    <exec executable="hg" outputproperty="hg.version" >
+      <arg value="id" />
+      <arg value="-i" />
+    </exec>
+    <mkdir dir="dist" />
+    <zip destfile="dist/terebi-vision-${hg.version}.zip">
+      <zipfileset prefix="terebi" dir=".">
+        <include name="mudlib/**" />
+        <exclude name="mudlib/lib/save/users/*.dat" />
+        <include name="etc/**" />
+        <include name="scripts/**" />
+      </zipfileset>
+      <zipfileset prefix="terebi/driver/"        dir="../lpc/output/ant/dist/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/"        dir="../net/output/ant/dist/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/"        dir="../engine/output/ant/dist/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/"        dir="../lpc/lib/compiler/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/"        dir="../net/lib/server/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/"        dir="../engine/lib/server/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/plugins" dir="../plugin.persist/output/ant/plugin/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/plugins" dir="../plugin.interactive/output/ant/plugin/" includes="*.jar" />
+    </zip>
+  </target>
+
+  <target name="clean">
+    <delete dir="dist" />
+  </target>
+
+</project>
+

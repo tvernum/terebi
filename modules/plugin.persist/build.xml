@@ -54,6 +54,8 @@
     </jar>
   </target>
 
+  <target name="dist" depends="jar" />
+
   <target name="clean">
     <delete dir="${dir.output}" />
   </target>

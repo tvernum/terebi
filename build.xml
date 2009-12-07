@@ -27,5 +27,9 @@
     <each-module target="clean" /> 
   </target>
 
+  <target name="dist" >
+    <each-module target="dist" /> 
+    <do-in-module module="lib.vision" target="dist" />
+  </target>
 
 </project>

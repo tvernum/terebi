@@ -10,8 +10,9 @@
   <property name="dir.output"         location="output/ant"            />
   <property name="dir.output.classes" location="${dir.output}/classes" />
   <property name="dir.output.junit"   location="${dir.output}/junit"   />
+  <property name="dir.output.dist"    location="${dir.output}/dist"   />
 
-  <target name="all"   description="Builds Network module + runs tests" depends="build, test" />
+  <target name="all"   description="Builds Network module + runs tests" depends="build, test, dist" />
   <target name="build" description="Builds Network module"              depends="libs, compile " />
 
   <import file="${dir.source.build}/install-ivy.xml" />
@@ -21,7 +22,7 @@
     <ivy:retrieve type="jar" pattern="${ivy.lib.dir}/[conf]/[artifact]-[revision].[ext]"  />
   </target>
 
-  <target name="compile" depends="compile.server, compile.test" />
+  <target name="compile" depends="libs, compile.server, compile.test" />
 
   <macrodef name="compile_java">
        <attribute name="dir" />
@@ -74,6 +75,34 @@
       <formatter type="plain" />
     </junit>
   </target>
+
+  <target name="dist.jar" depends="compile">
+    <tstamp prefix="tstamp" >
+      <format property="date" pattern="yyyy-MM-dd" locale="en,AU"/>
+      <format property="time" pattern="HH:mm"      locale="en,AU"/>
+    </tstamp>
+    <exec executable="hg" outputproperty="hg.version" >
+      <arg value="id" />
+      <arg value="-i" />
+    </exec>
+    <mkdir dir="${dir.output.dist}" />
+    <jar destfile="${dir.output.dist}/${ant.project.name}.jar">
+      <manifest>
+        <attribute name="Implementation-Vendor"   value="Terebi"/>
+        <attribute name="Implementation-Title"    value="Terebi Network Server"/>
+        <attribute name="Implementation-URL"      value="http://www.terebi.us/"/>
+        <!-- <attribute name="Implementation-Version" value="1.0.0beta2"/> -->
+        <attribute name="Implementation-Revision" value="${hg.version}"/>
+        <attribute name="Built-Date"              value="${tstamp.date} ${tstamp.time}"/>
+      </manifest>
+      <fileset dir="${dir.output.classes}" />
+      <!-- <fileset dir="${dir.source.resource.server}" /> -->
+    </jar>
+  </target>
+
+  <target name="dist" depends="dist.jar">
+  </target>
+
 
   <target name="clean">
     <delete dir="${dir.output}" />
