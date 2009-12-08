@@ -1,3 +1,43 @@
+2009-12-08
+    Fixes to build process
+    Prompt after saving new user
+
+2009-12-07
+    Create distribution of terebi+vision
+
+2009-12-05
+    Improve build process
+
+2009-12-03
+    Close connection on IOException
+    Make sure references are 'dereferenced' before passing as a function argument
+    Tests & fixes for sscanf efun
+
+2009-12-02
+    Improved logging
+
+2009-12-01
+    Support catch expressions
+
+2009-11-16
+    Remove lpc2java compiler
+
+2009-10-06
+    Initia work on a direct to byte-code compiler
+
+2009-08-27
+    Fix plugin for new class support
+
+2009-08-25
+    Allow access to inherited fields
+
+2009-08-24
+    Fixes for inheritance
+    Runtime support for class values
+
+2009-08-23
+    Support destruct (from LPC) of connection object
+
 2009-08-22
     Create a parser for literal LPC expressions [for use in restore_object]
 

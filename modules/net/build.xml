@@ -100,9 +100,13 @@
     </jar>
   </target>
 
-  <target name="dist" depends="dist.jar">
+  <target name="dist.source" >
+    <zip destfile="${dir.output.dist}/${ant.project.name}-source.zip">
+      <fileset dir="." includes="source/java/**" />
+    </zip>
   </target>
 
+  <target name="dist" depends="dist.jar, dist.source" />
 
   <target name="clean">
     <delete dir="${dir.output}" />

@@ -19,6 +19,11 @@ public void save()
     write("\n");
 }
 
+string prompt()
+{
+    write( "> " );
+}
+
 void new_password(string input, int count)
 {
     if( count == 0 )
@@ -30,17 +35,13 @@ void new_password(string input, int count)
     else if(input == _password)
     {
        save();
+       prompt();
     }
     else
     {
         write("Those password didn't match. Please try again.\nPlease select a password: ");
         efun::input_to( "new_password", INPUT_NO_ESCAPE | INPUT_NO_ECHO, 0);
     }
-}
-
-string prompt()
-{
-        write( "> " );
 }
 
 void read_password(string input, int count)

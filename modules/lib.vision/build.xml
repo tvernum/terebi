@@ -7,21 +7,23 @@
       <arg value="-i" />
     </exec>
     <mkdir dir="dist" />
-    <zip destfile="dist/terebi-vision-${hg.version}.zip">
+    <zip destfile="dist/terebi-vision-${hg.version}.zip" duplicate="preserve">
       <zipfileset prefix="terebi" dir=".">
         <include name="mudlib/**" />
-        <exclude name="mudlib/lib/save/users/*.dat" />
+        <exclude name="mudlib/save/users/*.dat" />
         <include name="etc/**" />
+      </zipfileset>
+      <zipfileset prefix="terebi" dir="." filemode="755">
         <include name="scripts/**" />
       </zipfileset>
-      <zipfileset prefix="terebi/driver/"        dir="../lpc/output/ant/dist/" includes="*.jar" />
-      <zipfileset prefix="terebi/driver/"        dir="../net/output/ant/dist/" includes="*.jar" />
-      <zipfileset prefix="terebi/driver/"        dir="../engine/output/ant/dist/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/"        dir="../lpc/output/ant/dist/" includes="*.jar,*.zip" />
+      <zipfileset prefix="terebi/driver/"        dir="../net/output/ant/dist/" includes="*.jar,*.zip" />
+      <zipfileset prefix="terebi/driver/"        dir="../engine/output/ant/dist/" includes="*.jar,*.zip" />
       <zipfileset prefix="terebi/driver/"        dir="../lpc/lib/compiler/" includes="*.jar" />
       <zipfileset prefix="terebi/driver/"        dir="../net/lib/server/" includes="*.jar" />
       <zipfileset prefix="terebi/driver/"        dir="../engine/lib/server/" includes="*.jar" />
-      <zipfileset prefix="terebi/driver/plugins" dir="../plugin.persist/output/ant/plugin/" includes="*.jar" />
-      <zipfileset prefix="terebi/driver/plugins" dir="../plugin.interactive/output/ant/plugin/" includes="*.jar" />
+      <zipfileset prefix="terebi/driver/plugins" dir="../plugin.persist/output/ant/plugin/" includes="*.jar,*.zip" />
+      <zipfileset prefix="terebi/driver/plugins" dir="../plugin.interactive/output/ant/plugin/" includes="*.jar,*.zip" />
     </zip>
   </target>
 

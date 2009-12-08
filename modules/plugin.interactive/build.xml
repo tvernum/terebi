@@ -54,7 +54,14 @@
     </jar>
   </target>
 
-  <target name="dist" depends="jar" />
+  <target name="dist.source" >
+    <zip destfile="${dir.output.plugin}/${ant.project.name}-source.zip">
+      <fileset dir="." includes="source/java/**" />
+      <fileset dir="." includes="source/resource/plugin/*" />
+    </zip>
+  </target>
+
+  <target name="dist" depends="jar,dist.source" />
 
   <target name="clean">
     <delete dir="${dir.output}" />
