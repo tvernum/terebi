@@ -31,4 +31,9 @@ public class ASTIdentifier extends SimpleNode
     {
         return ASTUtil.getImage(this);
     }
+
+    public String toString()
+    {
+        return super.toString() + " {" + getIdentifierName() + "}";
+    }
 }

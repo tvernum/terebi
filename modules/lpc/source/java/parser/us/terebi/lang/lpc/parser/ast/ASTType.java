@@ -1,6 +1,7 @@
 package us.terebi.lang.lpc.parser.ast;
 
 import us.terebi.lang.lpc.parser.jj.*;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcType.Kind;
 
@@ -71,5 +72,10 @@ public class ASTType extends SimpleNode
     public Object jjtAccept(ParserVisitor visitor, Object data)
     {
         return visitor.visit(this, data);
+    }
+    
+    public String toString()
+    {
+        return super.toString() + " - " + ASTUtil.getCompleteImage(this);
     }
 }

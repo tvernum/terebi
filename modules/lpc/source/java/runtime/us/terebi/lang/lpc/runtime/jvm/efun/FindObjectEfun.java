@@ -21,12 +21,18 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.Collections;
 import java.util.List;
 
+import us.terebi.lang.lpc.compiler.java.context.ObjectId;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -46,8 +52,20 @@ public class FindObjectEfun extends AbstractEfun implements FunctionSignature, C
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments);
+        String name = arguments.get(0).asString();
+
+        ThreadContext context = RuntimeContext.obtain();
+        ObjectManager manager = context.system().objectManager();
+        try
+        {
+            ObjectInstance object = manager.findObject(new ObjectId(name));
+            return getValue(object);
+        }
+        catch (NumberFormatException e)
+        {
+            return NilValue.INSTANCE;
+        }
     }
 
 }

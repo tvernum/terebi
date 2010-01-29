@@ -33,4 +33,9 @@ public class LpcRuntimeException extends RuntimeException
         super(message);
     }
 
+    public String getLpcMessage()
+    {
+        return "*" + getMessage();
+    }
+
 }

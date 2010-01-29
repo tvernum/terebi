@@ -33,7 +33,6 @@ import us.terebi.lang.lpc.compiler.ObjectSource;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
-import us.terebi.lang.lpc.parser.util.StackFreeRebuilder;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
@@ -56,7 +55,6 @@ public class ByteCodeCompiler implements Compiler
     {
         ClassSpec spec = new ClassSpec(name.packageName, name.className).withSuperClass(LpcObject.class).withModifiers(ElementModifier.PUBLIC);
         ASTObjectDefinition ast = source.getSyntaxTree();
-        ast = new StackFreeRebuilder().rebuild(ast);
         CompileContext context = new CompileContext(store, new CompileOptions(), ast, spec);
 
         compile(context, spec);

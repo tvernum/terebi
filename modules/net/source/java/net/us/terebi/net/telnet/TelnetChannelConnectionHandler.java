@@ -200,7 +200,6 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
             Object attachment = key.attachment();
             assert attachment instanceof TelnetChannelConnection;
             final TelnetChannelConnection connection = (TelnetChannelConnection) attachment;
-            LOG.info("Connection " + connection + " is " + (connection.isOpen() ? "" : "not ") + "open");
             if (connection.isOpen())
             {
                 Runnable runnable = new ConnectionReader(key, connection);

@@ -76,7 +76,6 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
         return null;
     }
 
-    @SuppressWarnings("unchecked")
     private ElementBuilder<MethodDescriptor> buildMethod(ASTMethod node)
     {
         MethodSupport support = new MethodSupport(getScope(), node, getModifiers(MemberDefinition.Kind.METHOD), getType());
@@ -87,11 +86,12 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
         }
         support.declareParameters();
 
-        MethodSpec method = new MethodSpec(support.getMethodName());
+        String name = support.getMethodName();
+        MethodSpec method = new MethodSpec(name);
         method.withModifiers(ElementModifier.PUBLIC).withReturnType(LpcValue.class);
 
         Modifier[] modifiers = super.getModifiers(Kind.METHOD).toArray(MODIFIER_ARRAY);
-        method.withAnnotation(new AnnotationSpec(LpcMember.class).withRuntimeVisibility(true).withAttribute("name", support.getMethodName()).withAttribute(
+        method.withAnnotation(new AnnotationSpec(LpcMember.class).withRuntimeVisibility(true).withAttribute("name", name).withAttribute(
                 "modifiers", modifiers));
 
         LpcType type = getType();
@@ -114,6 +114,7 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
             }
             annotation.withAttribute("name", arg.getName());
             annotation.withAttribute("semantics", arg.getSemantics());
+            annotation.withAttribute("varargs", arg.isVarArgs());
             parameters[i] = new ParameterSpec("p$" + arg.getName()).withType(LpcValue.class).withAnnotation(annotation);
         }
         method.withParameters(parameters);
@@ -136,7 +137,6 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
         return typeAnnotation;
     }
 
-    @SuppressWarnings("unchecked")
     private List< ? extends ElementBuilder< ? extends Statement>> buildBody(MethodSupport support)
     {
         ASTStatementBlock body = support.getBody();

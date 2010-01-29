@@ -46,6 +46,7 @@ import us.terebi.lang.lpc.runtime.jvm.LpcField;
 import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.util.Apply;
@@ -223,8 +224,7 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
             return null;
         }
         CompiledObjectDefinition definition = _inherited.get(annotation.name());
-        InheritedObject< ? > inherited = new InheritedObject<Object>(annotation.name(), definition.getImplementationClass(),
-                definition);
+        InheritedObject< ? > inherited = new InheritedObject<Object>(annotation.name(), definition.getImplementationClass(), definition);
         try
         {
             field.setAccessible(true);
@@ -242,7 +242,10 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         try
         {
             Constructor< ? extends T> constructor = _implementation.getConstructor(CompiledObjectDefinition.class);
-            return constructor.newInstance(this);
+            synchronized (RuntimeContext.lock())
+            {
+                return constructor.newInstance(this);
+            }
         }
         catch (LpcRuntimeException e)
         {

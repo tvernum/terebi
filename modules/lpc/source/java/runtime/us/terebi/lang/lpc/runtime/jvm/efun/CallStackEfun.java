@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -26,8 +27,14 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.DetailFrame;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -45,11 +52,74 @@ public class CallStackEfun extends AbstractEfun implements FunctionSignature, Ca
         return Types.MIXED_ARRAY;
     }
 
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
+
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
-        return VoidValue.INSTANCE;
+        if (arguments.size() == 0)
+        {
+            return execute(0);
+        }
+        else
+        {
+            LpcValue arg = arguments.get(0);
+            return execute((int) arg.asLong());
+        }
+    }
+
+    /*
+     * > eval return call_stack()
+    Result = ({ "/secure/tmp/zod_CMD_EVAL_TMP_FILE.c", "/secure/cmds/creators/eval.c", "/lib/command.c", "/<driver>" })
+
+    > eval return call_stack(1)
+    Result = ({ OBJ(/secure/tmp/zod_CMD_EVAL_TMP_FILE), OBJ(/secure/cmds/creators/eval), OBJ(zod /secure/save/creators/z/zod), OBJ(zod
+    /secure/save/creators/z/zod) })
+
+    > eval return call_stack(2)
+    Result = ({ "eval", "cmd", "cmdAll", "<function>" })
+
+    > eval return call_stack(3)
+    Result = ({ "call_other", "call_other", "local", "function pointer" })
+
+    > eval return call_stack(4)
+    ---
+    2009.12.24-14.40,24
+    *First argument of call_stack() must be 0, 1, 2, or 3.
+    Object: /secure/tmp/zod_CMD_EVAL_TMP_FILE at line 21
+
+     */
+    private LpcValue execute(int arg)
+    {
+        List<LpcValue> result = new ArrayList<LpcValue>();
+
+        ThreadContext context = RuntimeContext.obtain();
+        List<DetailFrame> frames = context.callStack().detailFrames();
+
+        LpcType type = (arg == 1) ? Types.OBJECT_ARRAY : Types.STRING_ARRAY;
+        for (MajorFrame frame : frames)
+        {
+            if (arg == 1)
+            {
+                result.add(new ObjectValue(frame.instance));
+                continue;
+            }
+            String str;
+            switch (arg)
+            {
+                case 0:
+                    str = frame.instance.getDefinition().getName();
+                default:
+                    // @TODO
+                    str = "?";
+            }
+            result.add(new StringValue(str));
+        }
+
+        return new ArrayValue(type, result);
     }
 
 }

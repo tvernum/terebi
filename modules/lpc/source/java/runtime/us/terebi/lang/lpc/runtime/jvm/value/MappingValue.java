@@ -69,6 +69,11 @@ public class MappingValue extends AbstractValue implements LpcValue
         return this.asMap().hashCode();
     }
 
+    public String asString()
+    {
+        return debugInfo().toString();
+    }
+
     public CharSequence debugInfo()
     {
         if (_map.isEmpty())

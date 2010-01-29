@@ -18,8 +18,12 @@
 package us.terebi.lang.lpc.compiler.bytecode;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
+
+import org.objectweb.asm.Label;
 
 import org.adjective.stout.builder.ElementBuilder;
 import org.adjective.stout.core.ExtendedType;
@@ -32,6 +36,7 @@ import org.adjective.stout.loop.IterableLoopSpec;
 import org.adjective.stout.loop.WhileLoopSpec;
 import org.adjective.stout.operation.EmptyStatement;
 import org.adjective.stout.operation.Expression;
+import org.adjective.stout.operation.LabelStatement;
 import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
 
@@ -47,6 +52,7 @@ import us.terebi.lang.lpc.parser.ast.ASTConditionalStatement;
 import us.terebi.lang.lpc.parser.ast.ASTControlStatement;
 import us.terebi.lang.lpc.parser.ast.ASTFullType;
 import us.terebi.lang.lpc.parser.ast.ASTIdentifier;
+import us.terebi.lang.lpc.parser.ast.ASTLabel;
 import us.terebi.lang.lpc.parser.ast.ASTLoopStatement;
 import us.terebi.lang.lpc.parser.ast.ASTOptVariableOrExpression;
 import us.terebi.lang.lpc.parser.ast.ASTStatementBlock;
@@ -57,12 +63,18 @@ import us.terebi.lang.lpc.parser.ast.Node;
 import us.terebi.lang.lpc.parser.ast.ParserVisitor;
 import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.ast.StatementNode;
+import us.terebi.lang.lpc.parser.ast.TokenNode;
+import us.terebi.lang.lpc.parser.jj.ParserConstants;
+import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.LpcVariable;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
+import us.terebi.lang.lpc.runtime.jvm.support.ComparisonSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.util.Pair;
 
 import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.MAP_ENTRY_GET_KEY;
 import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.MAP_ENTRY_GET_VALUE;
@@ -384,7 +396,154 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
 
     protected StatementResult visitSwitch(ASTConditionalStatement node)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        SimpleNode exprNode = (SimpleNode) node.jjtGetChild(0);
+        ASTStatementBlock stmtNode = (ASTStatementBlock) node.jjtGetChild(1);
+        // @TODO : Optimise for where a TABLESWITCH or LOOKUPSWITCH would do the job
+
+        Map<Label, List<StatementNode>> statements = new LinkedHashMap<Label, List<StatementNode>>();
+        Map<Pair<LpcExpression, LpcExpression>, Label> table = new LinkedHashMap<Pair<LpcExpression, LpcExpression>, Label>();
+
+        // @TODO This could probably just sit on the stack...
+        String var = "switch$" + _scope.variables().allocateInternalVariableName();
+        _statements.add(VM.Statement.declareVariable(ByteCodeConstants.LPC_VALUE, var));
+        _statements.add(VM.Statement.assignVariable(var, ExpressionCompiler.getValue(processExpression(exprNode))));
+
+        boolean hasDefault = false;
+        Label jump = null;
+        List<StatementNode> block = null;
+        for (TokenNode child : ASTUtil.children(stmtNode))
+        {
+            if (child instanceof ASTLabel)
+            {
+                Pair<LpcExpression, LpcExpression> pair;
+                Token token = child.jjtGetFirstToken();
+                switch (token.kind)
+                {
+                    case ParserConstants.DEFLT:
+                        pair = new Pair<LpcExpression, LpcExpression>(null, null);
+                        hasDefault = true;
+                        break;
+                    case ParserConstants.CASE:
+                        LpcExpression caseStart = processExpression(child.jjtGetChild(0));
+                        LpcExpression caseEnd = (child.jjtGetNumChildren() > 1) ? processExpression(child.jjtGetChild(1)) : null;
+                        pair = new Pair<LpcExpression, LpcExpression>(caseStart, caseEnd);
+                        break;
+                    default:
+                        continue;
+                }
+                if (block != null)
+                {
+                    block = null;
+                    jump = null;
+                }
+                if (jump == null)
+                {
+                    jump = new Label();
+                }
+                table.put(pair, jump);
+            }
+            else if (jump == null)
+            {
+                throw new CompileException(child, "Cannot have a statement inside a switch without a label");
+            }
+            else if (child instanceof StatementNode)
+            {
+                if (block == null)
+                {
+                    block = new ArrayList<StatementNode>();
+                    statements.put(jump, block);
+                }
+                block.add((StatementNode) child);
+            }
+            else
+            {
+                throw new InternalError("Compile error - Non statement " + child + " inside switch");
+            }
+        }
+
+        for (Entry<Pair<LpcExpression, LpcExpression>, Label> entry : table.entrySet())
+        {
+            Pair<LpcExpression, LpcExpression> pair = entry.getKey();
+            Label label = entry.getValue();
+
+            ElementBuilder<Statement> go = VM.Statement.Goto(label);
+            if (pair.getFirst() == null)
+            {
+                _statements.add(go);
+            }
+            else
+            {
+                Expression getVar = VM.Expression.variable(var);
+                Expression first = ExpressionCompiler.getValue(pair.getFirst());
+                Expression compare;
+                if (pair.getSecond() == null)
+                {
+                    compare = VM.Expression.callMethod(getVar, ByteCodeConstants.LPC_VALUE, ByteCodeConstants.EQUALS, first);
+                }
+                else
+                {
+                    Expression second = ExpressionCompiler.getValue(pair.getSecond());
+                    compare = VM.Expression.callStatic(ComparisonSupport.class, ByteCodeConstants.IS_IN_RANGE, first, second, getVar);
+                }
+                ElementBuilder<Condition> condition = VM.Condition.expression(compare);
+                IfElseSpec ifElse = VM.Condition.ifElse().withCondition(condition).whenTrue(go.create());
+                _statements.add(ifElse);
+            }
+        }
+
+        Label endLabel = new Label();
+        ElementBuilder<Statement> gotoEnd = VM.Statement.Goto(endLabel);
+        if (!hasDefault)
+        {
+            _statements.add(gotoEnd);
+        }
+
+        boolean allCasesReturn = true;
+        for (Entry<Label, List<StatementNode>> entry : statements.entrySet())
+        {
+            boolean thisCaseTerminates = false;
+            boolean thisCaseReturns = false;
+            Label label = entry.getKey();
+            _statements.add(new LabelStatement(label));
+            for (StatementNode stmt : entry.getValue())
+            {
+                if (stmt.jjtGetFirstToken().kind == ParserConstants.BREAK)
+                {
+                    thisCaseTerminates = true;
+                    _statements.add(gotoEnd);
+                }
+                else
+                {
+                    if (thisCaseTerminates)
+                    {
+                        throw new CompileException(stmt, "Unreachable statement");
+                    }
+                    StatementResult result = this.compileStatement(stmt);
+                    if (result.isTerminated())
+                    {
+                        if (result.termination == StatementResult.TerminationType.RETURN)
+                        {
+                            thisCaseReturns = true;
+                        }
+                        thisCaseTerminates = true;
+                    }
+                }
+            }
+            if (!thisCaseTerminates || !thisCaseReturns)
+            {
+                allCasesReturn = false;
+            }
+        }
+
+        _statements.add(new LabelStatement(endLabel));
+
+        if (allCasesReturn && hasDefault)
+        {
+            return new StatementResult(StatementResult.TerminationType.RETURN);
+        }
+        else
+        {
+            return StatementResult.NON_TERMINAL;
+        }
     }
 }

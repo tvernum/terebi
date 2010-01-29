@@ -96,7 +96,7 @@ public class MiscSupport
     public static boolean isExtension(LpcValue value)
     {
         LpcType type = value.getActualType();
-        return type.getKind() == Kind.EXTENSION && type.getArrayDepth() == 0 ;
+        return type.getKind() == Kind.EXTENSION && type.getArrayDepth() == 0;
     }
 
     public static boolean isClassReference(LpcValue value)

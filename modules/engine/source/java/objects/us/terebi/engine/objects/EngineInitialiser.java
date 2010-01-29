@@ -146,6 +146,7 @@ public class EngineInitialiser
         options.defineTrue("__TEREBI__");
         options.defineString("__ARCH__", getArchitecture());
         options.defineString("__SAVE_EXTENSION__", _behaviour.getSaveBehaviour().extension);
+        attachToContext(CompileOptions.class, options);
         return options;
     }
 
@@ -162,12 +163,16 @@ public class EngineInitialiser
 
     private BehaviourOptions loadBehaviourOptions()
     {
-        return new BehaviourOptions(_config);
+        BehaviourOptions behaviour = new BehaviourOptions(_config);
+        attachToContext(BehaviourOptions.class, behaviour);
+        return behaviour;
     }
 
     private MudlibSetup loadMudlibConfig()
     {
-        return new MudlibSetup(_config);
+        MudlibSetup mudlib = new MudlibSetup(_config);
+        attachToContext(MudlibSetup.class, mudlib);
+        return mudlib;
     }
 
     public Config getConfig()

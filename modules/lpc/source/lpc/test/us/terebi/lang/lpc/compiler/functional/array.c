@@ -162,3 +162,18 @@ public int b4()
     return sizeof(a);
 }
 
+public b5()
+{
+    int array a = ({ 1, 2, 3, 4, 5, 6, 7, 8 });
+    int array b = ({ -3 , -2, -1, 0, 1, 2, 3, 4, 5 });
+    return sizeof( a & b );
+}
+
+public b6()
+{
+    int array a = ({ 1, 2, 3, 4 });
+    int array b = ({ 3, 4, 5, 6 });
+    return sizeof( a | b );
+}
+
+

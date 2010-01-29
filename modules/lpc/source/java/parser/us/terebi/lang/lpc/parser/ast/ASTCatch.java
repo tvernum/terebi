@@ -2,7 +2,7 @@ package us.terebi.lang.lpc.parser.ast;
 
 import us.terebi.lang.lpc.parser.jj.*;
 
-public class ASTCatch extends ExpressionNode implements StackFree
+public class ASTCatch extends ExpressionNode  
 {
     public ASTCatch(int id)
     {

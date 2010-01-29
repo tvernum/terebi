@@ -37,7 +37,7 @@ import us.terebi.net.telnet.TelnetChannelConnectionHandler;
  */
 public class TerebiServer
 {
-    private static final String TELNET_PORT_KEY = "telnet.ports";
+    public static final String TELNET_PORT_KEY = "telnet.ports";
     private final NetServer _net;
 
     public interface ConnectionObjectFactory

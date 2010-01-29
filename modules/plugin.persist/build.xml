@@ -23,7 +23,7 @@
                    destdir="${dir.output.classes}"
                    classpathref="@{classpath}"
                    debug="true"
-                   deprecation="false" 
+                   deprecation="true" 
                    optimize="false"
                    listfiles="false"
                    source="1.5">

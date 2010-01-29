@@ -21,21 +21,16 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
-import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
-import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.lang.lpc.runtime.util.SystemLog;
 import us.terebi.util.io.IOUtil;
 import us.terebi.util.io.RuntimeIOException;
@@ -43,7 +38,7 @@ import us.terebi.util.io.RuntimeIOException;
 /**
  * 
  */
-public class PluralizeEfun extends AbstractEfun implements FunctionSignature, Callable
+public class PluralizeEfun extends AbstractStringEfun implements FunctionSignature, Callable
 {
     private static final String RULE_PATTERN = "^\\s*(\\w+)\\s+(\\w+)\\s*$";
     private static final Pattern X_OF_Y = Pattern.compile("^(\\w+)(\\s+of\\s+\\w+)$");
@@ -114,16 +109,6 @@ public class PluralizeEfun extends AbstractEfun implements FunctionSignature, Ca
     private void error(String msg, Throwable cause)
     {
         SystemLog.message(msg, cause);
-    }
-
-    protected List< ? extends ArgumentDefinition> defineArguments()
-    {
-        return Collections.singletonList(new ArgumentSpec("str", Types.STRING));
-    }
-
-    public LpcType getReturnType()
-    {
-        return Types.STRING;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)

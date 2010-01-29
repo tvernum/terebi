@@ -34,6 +34,8 @@ import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.test.TestSuite;
 import us.terebi.test.TestSuiteRunner;
 
@@ -50,6 +52,7 @@ public class FunctionalTest
         list.addAll(getTests("math.c", builder));
         list.addAll(getTests("logic.c", builder));
         list.addAll(getTests("loop.c", builder));
+        list.addAll(getTests("switch.c", builder));
         list.addAll(getTests("string.c", builder));
         list.addAll(getTests("function.c", builder));
         list.addAll(getTests("varargs.c", builder));
@@ -68,7 +71,14 @@ public class FunctionalTest
     {
         try
         {
-            CompiledObjectDefinition definition = builder.compile(file);
+            CompiledObjectDefinition definition ;
+            SystemContext system = new SystemContext(StandardEfuns.getImplementation(), builder.getObjectManager(), builder.getSourceFinder());
+            synchronized (system.lock())
+            {
+                RuntimeContext.activate(system);
+                definition = builder.compile(file);
+            }
+            
             Collection< ? extends CompiledMethodDefinition> methods = definition.getMethods().values();
             List<MethodTestCase> tests = new ArrayList<MethodTestCase>(methods.size());
             for (CompiledMethodDefinition method : methods)

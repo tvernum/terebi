@@ -71,7 +71,7 @@ public class FunctionCallSupport extends BaseASTVisitor implements ParserVisitor
         _scope = scope;
     }
 
-    public FunctionReference findFunction(SimpleNode node, String scope, String name)
+    public FunctionReference findFunction(TokenNode node, String scope, String name)
     {
         List<FunctionReference> functions = _scope.functions().findFunctions(scope, name, !_scope.isSecureObject());
         if (functions == null || functions.isEmpty())

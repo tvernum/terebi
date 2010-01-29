@@ -35,6 +35,8 @@ import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.jvm.LpcObject;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.util.Pair;
 import us.terebi.util.collection.ArrayStack;
@@ -57,10 +59,10 @@ public class VariableLookup implements VariableResolver
         public final String lpcName;
         public final String internalName;
         public final Type type;
-        public final ObjectDefinition definition;
+        public final Object definition;
 
         @SuppressWarnings("hiding")
-        private ObjectPath(String lpcName, String internalName, Type type, ObjectDefinition definition)
+        private ObjectPath(String lpcName, String internalName, Type type, Object definition)
         {
             this.lpcName = lpcName;
             this.internalName = internalName;
@@ -70,7 +72,7 @@ public class VariableLookup implements VariableResolver
 
         public String toString()
         {
-            return lpcName;
+            return lpcName + " (" + type + ";" + definition + ")";
         }
 
         public static Pair<Expression, UnresolvedType> findTarget(VariableLookup.ObjectPath[] path)
@@ -86,16 +88,28 @@ public class VariableLookup implements VariableResolver
                             ByteCodeConstants.INHERITED_OBJECT_TYPE);
                     target = VM.Expression.callMethod(inherited, ByteCodeConstants.INHERITED_OBJECT_TYPE, ByteCodeConstants.INHERITED_OBJECT_GET);
                 }
+                else if (step.type == Type.ENCLOSING)
+                {
+                    target = VM.Expression.callMethod(VM.Expression.thisObject(), LpcObject.class, ByteCodeConstants.FUNCTION_OWNER);
+                }
                 else
                 {
                     throw new UnsupportedOperationException("findTarget(" + step.type + ") - Not implemented");
                 }
-                if (!(step.definition instanceof CompiledObjectDefinition))
+                if (step.definition instanceof UnresolvedType)
                 {
-                    throw new UnsupportedOperationException("Calls to non compiled methods are not yet implemented");
+                    type = (UnresolvedType) step.definition;
                 }
-                CompiledObjectDefinition definition = (CompiledObjectDefinition) step.definition;
-                type = new ParameterisedClassImpl(definition.getImplementationClass());
+                else if (step.definition instanceof CompiledObjectDefinition)
+                {
+                    CompiledObjectDefinition cod = (CompiledObjectDefinition) step.definition;
+                    type = new ParameterisedClassImpl(cod.getImplementationClass());
+                }
+                else
+                {
+                    throw new UnsupportedOperationException("Calls to non compiled methods are not yet implemented (" + step + ")");
+                }
+
                 target = VM.Expression.cast(type, target);
             }
 
@@ -107,9 +121,27 @@ public class VariableLookup implements VariableResolver
             return new ObjectPath(scope, scope, Type.INHERIT, object);
         }
 
-        public static ObjectPath enclosing(String name, ObjectDefinition object)
+        public static ObjectPath enclosing(String name, UnresolvedType enclosingType)
         {
-            return new ObjectPath("", name, Type.ENCLOSING, object);
+            if (enclosingType == null)
+            {
+                throw new InternalError("Attempt to create enclosing Path '" + name + "' with to no object");
+            }
+            return new ObjectPath("", name, Type.ENCLOSING, enclosingType);
+        }
+
+        public static ObjectPath enclosing(String name, ObjectDefinition enclosingType)
+        {
+            if (enclosingType == null)
+            {
+                throw new InternalError("Attempt to create enclosing Path '" + name + "' with to no object");
+            }
+            return new ObjectPath("", name, Type.ENCLOSING, enclosingType);
+        }
+
+        public ObjectDefinition getDefinition()
+        {
+            return (ObjectDefinition) this.definition;
         }
     }
 
@@ -162,7 +194,6 @@ public class VariableLookup implements VariableResolver
         {
             return new VariableReference(Kind.INTERNAL, name, name, type, null);
         }
-
 
         public static VariableReference enclosed(VariableReference ref, ObjectDefinition enclosingObject, String enclosingPath)
         {

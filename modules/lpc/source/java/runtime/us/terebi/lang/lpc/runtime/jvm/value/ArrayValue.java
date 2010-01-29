@@ -81,6 +81,11 @@ public class ArrayValue extends AbstractValue implements LpcValue
     {
         return _list.hashCode();
     }
+    
+    public String asString()
+    {
+        return debugInfo().toString();
+    }
 
     public CharSequence debugInfo()
     {

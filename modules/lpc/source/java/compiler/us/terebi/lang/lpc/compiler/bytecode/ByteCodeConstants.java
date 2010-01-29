@@ -22,6 +22,7 @@ import java.util.Collections;
 import java.util.Map;
 
 import org.adjective.stout.core.ConstructorSignature;
+import org.adjective.stout.core.ExtendedType;
 import org.adjective.stout.core.MethodSignature;
 import org.adjective.stout.core.ParameterisedClass;
 import org.adjective.stout.impl.ParameterisedClassImpl;
@@ -42,10 +43,13 @@ import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.LpcRuntimeSupport;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.ClassSupport;
+import us.terebi.lang.lpc.runtime.jvm.support.ComparisonSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.IndexSupport;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.util.LogCatch;
 
 /**
  * 
@@ -54,9 +58,10 @@ public class ByteCodeConstants
 {
     public static final ParameterisedClass LPC_VALUE = new ParameterisedClassImpl(LpcValue.class);
     public static final ParameterisedClass LPC_REFERENCE = new ParameterisedClassImpl(LpcReference.class);
-    public static final ParameterisedClass LPC_FIELD = new ParameterisedClassImpl(LpcField.class);
     public static final ParameterisedClass LPC_RUNTIME_EXCEPTION = new ParameterisedClassImpl(LpcRuntimeException.class);
-
+    public static final ParameterisedClass LPC_FIELD = new ParameterisedClassImpl(LpcField.class);
+    public static final ExtendedType LPC_VALUE_ARRAY = new ParameterisedClassImpl(LpcValue[].class);
+    
     public static final Expression[] NO_ARGUMENTS = new Expression[0];
 
     public static final MethodSignature VALUE_AS_LIST = VM.Method.find(LpcValue.class, "asList");
@@ -68,11 +73,13 @@ public class ByteCodeConstants
     public static final MethodSignature MAP_ENTRY_GET_KEY = VM.Method.find(Map.Entry.class, "getKey");
     public static final MethodSignature MAP_ENTRY_GET_VALUE = VM.Method.find(Map.Entry.class, "getValue");
 
+    public static final MethodSignature EQUALS = VM.Method.find(LpcObject.class, "equals", Object.class);
+
     public static final Expression NIL = VM.Expression.getStaticField(NilValue.class, "INSTANCE", NilValue.class);
     public static final Expression VOID = VM.Expression.getStaticField(VoidValue.class, "INSTANCE", VoidValue.class);
-    
+
     public static final ParameterisedClass JAVA_VOID_TYPE = new ParameterisedClassImpl(Void.TYPE);
-    
+
     public static final ParameterisedClass INHERITED_OBJECT_TYPE = new ParameterisedClassImpl(InheritedObject.class);
     public static final MethodSignature INHERITED_OBJECT_GET = VM.Method.find(InheritedObject.class, "get");
 
@@ -87,17 +94,33 @@ public class ByteCodeConstants
 
     public static final MethodSignature SINGLETON_LIST = VM.Method.find(Collections.class, "singletonList", Object.class);
 
-    public static final MethodSignature INDEX_REFERENCE_1 = VM.Method.find(IndexSupport.class, "index", LpcReference.class, LpcValue.class, Boolean.TYPE);
-    public static final MethodSignature INDEX_REFERENCE_2 = VM.Method.find(IndexSupport.class, "index", LpcReference.class, LpcValue.class, Boolean.TYPE, LpcValue.class, Boolean.TYPE);
+    public static final MethodSignature INDEX_REFERENCE_1 = VM.Method.find(IndexSupport.class, "index", LpcReference.class, LpcValue.class,
+            Boolean.TYPE);
+    public static final MethodSignature INDEX_REFERENCE_2 = VM.Method.find(IndexSupport.class, "index", LpcReference.class, LpcValue.class,
+            Boolean.TYPE, LpcValue.class, Boolean.TYPE);
     public static final MethodSignature INDEX_VALUE_1 = VM.Method.find(IndexSupport.class, "index", LpcValue.class, LpcValue.class, Boolean.TYPE);
-    public static final MethodSignature INDEX_VALUE_2 = VM.Method.find(IndexSupport.class, "index", LpcValue.class, LpcValue.class, Boolean.TYPE, LpcValue.class, Boolean.TYPE);
+    public static final MethodSignature INDEX_VALUE_2 = VM.Method.find(IndexSupport.class, "index", LpcValue.class, LpcValue.class, Boolean.TYPE,
+            LpcValue.class, Boolean.TYPE);
 
     public static final MethodSignature CLASS_GET_FIELD = VM.Method.find(ClassSupport.class, "getField", LpcValue.class, String.class);
 
-    public static final MethodSignature WITH_TYPE_4 = VM.Method.find(LpcRuntimeSupport.class, "withType", UserTypeDefinition.class, LpcType.Kind.class, String.class, Integer.TYPE);
+    public static final MethodSignature WITH_TYPE_4 = VM.Method.find(LpcRuntimeSupport.class, "withType", UserTypeDefinition.class,
+            LpcType.Kind.class, String.class, Integer.TYPE);
     public static final MethodSignature CLASS_DECLARING_OBJECT = VM.Method.find(LpcClass.class, "getDeclaringObject");
     public static final MethodSignature FUNCTION_OWNER_DEFINITION = VM.Method.find(LpcFunction.class, "getOwnerDefinition");
-    public static final MethodSignature EXCEPTION_GET_MESSAGE = VM.Method.find(Exception.class, "getMessage");
-    
+    public static final MethodSignature FUNCTION_OWNER= VM.Method.find(LpcFunction.class, "getOwner");
+    public static final MethodSignature EXCEPTION_GET_LPC_MESSAGE = VM.Method.find(LpcRuntimeException.class, "getLpcMessage");
+
     public static final ConstructorSignature STRING_VALUE_CONSTRUCTOR = VM.Method.constructor(StringValue.class, String.class);
+
+    public static final ParameterisedClass LOG_CATCH_TYPE = new ParameterisedClassImpl(LogCatch.class);
+    public static final MethodSignature LOG_CATCH_METHOD = VM.Method.find(LogCatch.class, "log", Exception.class);
+
+    public static final MethodSignature IS_IN_RANGE = VM.Method.find(ComparisonSupport.class, "isInRange", LpcValue.class, LpcValue.class, LpcValue.class);
+
+    public static final MethodSignature INT_VALUE = VM.Method.find(ValueSupport.class, "intValue", Long.TYPE);
+    public static final MethodSignature FLOAT_VALUE = VM.Method.find(ValueSupport.class, "floatValue", Double.TYPE);
+
+    public static final MethodSignature AS_LONG = VM.Method.find(LpcValue.class, "asLong");
+    public static final MethodSignature AS_DOUBLE = VM.Method.find(LpcValue.class, "asDouble");
 }

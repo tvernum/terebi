@@ -1,5 +1,4 @@
 /* ------------------------------------------------------------------------
- * $Id$
  * Copyright 2009 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -23,45 +22,60 @@ package us.terebi.lang.lpc.compiler.java.context;
  */
 public class ObjectId
 {
-    private final CompiledObjectDefinition _definition;
+    private final String _file;
     private final long _id;
 
-    public ObjectId(CompiledObjectInstance object)
+    public ObjectId(String file, long id)
     {
-        this(object.getDefinition(), object.getId());
-    }
-
-    public ObjectId(CompiledObjectDefinition definition, long id)
-    {
-        _definition = definition;
+        _file = normalise(file);
         _id = id;
     }
 
-    public int hashCode()
+    public ObjectId(String name) throws NumberFormatException
     {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((_definition == null) ? 0 : _definition.hashCode());
-        result = prime * result + (int) (_id ^ (_id >>> 32));
-        return result;
+        int hash = name.indexOf('#');
+        if (hash == -1)
+        {
+            _file = name;
+            _id = 0;
+        }
+        else
+        {
+            _file = name.substring(0, hash);
+            _id = Long.parseLong(name.substring(hash + 1));
+        }
     }
 
-    public boolean equals(Object obj)
+    public ObjectId(CompiledObjectInstance object)
     {
-        if (this == obj)
-        {
-            return true;
-        }
-        if (obj == null)
-        {
-            return false;
-        }
-        if (getClass() != obj.getClass())
-        {
-            return false;
-        }
-        final ObjectId other = (ObjectId) obj;
-        return (this._definition == other._definition && this._id == other._id);
+        this(object.getDefinition().getName(), object.getId());
     }
 
+    public static String normalise(String name)
+    {
+        if (name.length() == 0)
+        {
+            return name;
+        }
+        if (name.endsWith(".c"))
+        {
+            name = name.substring(0, name.length() - 2);
+        }
+        name = name.replace("//", "/");
+        if (name.charAt(0) != '/')
+        {
+            name = "/" + name;
+        }
+        return name;
+    }
+
+    public String getFile()
+    {
+        return _file;
+    }
+
+    public long getId()
+    {
+        return _id;
+    }
 }

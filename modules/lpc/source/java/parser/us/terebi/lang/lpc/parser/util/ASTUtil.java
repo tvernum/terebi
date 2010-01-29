@@ -270,4 +270,17 @@ public class ASTUtil
         }
         return count;
     }
+
+    public static <N> N findAncestor(Class< ? extends N> type, Node node)
+    {
+        while (node != null)
+        {
+            node = node.jjtGetParent();
+            if (type.isInstance(node))
+            {
+                return type.cast(node);
+            }
+        }
+        return null;
+    }
 }

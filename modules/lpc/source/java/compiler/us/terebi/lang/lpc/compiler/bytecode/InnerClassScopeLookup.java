@@ -17,6 +17,8 @@
 
 package us.terebi.lang.lpc.compiler.bytecode;
 
+import org.adjective.stout.core.UnresolvedType;
+
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.ClassLookup;
 import us.terebi.lang.lpc.compiler.java.context.FunctionLookup;
@@ -29,16 +31,16 @@ import us.terebi.lang.lpc.runtime.ObjectDefinition;
  */
 public class InnerClassScopeLookup implements ScopeLookup
 {
-    private static final String OWNER = "#" + InnerClassScopeLookup.class.getSimpleName() + "#parent#";
+    private static final String OWNER = "{" + InnerClassScopeLookup.class.getSimpleName() + ":parent}";
 
     private final ScopeLookup _parent;
     private final FunctionLookup _functions;
     private final VariableLookup _variables;
 
-    public InnerClassScopeLookup(ScopeLookup parentScope)
+    public InnerClassScopeLookup(ScopeLookup parentScope, UnresolvedType outer)
     {
         _parent = parentScope;
-        _functions = FunctionLookup.enclosing(_parent.functions(), OWNER);
+        _functions = FunctionLookup.enclosing(_parent.functions(), OWNER, outer);
         _variables = new VariableLookup();
     }
 

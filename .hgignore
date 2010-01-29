@@ -7,6 +7,7 @@ syntax: regexp
 ^modules/[^/]*/.settings/
 ^modules/lib\.[^/]*/work/
 ^modules/lib\.[^/]*/mudlib/save/
+^modules/lib\.ds/lib
 /\.DS_Store
 ^\.DS_Store
 \.swp

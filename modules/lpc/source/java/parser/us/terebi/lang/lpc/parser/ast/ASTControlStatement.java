@@ -24,4 +24,10 @@ public class ASTControlStatement extends StatementNode
     {
         return jjtGetFirstToken().kind;
     }
+    
+    public String toString()
+    {
+        return super.toString() + " (" + jjtGetFirstToken().image + ")";
+    }
+    
 }

@@ -21,9 +21,12 @@ package us.terebi.lang.lpc.runtime.jvm;
 import us.terebi.lang.lpc.compiler.java.context.ClassFinder;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
+import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.value.ClassReference;
 
 /**
@@ -104,6 +107,19 @@ public class LpcObject extends LpcRuntimeSupport
     {
         // @TODO - this shouldn't use something in the compiler package
         return new ClassFinder(_definition).find(lpcClassName);
+    }
+
+    public Callable method(String name)
+    {
+        CompiledMethodDefinition method = getObjectDefinition().getMethods().get(name);
+        if (method != null)
+        {
+            return method.getFunction(getObjectInstance());
+        }
+        else
+        {
+            throw new InternalError("Not such method " + name + " in " + getObjectDefinition());
+        }
     }
 
 }

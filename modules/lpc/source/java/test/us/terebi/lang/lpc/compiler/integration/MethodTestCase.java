@@ -72,7 +72,15 @@ public class MethodTestCase implements Callable<Object>
 
     private void testMethod(CompiledMethodDefinition method) throws Exception
     {
-        ObjectInstance instance = method.getDeclaringType().newInstance(Collections.<LpcValue> emptyList());
+        ObjectInstance instance ;
+
+        SystemContext system = getContext();
+        synchronized (system.lock())
+        {
+            RuntimeContext.activate(system);
+            instance = method.getDeclaringType().newInstance(Collections.<LpcValue> emptyList());
+        }
+        
         List< ? extends LpcValue> arguments = Collections.emptyList();
         String name = method.getName();
 
@@ -132,7 +140,7 @@ public class MethodTestCase implements Callable<Object>
 
     private LpcValue execute(CompiledMethodDefinition method, ObjectInstance instance, List< ? extends LpcValue> arguments)
     {
-        SystemContext system = new SystemContext(StandardEfuns.getImplementation(), _builder.getObjectManager(), _builder.getSourceFinder());
+        SystemContext system = getContext();
         synchronized (system.lock())
         {
             ThreadContext thread = RuntimeContext.activate(system);
@@ -157,6 +165,11 @@ public class MethodTestCase implements Callable<Object>
 
             return result;
         }
+    }
+
+    private SystemContext getContext()
+    {
+        return new SystemContext(StandardEfuns.getImplementation(), _builder.getObjectManager(), _builder.getSourceFinder());
     }
 
 }

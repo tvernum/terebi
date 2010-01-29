@@ -78,6 +78,7 @@ public class ClassCompiler extends MemberVisitor implements ParserVisitor
 
         String internalName = _context.publicClass().getName() + "$" + lpcName;
         ClassSpec spec = new ClassSpec(_context.publicClass().getPackage(), internalName);
+        _context.pushClass(spec);
 
         DynamicClassDefinition classDefinition = new CompiledClassDefinition(lpcName, getModifiers(MemberDefinition.Kind.CLASS), spec);
 
@@ -119,6 +120,8 @@ public class ClassCompiler extends MemberVisitor implements ParserVisitor
         {
             throw new CompileException("Cannot write class file " + spec, e);
         }
+        
+        _context.popClass(spec);
 
         return null;
     }

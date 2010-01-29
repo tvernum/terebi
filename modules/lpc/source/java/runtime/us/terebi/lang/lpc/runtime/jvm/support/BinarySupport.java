@@ -18,10 +18,18 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
-import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
+import java.util.ArrayList;
+import java.util.List;
 
 import us.terebi.lang.lpc.compiler.util.MathLength;
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
 
 /**
  * 
@@ -40,22 +48,85 @@ public class BinarySupport
 
     public static LpcValue binaryOr(LpcValue... values)
     {
-        long v = 0;
+        if (values.length == 0)
+        {
+            return NilValue.INSTANCE;
+        }
+        if (MiscSupport.isInt(values[0]))
+        {
+            long v = 0;
+            for (LpcValue value : values)
+            {
+                v |= value.asLong();
+            }
+            return intValue(v);
+        }
+        else if (MiscSupport.isArray(values[0]))
+        {
+            return union(values);
+        }
+        else
+        {
+            throw new LpcRuntimeException("Incompatible type (" + values[0].getActualType() + ") to operator '|'");
+        }
+    }
+
+    private static LpcValue union(LpcValue... values)
+    {
+        List<LpcValue> union = new ArrayList<LpcValue>();
+        LpcType[] types = new LpcType[values.length];
+        int i = 0;
+
         for (LpcValue value : values)
         {
-            v |= value.asLong();
+            types[i++] = value.getActualType();
+            List<LpcValue> list = value.asList();
+            for (LpcValue element : list)
+            {
+                if (!union.contains(element))
+                {
+                    union.add(element);
+                }
+            }
         }
-        return intValue(v);
+        return new ArrayValue(MiscSupport.commonType(types), union);
     }
 
     public static LpcValue binaryAnd(LpcValue... values)
     {
-        long v = 0xFFFFFFFFFFFFFFFFL;
+        if (values.length == 0)
+        {
+            return NilValue.INSTANCE;
+        }
+        if (MiscSupport.isInt(values[0]))
+        {
+            long v = 0xFFFFFFFFFFFFFFFFL;
+            for (LpcValue value : values)
+            {
+                v &= value.asLong();
+            }
+            return intValue(v);
+        }
+        else if (MiscSupport.isArray(values[0]))
+        {
+            return intersection(values);
+        }
+        else
+        {
+            throw new LpcRuntimeException("Incompatible type (" + values[0].getActualType() + ") to operator '|'");
+        }
+
+    }
+
+    private static LpcValue intersection(LpcValue[] values)
+    {
+        List<LpcValue> intersection = new ArrayList<LpcValue>(values[0].asList());
         for (LpcValue value : values)
         {
-            v &= value.asLong();
+            List<LpcValue> list = value.asList();
+            intersection.retainAll(list);
         }
-        return intValue(v);
+        return new ArrayValue(Types.arrayOf(MiscSupport.commonType(intersection)), intersection);
     }
 
     public static LpcValue xor(MathLength math, LpcValue... values)

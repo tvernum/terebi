@@ -31,6 +31,7 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
@@ -38,6 +39,8 @@ import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.BoundMethod;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
 import us.terebi.lang.lpc.runtime.util.NilCallable;
@@ -202,11 +205,6 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
 
     }
 
-    protected IntValue getValue(boolean bool)
-    {
-        return bool ? LpcConstants.INT.TRUE : LpcConstants.INT.FALSE;
-    }
-
     protected void checkArguments(List< ? extends LpcValue> arguments, int minCount)
     {
         if (arguments.size() < minCount)
@@ -256,5 +254,28 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         }
         this.badArgumentType(index, value.getActualType(), Types.FUNCTION, Types.STRING);
         return null;
+    }
+
+    protected IntValue getValue(boolean bool)
+    {
+        return bool ? LpcConstants.INT.TRUE : LpcConstants.INT.FALSE;
+    }
+
+    protected LpcValue getValue(ObjectInstance object)
+    {
+        if (object == null)
+        {
+            return NilValue.INSTANCE;
+        }
+        return new ObjectValue(object);
+    }
+
+    protected LpcValue getValue(ObjectDefinition object)
+    {
+        if (object == null)
+        {
+            return NilValue.INSTANCE;
+        }
+        return new ObjectValue(object.getMasterInstance());
     }
 }

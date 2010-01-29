@@ -76,7 +76,7 @@
 
   <target name="test">
     <mkdir dir="${output.junit}" />
-    <junit fork="yes" forkmode="once"  dir="${basedir}" >
+    <junit fork="yes" forkmode="once"  dir="${basedir}" haltonerror="false" failureproperty="junit.failure" errorproperty="junit.error" >
       <classpath>
         <fileset dir="lib" />
         <pathelement location="${output.classes}" />
@@ -91,6 +91,8 @@
       <formatter type="xml" />
       <formatter type="plain" />
     </junit>
+    <fail if="junit.failure" />
+    <fail if="junit.error" />
   </target>
 
   <target name="dist.jar" depends="grammar,compile">

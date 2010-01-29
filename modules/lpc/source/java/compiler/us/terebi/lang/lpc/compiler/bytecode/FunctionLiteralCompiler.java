@@ -21,8 +21,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.adjective.stout.builder.ClassSpec;
@@ -40,7 +42,10 @@ import org.adjective.stout.operation.VM;
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.context.LookupException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
+import us.terebi.lang.lpc.compiler.java.context.VariableResolver;
+import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolution;
+import us.terebi.lang.lpc.compiler.util.FunctionCallSupport;
 import us.terebi.lang.lpc.compiler.util.MethodSupport;
 import us.terebi.lang.lpc.compiler.util.Positional;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionLiteral;
@@ -49,6 +54,7 @@ import us.terebi.lang.lpc.parser.ast.ASTParameterDeclarations;
 import us.terebi.lang.lpc.parser.ast.ASTStatementBlock;
 import us.terebi.lang.lpc.parser.ast.ASTVariableReference;
 import us.terebi.lang.lpc.parser.ast.ExpressionNode;
+import us.terebi.lang.lpc.parser.ast.TokenNode;
 import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
@@ -67,6 +73,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class FunctionLiteralCompiler
 {
+    public static final String POSITIONAL_ARGUMENT_COLLECTION = "args";
     private final ScopeLookup _scope;
     private final ScopeLookup _parentScope;
     private final CompileContext _context;
@@ -75,7 +82,7 @@ public class FunctionLiteralCompiler
     {
         _parentScope = parentScope;
         _context = context;
-        _scope = new InnerClassScopeLookup(parentScope);
+        _scope = new InnerClassScopeLookup(parentScope, context.publicClass());
     }
 
     public LpcExpression compile(ASTFunctionLiteral node)
@@ -95,7 +102,18 @@ public class FunctionLiteralCompiler
         //        <LEFT_BRACKET> <COLON> Expression() <COLON> <RIGHT_BRACKET>
         ExpressionNode exprNode = node.getExpressionBody();
 
-        Collection<ASTVariableReference> vars = ASTUtil.findDescendants(ASTVariableReference.class, node);
+        // Handle (: someFunction :)
+        if (exprNode instanceof ASTVariableReference)
+        {
+            ASTVariableReference ref = (ASTVariableReference) exprNode;
+            VariableResolution var = _parentScope.variables().findVariable(ref.getVariableName());
+            if (var == null)
+            {
+                return getFunctionReference(ref);
+            }
+        }
+
+        Collection<ASTVariableReference> vars = findReferencedVariables(node);
         int positionalCount = countPositionalArguments(vars);
         ClassSpec spec = createClassSpec(node);
 
@@ -104,7 +122,7 @@ public class FunctionLiteralCompiler
         parameters.add(new ParameterSpec("s$owner").withType(LpcObject.class).create());
         parameters.add(new ParameterSpec("s$argCount").withType(Integer.TYPE).create());
 
-        getReferencedVariables(vars, spec, parameters);
+        Map<String, VariableResolution> variables = getReferencedVariables(vars, spec, parameters);
 
         ExpressionCompiler compiler = new ExpressionCompiler(_scope, _context);
         LpcExpression[] immediates = getImmediateVariables(node, spec, compiler);
@@ -112,7 +130,7 @@ public class FunctionLiteralCompiler
         MethodSpec constructor = getExpressionConstructor(parameters, immediates);
         spec.withMethod(constructor);
 
-        LpcExpression expr = compiler.compile(exprNode);
+        LpcExpression expr = compile(exprNode, compiler);
         _scope.variables().popScope();
         MethodSpec execute = getExpressionExecute(expr);
         spec.withMethod(execute);
@@ -124,15 +142,35 @@ public class FunctionLiteralCompiler
         args[1] = VM.Expression.constant(positionalCount);
         for (int i = 2; i < args.length; i++)
         {
-            args[i] = VM.Expression.variable(parameters.get(i).getName());
+            args[i] = variables.get(parameters.get(i).getName()).access();
         }
 
         Expression function = VM.Expression.construct(spec, constructor, args);
         return new LpcExpression(Types.FUNCTION, function);
     }
 
+    private LpcExpression getFunctionReference(ASTVariableReference ref)
+    {
+        FunctionCallSupport fcs = new FunctionCallSupport(_scope);
+        FunctionReference function = fcs.findFunction(ref, ref.getScope(), ref.getVariableName());
+        Expression callable = FunctionCallCompiler.getCallable(function);
+        return new LpcExpression(function.signature.getReturnType(), callable);
+    }
+
+    private LpcExpression compile(ExpressionNode exprNode, ExpressionCompiler compiler)
+    {
+        return compiler.compile(exprNode);
+    }
+
+    public static Collection<ASTVariableReference> findReferencedVariables(TokenNode node)
+    {
+        Collection<ASTVariableReference> vars = ASTUtil.findDescendants(ASTVariableReference.class, node);
+        return vars;
+    }
+
     private void store(ClassSpec spec)
     {
+        _context.popClass(spec);
         try
         {
             ByteCodeCompiler.store(spec, _context);
@@ -157,12 +195,14 @@ public class FunctionLiteralCompiler
         return immediates;
     }
 
-    private void getReferencedVariables(Collection<ASTVariableReference> vars, ClassSpec spec, List<Parameter> parameters)
+    private Map<String, VariableResolution> getReferencedVariables(Collection<ASTVariableReference> vars, ClassSpec spec, List<Parameter> parameters)
     {
         Set<VariableResolution> pass = getReferencedVariables(vars);
         _scope.variables().pushScope();
+        Map<String, VariableResolution> result = new HashMap<String, VariableResolution>(pass.size());
         for (VariableResolution var : pass)
         {
+            result.put(var.internalName(), var);
             String fieldName = "e$" + var.internalName();
             _scope.variables().declareEnclosing(var.lpcName(), fieldName, var.type());
             FieldSpec field = new FieldSpec(fieldName);
@@ -174,6 +214,7 @@ public class FunctionLiteralCompiler
             param.withType(LpcReference.class);
             parameters.add(param.create());
         }
+        return result;
     }
 
     private ClassSpec createClassSpec(ASTFunctionLiteral node)
@@ -183,10 +224,18 @@ public class FunctionLiteralCompiler
         ClassSpec spec = new ClassSpec(_context.publicClass().getPackage(), className);
         spec.withSuperClass(LpcFunction.class);
         spec.withModifiers(ElementModifier.PUBLIC, ElementModifier.FINAL);
+        _context.pushClass(spec);
         return spec;
     }
 
     private Set<VariableResolution> getReferencedVariables(Collection<ASTVariableReference> vars)
+    {
+        VariableResolver variables = _parentScope.variables();
+        Set<VariableResolution> pass = getReferencedVariables(vars, variables);
+        return pass;
+    }
+
+    public static Set<VariableResolution> getReferencedVariables(Collection<ASTVariableReference> vars, VariableResolver variables)
     {
         Set<VariableResolution> pass = new HashSet<VariableResolution>();
         for (ASTVariableReference variableReference : vars)
@@ -196,7 +245,7 @@ public class FunctionLiteralCompiler
             {
                 try
                 {
-                    VariableResolution var = _parentScope.variables().findVariable(variableReference.getVariableName());
+                    VariableResolution var = variables.findVariable(variableReference.getVariableName());
                     if (var != null)
                     {
                         pass.add(var);
@@ -212,7 +261,7 @@ public class FunctionLiteralCompiler
         return pass;
     }
 
-    private int countPositionalArguments(Collection<ASTVariableReference> vars)
+    public static int countPositionalArguments(Collection<ASTVariableReference> vars)
     {
         int positionalCount = 0;
         for (ASTVariableReference variableReference : vars)
@@ -250,7 +299,7 @@ public class FunctionLiteralCompiler
         for (ASTImmediateExpression expression : immediates)
         {
             ExpressionNode body = expression.getBody();
-            LpcExpression compiled = compiler.compile(body);
+            LpcExpression compiled = compile(body, compiler);
 
             LpcExpression precompile = new LpcExpression(compiled.type, VM.Expression.getField("p$" + i, ByteCodeConstants.LPC_VALUE));
             compiler.precompile(expression, precompile);
@@ -260,7 +309,6 @@ public class FunctionLiteralCompiler
         return values;
     }
 
-    @SuppressWarnings("unchecked")
     private MethodSpec getExpressionExecute(LpcExpression expr)
     {
         List<ElementBuilder<Statement>> body = Collections.singletonList(VM.Statement.returnObject(ExpressionCompiler.getValue(expr)));
@@ -269,7 +317,7 @@ public class FunctionLiteralCompiler
 
     private MethodSpec getExecute(List< ? extends ElementBuilder< ? extends Statement>> statements)
     {
-        Parameter parameter = new ParameterSpec("args").withType(LpcValue[].class).create();
+        Parameter parameter = new ParameterSpec(POSITIONAL_ARGUMENT_COLLECTION).withType(LpcValue[].class).create();
         MethodSpec execute = new MethodSpec("execute").withModifiers(ElementModifier.PUBLIC).withParameters(parameter);
         return execute.withReturnType(ByteCodeConstants.LPC_VALUE).withBody(statements);
     }
@@ -323,7 +371,7 @@ public class FunctionLiteralCompiler
     {
         ASTParameterDeclarations signatureNode = node.getBlockSignature();
         ASTStatementBlock blockNode = node.getBlockBody();
-        Collection<ASTVariableReference> vars = ASTUtil.findDescendants(ASTVariableReference.class, node);
+        Collection<ASTVariableReference> vars = findReferencedVariables(node);
         ClassSpec spec = createClassSpec(node);
 
         List<Parameter> parameters = new ArrayList<Parameter>();

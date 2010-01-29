@@ -1,5 +1,7 @@
 /* vim: set ft=lpc : */
 
+private int field;
+
 public int a1()
 {
     function f = (: 1 :) ;
@@ -107,5 +109,12 @@ public int a13()
 {
     function f = (: 13 :);
     return evaluate(f);
+}
+
+public int a14()
+{
+    function f = (: field :) ;
+    field = 14;
+    return (*f)();
 }
 

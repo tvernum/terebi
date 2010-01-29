@@ -33,4 +33,5 @@ public interface LpcType
     public ClassDefinition getClassDefinition();
     public ExtensionType getExtensionType();
     public int getArrayDepth();
+    public boolean isArray();
 }

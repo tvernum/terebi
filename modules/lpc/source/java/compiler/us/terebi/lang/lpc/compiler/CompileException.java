@@ -22,11 +22,12 @@ import us.terebi.lang.lpc.parser.ParserException;
 import us.terebi.lang.lpc.parser.ast.TokenNode;
 import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.parser.util.ASTUtil;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 
 /**
  * 
  */
-public class CompileException extends RuntimeException
+public class CompileException extends LpcRuntimeException
 {
     private final Token _token;
 
@@ -77,7 +78,7 @@ public class CompileException extends RuntimeException
 
     public CompileException(ParserException e)
     {
-        super(e);
+        super(e.getMessage(), e);
         _token = e.getToken();
     }
 

@@ -24,15 +24,21 @@ string prompt()
     write( "> " );
 }
 
-void new_password(string input, int count)
+public int match_password(string input)
+{
+    // First 2 characters of "_password" are the salt to encrypt with
+    return crypt(input, _password) == _password ;
+}
+
+private void new_password(string input, int count)
 {
     if( count == 0 )
     {
-        _password = input;
+        _password = crypt(input,0);
         write("Please enter that same password again to confirm: ");
         efun::input_to( "new_password", INPUT_NO_ESCAPE | INPUT_NO_ECHO, 1);
     }
-    else if(input == _password)
+    else if( match_password(input) )
     {
        save();
        prompt();
@@ -46,7 +52,7 @@ void new_password(string input, int count)
 
 void read_password(string input, int count)
 {
-    if( _password == input) 
+    if( match_password(input) )
     {
         prompt();
     }
@@ -113,7 +119,7 @@ private object find_command(string cmd)
 
 public void process_input(string input)
 {
-    string cmd = input;
+    string cmd = trim(input);
     string args = "";
     sscanf(input, "%s %s", cmd, args);
     object cmd_object = find_command(cmd);
@@ -124,8 +130,8 @@ public void process_input(string input)
     else
     {
         write("No such command '" + cmd + "'\n");
-        prompt();
     }
+    prompt();
 }
 
 public void receive_message(object type, object message)
@@ -140,11 +146,17 @@ public void catch_tell(string message)
 
 public void grant_role(string role)
 {
+    // @TODO : Needs to be secure
     _roles += ({ role }) ;
 }
 
 public void revoke_role(string role)
 {
+    // @TODO : Needs to be secure
     _roles -= ({ role }) ;
 }
 
+public int has_role(string role)
+{
+    return member_array(role, _roles) != -1;
+}

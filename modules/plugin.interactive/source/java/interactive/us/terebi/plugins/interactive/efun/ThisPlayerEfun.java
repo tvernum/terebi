@@ -35,6 +35,7 @@ import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
+import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * @version $Revision$
@@ -45,9 +46,14 @@ public class ThisPlayerEfun extends AbstractEfun
 
     public List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.emptyList();
+        return Collections.singletonList(new ArgumentSpec("flag", Types.INT));
     }
-
+    
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
+    
     public LpcType getReturnType()
     {
         return Types.OBJECT;
@@ -55,6 +61,7 @@ public class ThisPlayerEfun extends AbstractEfun
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
+        // @TODO - Use flag
         ObjectInstance instance = this_player();
         if (instance == null)
         {

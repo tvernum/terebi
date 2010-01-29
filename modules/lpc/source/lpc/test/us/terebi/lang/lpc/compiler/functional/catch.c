@@ -47,9 +47,11 @@ public int a1()
     return !s;
 }
 
-public string str_abcd()
+public string eq0()
 {
-    return catch( error("abcd" ) ) ;
+    return ({ "*abcd", 
+               catch( error("abcd" ) ) ,
+            }) ;
 }
 
 public int complex2()
@@ -64,5 +66,22 @@ public int complex2()
         }
     }
     return count;
+}
+
+public int b1()
+{
+    string err;
+    object o;
+    function f = (: err = catch( o->foo() ) :) ;
+    (*f)();
+    return !!err;
+}
+
+public int c1()
+{
+    string err;
+    function f = (: err = catch( $1->foo() ) :) ;
+    (*f)(0);
+    return !!err;
 }
 

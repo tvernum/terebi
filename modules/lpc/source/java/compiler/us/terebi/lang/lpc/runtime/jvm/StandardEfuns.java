@@ -56,6 +56,7 @@ public class StandardEfuns
         public static final Efun upper_case = new UpperCaseEfun();
         public static final Efun capitalize = new CapitalizeEfun();
         public static final Efun pluralize = new PluralizeEfun();
+        public static final Efun trim = new TrimEfun();
     }
 
     public static class COLLECTION
@@ -97,6 +98,7 @@ public class StandardEfuns
         public static final Efun _new = clone_object;
         public static final Efun destruct = new DestructEfun();
         public static final Efun clonep = new ClonepEfun();
+        public static final Efun virtualp = new VirtualpEfun();
     }
 
     public static class CLASS
@@ -165,10 +167,12 @@ public class StandardEfuns
         public static final Efun read_file = new ReadFileEfun();
         public static final Efun read_bytes = new ReadBytesEfun();
         public static final Efun write_file = new WriteFileEfun();
+        public static final Efun rename = new RenameEfun();
         public static final Efun cp = new CopyFileEfun();
         public static final Efun rm = new RemoveFileEfun();
         public static final Efun mkdir = new CreateDirectoryEfun();
         public static final Efun get_dir = new GetDirectoryInfoEfun();
+        public static final Efun match_path = new MatchPathEfun();
     }
 
     public static class SYSTEM
@@ -180,7 +184,6 @@ public class StandardEfuns
         public static final Efun time = new TimeEfun();
         public static final Efun ctime = new CtimeEfun();
         public static final Efun localtime = new LocaltimeEfun();
-        public static final Efun crypt = new CryptEfun();
         public static final Efun query_privs = new QueryPrivsEfun();
         public static final Efun reset_eval_cost = new ResetEvalCostEfun();
         public static final Efun set_eval_limit = new SetEvalLimitEfun();

@@ -18,13 +18,13 @@
 package us.terebi.lang.lpc.parser.ast;
 
 import us.terebi.lang.lpc.parser.jj.Parser;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 
 /**
  * 
  */
 public class OperatorNode extends SimpleNode
 {
-
     public OperatorNode(int i)
     {
         super(i);
@@ -33,6 +33,11 @@ public class OperatorNode extends SimpleNode
     public OperatorNode(Parser p, int i)
     {
         super(p, i);
+    }
+
+    public String toString()
+    {
+        return super.toString() + " '" + ASTUtil.getImage(this) + "'";
     }
 
 }

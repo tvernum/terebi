@@ -193,7 +193,7 @@ public class ObjectBuilder implements ObjectCompiler
         {
             if (ast == null)
             {
-                throw new CompileException("Cannot access source " + resource + " - " + e.getMessage(), e);
+                throw new CompileResourceException(resource, e);
             }
             else
             {

@@ -1,6 +1,7 @@
 package us.terebi.lang.lpc.parser.ast;
 
 import us.terebi.lang.lpc.parser.jj.*;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 
 public class ASTConstant extends LiteralNode
 {
@@ -18,5 +19,10 @@ public class ASTConstant extends LiteralNode
     public Object jjtAccept(ParserVisitor visitor, Object data)
     {
         return visitor.visit(this, data);
+    }
+    
+    public String toString()
+    {
+        return super.toString() + " {" + ASTUtil.getCompleteImage(this) + "}";
     }
 }

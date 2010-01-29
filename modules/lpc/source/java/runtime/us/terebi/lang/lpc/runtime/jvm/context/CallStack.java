@@ -18,6 +18,8 @@
 
 package us.terebi.lang.lpc.runtime.jvm.context;
 
+import java.util.List;
+
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.util.collection.ArrayStack;
 import us.terebi.util.collection.Stack;
@@ -32,7 +34,7 @@ public class CallStack
         APPLY, HEART_BEAT, CALL_OUT, CALL_OTHER, EFUN, POINTER,
     }
 
-    public class MajorFrame
+    public static class MajorFrame
     {
         public final Origin origin;
         public final ObjectInstance instance;
@@ -49,6 +51,17 @@ public class CallStack
         {
             return "<" + origin + ":" + instance + ">";
         }
+    }
+
+    public static class DetailFrame extends MajorFrame
+    {
+        public DetailFrame(Origin orgn, ObjectInstance inst, int javaStackSz)
+        {
+            super(orgn, inst, javaStackSz);
+            //@TODO
+        }
+
+//        public final String function;
     }
 
     private final Stack<MajorFrame> _frames;
@@ -102,9 +115,26 @@ public class CallStack
     /**
      * @return An {@link Iterable} over the set of {@link MajorFrame frames}, starting with the bottom-most (newest) frame.
      */
-    public Iterable<MajorFrame> allFrames()
+    public Iterable<MajorFrame> majorFrames()
     {
         return _frames;
+    }
+
+    public List<DetailFrame> detailFrames()
+    {
+        StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+
+        int stackIndex = stackTrace.length - 2;
+        for (; stackIndex > 0; stackIndex--)
+        {
+            if (isUserCode(stackTrace[stackIndex]))
+            {
+                break;
+            }
+        }
+//        return stackIndex;
+        // @TODO
+        return null;
     }
 
     public int size()

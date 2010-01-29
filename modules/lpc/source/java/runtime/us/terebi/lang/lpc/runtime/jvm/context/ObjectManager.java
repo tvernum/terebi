@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime.jvm.context;
 
+import us.terebi.lang.lpc.compiler.java.context.ObjectId;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 
@@ -33,7 +34,8 @@ public interface ObjectManager
     public ObjectInstance getSimulatedEfunObject();
     
     public ObjectDefinition findObject(String name);
-    public ObjectInstance findObject(String name, int id);
+    public ObjectInstance findObject(ObjectId id);
+    
     public Iterable< ? extends ObjectInstance> objects();
     public Iterable<? extends ObjectInstance> objects(String name);
 

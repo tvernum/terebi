@@ -22,10 +22,12 @@ package us.terebi.lang.lpc.preprocessor;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -88,6 +90,8 @@ public class Preprocessor
 
     private static final Macro __LINE__ = new Macro("__LINE__");
     private static final Macro __FILE__ = new Macro("__FILE__");
+    private static final Macro __DATE__ = new Macro("__DATE__");
+    private static final Macro __TIME__ = new Macro("__TIME__");
 
     private final Map<String, Macro> _macros;
     private final Stack<State> _states;
@@ -103,8 +107,10 @@ public class Preprocessor
     public Preprocessor()
     {
         this._macros = new HashMap<String, Macro>();
-        _macros.put(__LINE__.getName(), __LINE__);
-        _macros.put(__FILE__.getName(), __FILE__);
+        storeMacro(__LINE__);
+        storeMacro(__FILE__);
+        storeMacro(__TIME__);
+        storeMacro(__DATE__);
         this._states = new Stack<State>();
         _states.push(new State());
         this._source = null;
@@ -260,7 +266,9 @@ public class Preprocessor
             this._source = input;
             /* We need to get a \n onto the end of this somehow. */
             if (_features.contains(Feature.LINEMARKERS))
+            {
                 source_untoken(line_token(1, input.getName(), "\n"));
+            }
         }
         else
         {
@@ -355,11 +363,17 @@ public class Preprocessor
      */
     public void addMacro(Macro m) throws LexerException
     {
-        String name = m.getName();
         /* Already handled as a source error in macro(). */
-        if ("defined".equals(name))
+        if ("defined".equals(m.getName()))
+        {
             throw new LexerException("Cannot redefine name 'defined'");
-        _macros.put(m.getName(), m);
+        }
+        storeMacro(m);
+    }
+
+    private Macro storeMacro(Macro m)
+    {
+        return _macros.put(m.getName(), m);
     }
 
     /**
@@ -577,7 +591,7 @@ public class Preprocessor
                 {
                     /* Not perfect, but ... */
                     source_untoken(new Token(NL, _source.getLine(), 0, "\n"));
-                    return line_token(_source.getLine(), _source.getName(), "");
+                    return line_token(_source.getLine(), _source.getPath(), "");
                 }
                 else
                 {
@@ -769,34 +783,26 @@ public class Preprocessor
 
         if (m == __LINE__)
         {
-            push_source(new FixedTokenSource(new Token[] { new Token(INTEGER, orig.getLine(), orig.getColumn(), String.valueOf(orig.getLine()),
-                    Integer.valueOf(orig.getLine())) }), true);
+            pushIntegerToken(orig, orig.getLine());
         }
         else if (m == __FILE__)
         {
-            StringBuilder buf = new StringBuilder("\"");
             String name = _source.getName();
             if (name == null)
-                name = "<no file>";
-            for (int i = 0; i < name.length(); i++)
             {
-                char c = name.charAt(i);
-                switch (c)
-                {
-                    case '\\':
-                        buf.append("\\\\");
-                        break;
-                    case '"':
-                        buf.append("\\\"");
-                        break;
-                    default:
-                        buf.append(c);
-                        break;
-                }
+                name = "<no file>";
             }
-            buf.append("\"");
-            String text = buf.toString();
-            push_source(new FixedTokenSource(new Token[] { new Token(STRING, orig.getLine(), orig.getColumn(), text, text) }), true);
+            pushStringToken(orig, name);
+        }
+        else if (m == __DATE__)
+        {
+            String text = DateFormat.getDateInstance(DateFormat.SHORT).format(new Date());
+            pushStringToken(orig, text);
+        }
+        else if (m == __TIME__)
+        {
+            String text = DateFormat.getTimeInstance(DateFormat.SHORT).format(new Date());
+            pushStringToken(orig, text);
         }
         else
         {
@@ -804,6 +810,41 @@ public class Preprocessor
         }
 
         return true;
+    }
+
+    private void pushStringToken(Token orig, String content)
+    {
+        StringBuilder buf = new StringBuilder("\"");
+        for (int i = 0; i < content.length(); i++)
+        {
+            char c = content.charAt(i);
+            switch (c)
+            {
+                case '\\':
+                    buf.append("\\\\");
+                    break;
+                case '"':
+                    buf.append("\\\"");
+                    break;
+                default:
+                    buf.append(c);
+                    break;
+            }
+        }
+        buf.append("\"");
+        String text = buf.toString();
+        pushNewToken(STRING, orig, text, text);
+    }
+
+    private void pushIntegerToken(Token orig, int value)
+    {
+        pushNewToken(INTEGER, orig, String.valueOf(value), Integer.valueOf(value));
+    }
+
+    private void pushNewToken(int type, Token orig, String text, Object value)
+    {
+        Token token = new Token(type, orig.getLine(), orig.getColumn(), text, value);
+        push_source(new FixedTokenSource(new Token[] { token }), true);
     }
 
     /**
@@ -1071,9 +1112,17 @@ public class Preprocessor
     {
         if (quoted)
         {
-            VirtualFile pfile = _filesystem.getFile(parent);
-            VirtualFile dir = pfile.getParentFile();
-            VirtualFile ifile = dir.getChildFile(name);
+            VirtualFile ifile;
+            if (name.startsWith("/"))
+            {
+                ifile = _filesystem.getFile(name);
+            }
+            else
+            {
+                VirtualFile pfile = _filesystem.getFile(parent);
+                VirtualFile dir = pfile.getParentFile();
+                ifile = dir.getChildFile(name);
+            }
             if (include(ifile))
                 return;
             if (include(_quoteincludepath, name))
@@ -1168,8 +1217,7 @@ public class Preprocessor
         }
     }
 
-    protected void pragma(Token name, @SuppressWarnings("unused")
-    List<Token> value) throws LexerException
+    protected void pragma(Token name, @SuppressWarnings("unused") List<Token> value) throws LexerException
     {
         if (!this.getFeature(Feature.PRAGMAS))
         {
@@ -1729,7 +1777,9 @@ public class Preprocessor
 
                 case P_LINE:
                     if (_features.contains(Feature.LINEMARKERS))
+                    {
                         return tok;
+                    }
                     break;
 
                 case ERROR:
@@ -1808,11 +1858,7 @@ public class Preprocessor
 
                         case PP_ELIF:
                             State state = _states.peek();
-                            if (false)
-                            {
-                                /* Check for 'if' */
-                            }
-                            else if (state.sawElse())
+                            if (state.sawElse())
                             {
                                 error(tok, "#elif after #" + "else");
                                 return source_skipline(false);
@@ -1844,10 +1890,7 @@ public class Preprocessor
 
                         case PP_ELSE:
                             state = _states.peek();
-                            if (false)
-                            { /* Check for 'if' */
-                            }
-                            else if (state.sawElse())
+                            if (state.sawElse())
                             {
                                 error(tok, "#" + "else after #" + "else");
                                 return source_skipline(false);

@@ -100,7 +100,6 @@ public class BaseASTVisitor implements NodeVisitor
     public void visitSpecial(List<Token> tokens)
     {
         // Do nothing
-        System.err.println("SPECIAL: " + tokens);
     }
 
     public Object visit(SimpleNode node, Object data)

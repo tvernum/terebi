@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.runtime.jvm.support;
 
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 
 /**
@@ -46,4 +47,8 @@ public class ValueSupport
         return new IntValue(value);
     }
 
+    public static LpcValue floatValue(double value)
+    {
+        return new FloatValue(value);
+    }
 }

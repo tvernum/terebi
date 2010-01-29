@@ -22,8 +22,8 @@
             <javac srcdir="${dir.source.java}/@{dir}"
                    destdir="${dir.output.classes}"
                    classpathref="@{classpath}"
-                   debug="false"
-                   deprecation="false" 
+                   debug="true"
+                   deprecation="true" 
                    optimize="true"
                    listfiles="false"
                    source="1.5">

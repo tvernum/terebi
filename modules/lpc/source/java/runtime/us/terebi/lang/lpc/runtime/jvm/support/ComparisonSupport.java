@@ -242,4 +242,9 @@ public class ComparisonSupport
         return 0;
     }
 
+    public static boolean isInRange(LpcValue min, LpcValue max, LpcValue value)
+    {
+        return compare(min, value) <= 0 && compare(max, value) >= 0;
+    }
+
 }

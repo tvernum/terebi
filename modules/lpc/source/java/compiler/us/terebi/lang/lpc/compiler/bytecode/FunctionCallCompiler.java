@@ -148,6 +148,10 @@ public class FunctionCallCompiler extends BaseASTVisitor
                 }
                 arguments[i] = ExpressionCompiler.makeLpcArray(elements);
             }
+            else if (i >= argVars.length)
+            {
+                arguments[i] = ByteCodeConstants.NIL;
+            }
             else
             {
                 arguments[i] = ExpressionCompiler.getValue(argVars[i].expression);
@@ -184,9 +188,15 @@ public class FunctionCallCompiler extends BaseASTVisitor
 
     private Expression compileIndirectMethodCall(FunctionReference function, FunctionArgument[] argVars, boolean expand)
     {
+        Expression callable = getCallable(function);
+        return executeCallable(function, callable, argVars, expand);
+    }
+
+    public static Expression getCallable(FunctionReference function)
+    {
         MethodSignature lookup = VM.Method.find(LpcObject.class, function.kind.name().toLowerCase(), String.class);
         Expression callable = VM.Expression.callInherited(lookup, VM.Expression.constant(function.name));
-        return executeCallable(function, callable, argVars, expand);
+        return callable;
     }
 
     public Expression executeCallable(FunctionReference function, Expression callable, FunctionArgument[] argVars, boolean expand)

@@ -18,38 +18,22 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun;
 
-import java.util.Collections;
 import java.util.List;
 
-import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
-import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
-import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class LowerCaseEfun extends AbstractEfun implements FunctionSignature, Callable
+public class LowerCaseEfun extends AbstractStringEfun implements FunctionSignature, Callable
 {
-    protected List< ? extends ArgumentDefinition> defineArguments()
-    {
-        return Collections.singletonList(new ArgumentSpec("str", Types.STRING));
-    }
-
-    public LpcType getReturnType()
-    {
-        return Types.STRING;
-    }
-
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
         LpcValue str = arguments.get(0);
         return new StringValue(str.asString().toLowerCase());
     }
-
 }

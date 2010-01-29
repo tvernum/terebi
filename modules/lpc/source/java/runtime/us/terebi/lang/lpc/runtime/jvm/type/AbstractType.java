@@ -45,6 +45,11 @@ public abstract class AbstractType implements LpcType
         return getKind() == Kind.CLASS && getArrayDepth() == 0;
     }
 
+    public boolean isArray()
+    {
+        return getArrayDepth() > 0;
+    }
+    
     public boolean equals(Object obj)
     {
         if (obj == this)

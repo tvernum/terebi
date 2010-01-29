@@ -88,7 +88,7 @@ public class ASTVariableReference extends ExpressionNode
         }
         else
         {
-            return super.toString() + "(" + var + ")";
+            return super.toString() + " (" + var + ")";
         }
     }
 }

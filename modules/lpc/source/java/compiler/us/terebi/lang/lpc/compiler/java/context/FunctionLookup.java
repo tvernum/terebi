@@ -28,6 +28,8 @@ import java.util.Set;
 
 import org.apache.log4j.Logger;
 
+import org.adjective.stout.core.UnresolvedType;
+
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.InternalName;
@@ -47,6 +49,7 @@ public class FunctionLookup
     private final Map<String, ObjectDefinition> _inherited;
     private final FunctionLookup _enclosing;
     private final String _enclosingPath;
+    private final UnresolvedType _enclosingType;
     private final IdentityHashMap<FunctionSignature, String> _internalNames;
 
     public static class FunctionReference
@@ -106,10 +109,10 @@ public class FunctionLookup
             return new FunctionReference(Callable.Kind.FUNCTION, expr, expr, GenericSignature.INSTANCE, null);
         }
 
-        public static FunctionReference enclose(FunctionReference ref, ObjectDefinition enclosingObject, String enclosingPath)
+        public static FunctionReference enclose(FunctionReference ref, UnresolvedType enclosingType, String enclosingPath)
         {
             VariableLookup.ObjectPath[] path = new VariableLookup.ObjectPath[1 + (ref.objectPath == null ? 0 : ref.objectPath.length)];
-            path[0] = VariableLookup.ObjectPath.enclosing(enclosingPath, enclosingObject);
+            path[0] = VariableLookup.ObjectPath.enclosing(enclosingPath, enclosingType);
             if (path.length > 1)
             {
                 System.arraycopy(ref.objectPath, 0, path, 1, ref.objectPath.length);
@@ -148,17 +151,19 @@ public class FunctionLookup
         _localMethods = new FunctionMap();
         _enclosing = null;
         _enclosingPath = null;
+        _enclosingType = null;
         _internalNames = new IdentityHashMap<FunctionSignature, String>();
         _inherited = new HashMap<String, ObjectDefinition>();
     }
 
-    private FunctionLookup(FunctionLookup parent, String path)
+    private FunctionLookup(FunctionLookup parent, String path, UnresolvedType parentType)
     {
         _efuns = parent._efuns;
         _simul = parent._simul;
         _localMethods = new FunctionMap();
         _enclosing = parent;
         _enclosingPath = path;
+        _enclosingType = parentType;
         _internalNames = new IdentityHashMap<FunctionSignature, String>();
         _inherited = new HashMap<String, ObjectDefinition>();
     }
@@ -225,7 +230,7 @@ public class FunctionLookup
             List<VariableLookup.ObjectPath> path = getInheritedObject(_inherited, scope);
             if (!path.isEmpty())
             {
-                FunctionReference ref = findFunctionReference(name, path.get(path.size() - 1).definition, path);
+                FunctionReference ref = findFunctionReference(name, path.get(path.size() - 1).getDefinition(), path);
                 if (ref != null)
                 {
                     return Collections.singletonList(ref);
@@ -242,7 +247,7 @@ public class FunctionLookup
                 List<FunctionReference> result = new ArrayList<FunctionReference>(enclosing.size());
                 for (FunctionReference ref : enclosing)
                 {
-                    result.add(FunctionReference.enclose(ref, null, _enclosingPath));
+                    result.add(FunctionReference.enclose(ref, _enclosingType, _enclosingPath));
                 }
                 return result;
             }
@@ -363,9 +368,9 @@ public class FunctionLookup
         _internalNames.put(signature, internalName);
     }
 
-    public static FunctionLookup enclosing(FunctionLookup parent, String name)
+    public static FunctionLookup enclosing(FunctionLookup parent, String name, UnresolvedType parentType)
     {
-        FunctionLookup lookup = new FunctionLookup(parent, name);
+        FunctionLookup lookup = new FunctionLookup(parent, name, parentType);
         return lookup;
     }
 

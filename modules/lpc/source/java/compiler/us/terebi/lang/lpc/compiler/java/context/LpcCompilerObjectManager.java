@@ -39,7 +39,7 @@ import us.terebi.util.collection.PredicateIterator;
 public class LpcCompilerObjectManager implements CompilerObjectManager, CompilerAware
 {
     private final Logger LOG = Logger.getLogger(LpcCompilerObjectManager.class);
-    
+
     private final Map<String, CompiledObjectDefinition> _definitions;
     private final Map<ObjectId, CompiledObjectInstance> _objects;
     private ObjectCompiler _compiler;
@@ -65,7 +65,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
 
     public CompiledObjectDefinition findObject(String name)
     {
-        CompiledObjectDefinition definition = _definitions.get(normalise(name));
+        CompiledObjectDefinition definition = _definitions.get(ObjectId.normalise(name));
         if (definition == null && _compiler != null)
         {
             definition = _compiler.compile(filename(name));
@@ -76,39 +76,26 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
 
     private String filename(String name)
     {
-        return normalise(name) + ".c";
+        return ObjectId.normalise(name) + ".c";
     }
 
     public void registerObject(CompiledObjectDefinition object)
     {
         LOG.info("Loaded " + object);
-        String name = normalise(object.getName());
+        String name = ObjectId.normalise(object.getName());
         _definitions.put(name, object);
         forceLoad(object);
     }
 
     private CompiledObjectInstance forceLoad(CompiledObjectDefinition object)
     {
-        return object.getMasterInstance();
+        CompiledObjectInstance master = object.getMasterInstance();
+        return master;
     }
 
     public void registerObject(CompiledObjectInstance object)
     {
         _objects.put(new ObjectId(object), object);
-    }
-
-    private String normalise(String name)
-    {
-        if (name.endsWith(".c"))
-        {
-            name = name.substring(0, name.length() - 2);
-        }
-        name = name.replace("//", "/");
-        if (name.charAt(0) != '/')
-        {
-            name = "/" + name;
-        }
-        return name;
     }
 
     public long allocateObjectIdentifier()
@@ -120,14 +107,14 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         }
     }
 
-    public ObjectInstance findObject(String name, int id)
+    public CompiledObjectInstance findObject(ObjectId id)
     {
-        return findObject(new ObjectId(findObject(name), id));
-    }
-
-    private ObjectInstance findObject(ObjectId objectId)
-    {
-        return _objects.get(objectId);
+        CompiledObjectDefinition definition = _definitions.get(id.getFile());
+        if (definition == null)
+        {
+            return null;
+        }
+        return _objects.get(id);
     }
 
     public Iterable< ? extends ObjectInstance> objects()
@@ -177,10 +164,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
     {
         if (_sefun != null && !_sefun.equals(name))
         {
-            throw new IllegalStateException("Simulated Efun object is already defined as "
-                    + _sefun
-                    + " cannot redfined as "
-                    + name);
+            throw new IllegalStateException("Simulated Efun object is already defined as " + _sefun + " cannot redfined as " + name);
         }
         CompiledObjectDefinition definition = findObject(name);
         _sefun = name;

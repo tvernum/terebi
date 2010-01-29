@@ -24,6 +24,7 @@
       <zipfileset prefix="terebi/driver/"        dir="../engine/lib/server/" includes="*.jar" />
       <zipfileset prefix="terebi/driver/plugins" dir="../plugin.persist/output/ant/plugin/" includes="*.jar,*.zip" />
       <zipfileset prefix="terebi/driver/plugins" dir="../plugin.interactive/output/ant/plugin/" includes="*.jar,*.zip" />
+      <zipfileset prefix="terebi/driver/plugins" dir="../plugin.crypt/output/ant/plugin/" includes="*.jar,*.zip" />
     </zip>
   </target>
 

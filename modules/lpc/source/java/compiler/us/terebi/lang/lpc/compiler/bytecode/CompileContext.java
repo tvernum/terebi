@@ -21,6 +21,8 @@ import org.adjective.stout.builder.ClassSpec;
 
 import us.terebi.lang.lpc.compiler.ClassStore;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
+import us.terebi.util.collection.ArrayStack;
+import us.terebi.util.collection.Stack;
 
 /**
  * 
@@ -30,14 +32,17 @@ public class CompileContext
     private final ClassStore _store;
     private final CompileOptions _options;
     private final ASTObjectDefinition _tree;
-    private final ClassSpec _class;
+    private final ClassSpec _publicClass;
+    private final Stack<ClassSpec> _classes;
 
     public CompileContext(ClassStore store, CompileOptions options, ASTObjectDefinition tree, ClassSpec classSpec)
     {
         _store = store;
         _options = options;
         _tree = tree;
-        _class = classSpec;
+        _publicClass = classSpec;
+        _classes = new ArrayStack<ClassSpec>();
+        _classes.push(classSpec);
     }
 
     public ClassStore store()
@@ -57,6 +62,22 @@ public class CompileContext
 
     public ClassSpec publicClass()
     {
-        return _class;
+        return _publicClass;
+    }
+
+    public ClassSpec currentClass()
+    {
+        return _classes.peek();
+    }
+
+    public void pushClass(ClassSpec spec)
+    {
+        _classes.push(spec);
+    }
+
+    public void popClass(ClassSpec spec)
+    {
+        ClassSpec pop = _classes.pop();
+        assert pop == spec;
     }
 }

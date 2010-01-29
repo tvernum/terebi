@@ -18,12 +18,21 @@
 package us.terebi.lang.lpc.compiler.bytecode;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.adjective.stout.builder.ClassSpec;
 import org.adjective.stout.builder.ElementBuilder;
+import org.adjective.stout.builder.MethodSpec;
+import org.adjective.stout.builder.ParameterSpec;
+import org.adjective.stout.core.ElementModifier;
+import org.adjective.stout.core.ExtendedType;
 import org.adjective.stout.core.MethodSignature;
+import org.adjective.stout.core.Parameter;
+import org.adjective.stout.impl.MethodSignatureImpl;
 import org.adjective.stout.loop.Condition;
 import org.adjective.stout.operation.Expression;
 import org.adjective.stout.operation.NothingExpression;
@@ -49,11 +58,14 @@ import us.terebi.lang.lpc.parser.ast.ASTAssignmentExpression;
 import us.terebi.lang.lpc.parser.ast.ASTBinaryAndExpression;
 import us.terebi.lang.lpc.parser.ast.ASTBinaryOrExpression;
 import us.terebi.lang.lpc.parser.ast.ASTCallOther;
+import us.terebi.lang.lpc.parser.ast.ASTCastExpression;
 import us.terebi.lang.lpc.parser.ast.ASTCatch;
 import us.terebi.lang.lpc.parser.ast.ASTComparisonExpression;
+import us.terebi.lang.lpc.parser.ast.ASTCompoundExpression;
 import us.terebi.lang.lpc.parser.ast.ASTConstant;
 import us.terebi.lang.lpc.parser.ast.ASTExclusiveOrExpression;
 import us.terebi.lang.lpc.parser.ast.ASTExpressionCall;
+import us.terebi.lang.lpc.parser.ast.ASTFullType;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionArguments;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionCall;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionLiteral;
@@ -64,6 +76,7 @@ import us.terebi.lang.lpc.parser.ast.ASTLogicalAndExpression;
 import us.terebi.lang.lpc.parser.ast.ASTLogicalOrExpression;
 import us.terebi.lang.lpc.parser.ast.ASTMappingElement;
 import us.terebi.lang.lpc.parser.ast.ASTMappingLiteral;
+import us.terebi.lang.lpc.parser.ast.ASTMethod;
 import us.terebi.lang.lpc.parser.ast.ASTOptExpression;
 import us.terebi.lang.lpc.parser.ast.ASTPostfixExpression;
 import us.terebi.lang.lpc.parser.ast.ASTPostfixIncrementOperator;
@@ -88,6 +101,7 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcFunction;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
+import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.BinarySupport;
 import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
@@ -97,11 +111,18 @@ import us.terebi.lang.lpc.runtime.jvm.support.IndexSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.LogicSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.MathSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
-import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.EXCEPTION_GET_MESSAGE;
+import static java.util.Collections.singleton;
+import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.EXCEPTION_GET_LPC_MESSAGE;
+import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.LPC_REFERENCE;
 import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.LPC_RUNTIME_EXCEPTION;
+import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.LPC_VALUE;
 import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.STRING_VALUE_CONSTRUCTOR;
+import static us.terebi.lang.lpc.compiler.bytecode.FunctionLiteralCompiler.findReferencedVariables;
+import static us.terebi.lang.lpc.compiler.bytecode.FunctionLiteralCompiler.getReferencedVariables;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.commonType;
 
 /**
  * 
@@ -206,6 +227,7 @@ public class ExpressionCompiler extends BaseASTVisitor
     public LpcExpression visit(ASTConstant node, Object data)
     {
         Object constant = new ConstantHandler().getConstant(node, _context.options().getMath());
+
         if ((constant instanceof Float) || (constant instanceof Double))
         {
             double d = ((Number) constant).doubleValue();
@@ -214,12 +236,12 @@ public class ExpressionCompiler extends BaseASTVisitor
         else if (constant instanceof Integer)
         {
             int i = ((Number) constant).intValue();
-            return expression(makeValue(Integer.TYPE, VM.Expression.constant(i)), Types.INT);
+            return expression(makeValue(Integer.TYPE, VM.Expression.constant(i)), (i == 0 ? Types.MIXED : Types.INT));
         }
         else if ((constant instanceof Number))
         {
             long l = ((Number) constant).longValue();
-            return expression(makeValue(Long.TYPE, VM.Expression.constant(l)), Types.INT);
+            return expression(makeValue(Long.TYPE, VM.Expression.constant(l)), (l == 0 ? Types.MIXED : Types.INT));
         }
         else if (constant instanceof Character)
         {
@@ -380,7 +402,7 @@ public class ExpressionCompiler extends BaseASTVisitor
     {
         return VM.Expression.callInherited( //
                 VM.Method.find(LpcFunction.class, "getArg", LpcValue[].class, Integer.TYPE), //
-                VM.Expression.variable("args"), VM.Expression.constant(index)//
+                VM.Expression.variable(FunctionLiteralCompiler.POSITIONAL_ARGUMENT_COLLECTION), VM.Expression.constant(index)//
         );
     }
 
@@ -466,12 +488,29 @@ public class ExpressionCompiler extends BaseASTVisitor
     {
         Expression[] operands = new Expression[node.jjtGetNumChildren()];
 
+        boolean integer = false;
+        boolean array = false;
+        LpcType[] types = new LpcType[operands.length];
         for (int i = 0; i < operands.length; i++)
         {
             Node child = node.jjtGetChild(i);
             LpcExpression expr = compile(child);
-            checkType(child, expr, Types.INT);
+            checkType(child, expr, Types.INT, Types.MIXED_ARRAY);
+            types[i] = expr.type;
+            if (Types.INT.equals(expr.type))
+            {
+                integer = true;
+            }
+            else if (expr.type.isArray())
+            {
+                array = true;
+            }
             operands[i] = getValue(expr);
+        }
+
+        if (array && integer)
+        {
+            throw new CompileException(node, "Incompatible types to binary operator (int and array)");
         }
 
         Expression result;
@@ -491,7 +530,7 @@ public class ExpressionCompiler extends BaseASTVisitor
                     VM.Expression.array(LpcValue.class, operands));
         }
 
-        return expression(result, Types.INT);
+        return expression(result, commonType(types));
     }
 
     public LpcExpression visit(ASTLogicalOrExpression node, Object data)
@@ -651,11 +690,13 @@ public class ExpressionCompiler extends BaseASTVisitor
     {
         TokenNode leftNode = node.getLeftNode();
         TokenNode opNode = node.getOperatorNode();
-        Node rightNode = node.getRightNode();
+        TokenNode rightNode = node.getRightNode();
 
         LpcExpression leftVar = compile(leftNode);
         if (!leftVar.reference)
         {
+            ASTUtil.findAncestor(ASTMethod.class, node).dump("@ ");
+            node.dump("* ");
             throw new CompileException(node, "Cannot assign to value \"" + ASTUtil.getCompleteImage(leftNode) + "\"");
         }
 
@@ -915,6 +956,43 @@ public class ExpressionCompiler extends BaseASTVisitor
     @SuppressWarnings("unchecked")
     public LpcExpression visit(ASTCatch node, Object data)
     {
+        Token token = node.jjtGetFirstToken();
+        String methodName = "lpc$catch_" + token.beginLine + "_" + token.beginColumn;
+
+        Collection<ASTVariableReference> referenced = findReferencedVariables(node);
+        boolean positional = FunctionLiteralCompiler.countPositionalArguments(referenced) > 0;
+        Set<VariableResolution> variables = getReferencedVariables(referenced, _scope.variables());
+
+        int argCount = variables.size();
+        if (positional)
+        {
+            argCount++;
+        }
+        List<Parameter> parameters = new ArrayList<Parameter>(argCount);
+        ExtendedType[] parameterTypes = new ExtendedType[argCount];
+        Expression[] arguments = new Expression[argCount];
+
+        int i = 0;
+        for (VariableResolution var : variables)
+        {
+            parameters.add(new ParameterSpec(var.internalName()).withType(LpcReference.class).create());
+            parameterTypes[i] = LPC_REFERENCE;
+            arguments[i] = var.access();
+            i++;
+        }
+        if (positional)
+        {
+            parameters.add(new ParameterSpec(FunctionLiteralCompiler.POSITIONAL_ARGUMENT_COLLECTION).withType(LpcValue[].class).create());
+            parameterTypes[i] = ByteCodeConstants.LPC_VALUE_ARRAY;
+            arguments[i] = VM.Expression.variable(FunctionLiteralCompiler.POSITIONAL_ARGUMENT_COLLECTION);
+        }
+        MethodSignature signature = new MethodSignatureImpl(singleton(ElementModifier.PRIVATE), LPC_VALUE, methodName, parameterTypes);
+
+        MethodSpec method = new MethodSpec(methodName);
+        method.withParameters(parameters);
+        method.withModifiers(ElementModifier.PRIVATE, ElementModifier.SYNTHETIC);
+        method.withReturnType(LPC_VALUE);
+
         Node bodyNode = node.jjtGetChild(0);
         Statement bodyStmt = null;
         if (bodyNode instanceof ExpressionNode)
@@ -935,17 +1013,58 @@ public class ExpressionCompiler extends BaseASTVisitor
         TryCatchSpec tryCatch = VM.Statement.attempt(bodyStmt);
         String exceptionName = _scope.variables().allocateInternalVariableName();
         ElementBuilder<Statement> storeException = VM.Statement.assignVariable(exceptionName, (Expression) new NothingExpression());
-        Expression message = VM.Expression.callMethod(VM.Expression.variable(exceptionName), LPC_RUNTIME_EXCEPTION, EXCEPTION_GET_MESSAGE);
+        Expression message = VM.Expression.callMethod(VM.Expression.variable(exceptionName), LPC_RUNTIME_EXCEPTION, EXCEPTION_GET_LPC_MESSAGE);
         Expression string = makeLpcString(message);
         ElementBuilder<Statement> block = VM.Statement.block( //
                 VM.Statement.declareVariable(LpcRuntimeException.class, exceptionName), //
                 storeException, //
-                VM.Statement.assignVariable(exceptionValue, string)//
+                VM.Statement.assignVariable(exceptionValue, string), //
+                VM.Statement.callStatic(ByteCodeConstants.LOG_CATCH_TYPE, ByteCodeConstants.LOG_CATCH_METHOD, VM.Expression.variable(exceptionName)) //
         );
         tryCatch.on(ByteCodeConstants.LPC_RUNTIME_EXCEPTION, block);
         statements.add(tryCatch);
-        Expression expr = VM.Expression.variable(exceptionValue);
-        expr = VM.Expression.chain(statements, expr);
-        return expression(expr, Types.STRING);
+        statements.add(VM.Statement.returnObject(VM.Expression.variable(exceptionValue)));
+        method.withBody(statements);
+
+        ClassSpec thisClass = _context.currentClass();
+        thisClass.withMethod(method);
+
+        Expression call = VM.Expression.callInherited(signature, arguments);
+        return expression(call, Types.STRING);
+    }
+
+    public Object visit(ASTCastExpression node, Object data)
+    {
+        ASTFullType typeNode = (ASTFullType) node.jjtGetChild(0);
+        Node exprNode = node.jjtGetChild(1);
+
+        LpcExpression expr = compile(exprNode);
+        LpcType type = new TypeSupport(_scope, typeNode).getType();
+
+        if (Types.INT.equals(type))
+        {
+            Expression asLong = VM.Expression.callMethod(getValue(expr), LpcValue.class, ByteCodeConstants.AS_LONG);
+            return expression(VM.Expression.callStatic(ValueSupport.class, ByteCodeConstants.INT_VALUE, asLong), type);
+        }
+        else if (Types.FLOAT.equals(type))
+        {
+            Expression asDouble = VM.Expression.callMethod(getValue(expr), LpcValue.class, ByteCodeConstants.AS_DOUBLE);
+            return expression(VM.Expression.callStatic(ValueSupport.class, ByteCodeConstants.FLOAT_VALUE, asDouble), type);
+        }
+        else
+        {
+            // @TODO check the type...
+            return expression(getValue(expr), type);
+        }
+    }
+
+    public Object visit(ASTCompoundExpression node, Object data)
+    {
+        LpcExpression var = null;
+        for (TokenNode child : ASTUtil.children(node))
+        {
+            var = compile(child);
+        }
+        return var;
     }
 }
