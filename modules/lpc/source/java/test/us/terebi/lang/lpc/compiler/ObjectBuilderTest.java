@@ -38,6 +38,9 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -77,13 +80,18 @@ public class ObjectBuilderTest
         MethodDefinition method = methods.get("getNumber");
         assertNotNull(method);
 
-        CompiledObjectInstance instance = object.newInstance(Collections.<LpcValue> emptyList());
-        assertNotNull(instance);
-        assertIsInstance(object.getImplementationClass(), instance.getImplementingObject());
+        RuntimeContext.activate(new SystemContext(efuns, manager, finder));
+        synchronized (RuntimeContext.lock())
+        {
+            new ExecutionTimeCheck(1500).begin();
+            CompiledObjectInstance instance = object.newInstance(Collections.<LpcValue> emptyList());
+            assertNotNull(instance);
+            assertIsInstance(object.getImplementationClass(), instance.getImplementingObject());
 
-        LpcValue result = method.execute(instance, Collections.<LpcValue> emptyList());
-        assertNotNull(result);
-        assertEquals(7, result.asLong());
+            LpcValue result = method.execute(instance, Collections.<LpcValue> emptyList());
+            assertNotNull(result);
+            assertEquals(7, result.asLong());
+        }
     }
 
     private void assertIsInstance(Class< ? > expected, Object object)

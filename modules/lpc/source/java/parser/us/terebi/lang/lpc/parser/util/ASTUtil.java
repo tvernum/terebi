@@ -283,4 +283,15 @@ public class ASTUtil
         }
         return null;
     }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends TokenNode> List<T> childList(TokenNode parent, int start)
+    {
+        List<T> list = new ArrayList<T>(parent.jjtGetNumChildren() - start);
+        for (int i = start; i < parent.jjtGetNumChildren(); i++)
+        {
+            list.add((T) parent.jjtGetChild(i));
+        }
+        return list;
+    }
 }

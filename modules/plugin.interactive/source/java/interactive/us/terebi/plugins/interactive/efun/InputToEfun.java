@@ -32,8 +32,6 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
-import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
-import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
@@ -42,6 +40,7 @@ import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.lang.lpc.runtime.util.InContext;
 import us.terebi.net.core.Connection;
 import us.terebi.net.core.FeatureSet;
 import us.terebi.net.core.NetworkFeatures;
@@ -72,7 +71,7 @@ public class InputToEfun extends AbstractEfun implements Efun
                 connection.getWriter().println();
                 features.enableFeature(NetworkFeatures.CLIENT_ECHO);
             }
-            
+
             if (_allowEscape && line.startsWith("!"))
             {
                 line = line.substring(1);
@@ -80,7 +79,7 @@ public class InputToEfun extends AbstractEfun implements Efun
             }
 
             LpcValue string = new StringValue(line);
-            List<LpcValue> args;
+            final List<LpcValue> args;
             if (_extraArgs.isEmpty())
             {
                 args = Collections.singletonList(string);
@@ -92,24 +91,19 @@ public class InputToEfun extends AbstractEfun implements Efun
                 args.addAll(_extraArgs);
             }
 
-            synchronized (RuntimeContext.lock())
+            ObjectShell.setInputHandler(user, null);
+
+            final Callable func = _func;
+            InContext.<Object> execute(Origin.EFUN, user, new InContext.Exec<Object>()
             {
-                ObjectShell.setInputHandler(user, null);
-                CallStack stack = RuntimeContext.obtain().callStack();
-                stack.pushFrame(Origin.EFUN, user);
-                try
+                public Object execute()
                 {
-                    _func.execute(args);
+                    return func.execute(args);
                 }
-                finally
-                {
-                    stack.popFrame();
-                }
-            }
+            });
 
             return null;
         }
-
     }
 
     private final Logger LOG = Logger.getLogger(InputToEfun.class);
@@ -153,7 +147,6 @@ public class InputToEfun extends AbstractEfun implements Efun
         return flag;
     }
 
-    @SuppressWarnings("unchecked")
     private List< ? extends LpcValue> getExtraArguments(List< ? extends LpcValue> arguments)
     {
         if (arguments.size() > 2)
@@ -176,7 +169,7 @@ public class InputToEfun extends AbstractEfun implements Efun
 
         if (ObjectShell.getInputHandler(user) != null)
         {
-            LOG.info("Attempt to use 'input_to' when there is already and active input handler");
+            LOG.info("Attempt to use 'input_to' when there is already an active input handler");
         }
 
         if (isSet(flag, 0x1))

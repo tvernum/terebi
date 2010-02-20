@@ -1,5 +1,4 @@
 /* ------------------------------------------------------------------------
- * $Id$
  * Copyright 2009 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,18 +21,16 @@ import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
-import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
-import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 
 /**
  * 
  */
-public class MasterEfun extends AbstractEfun implements FunctionSignature
+public class GetElapsedExecTimeEfun extends AbstractEfun implements Efun
 {
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
@@ -42,13 +39,13 @@ public class MasterEfun extends AbstractEfun implements FunctionSignature
 
     public LpcType getReturnType()
     {
-        return Types.OBJECT;
+        return Types.INT;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        SystemContext context = RuntimeContext.obtain().system();
-        return new ObjectValue(context.objectManager().getMasterObject());
-    }
+        long t = ExecutionTimeCheck.get().getElapsedTime();
+        return ValueSupport.intValue(t);
+   }
 
 }

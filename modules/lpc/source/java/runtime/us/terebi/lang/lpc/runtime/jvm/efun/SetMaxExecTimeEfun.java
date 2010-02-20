@@ -1,5 +1,4 @@
 /* ------------------------------------------------------------------------
- * $Id$
  * Copyright 2009 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -22,33 +21,34 @@ import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
-import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
-import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
+import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
+import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class MasterEfun extends AbstractEfun implements FunctionSignature
+public class SetMaxExecTimeEfun extends AbstractEfun implements Efun
 {
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.emptyList();
+        return Collections.singletonList(new ArgumentSpec("max", Types.INT));
     }
 
     public LpcType getReturnType()
     {
-        return Types.OBJECT;
+        return Types.VOID;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        SystemContext context = RuntimeContext.obtain().system();
-        return new ObjectValue(context.objectManager().getMasterObject());
+        checkArguments(arguments);
+        long t = arguments.get(0).asLong();
+        ExecutionTimeCheck.get().setMaximumTime(t);
+        return VoidValue.INSTANCE;
     }
 
 }

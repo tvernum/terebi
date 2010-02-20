@@ -34,6 +34,7 @@ import org.adjective.stout.builder.MethodSpec;
 import org.adjective.stout.builder.ParameterSpec;
 import org.adjective.stout.core.ConstructorSignature;
 import org.adjective.stout.core.ElementModifier;
+import org.adjective.stout.core.MethodSignature;
 import org.adjective.stout.core.Parameter;
 import org.adjective.stout.operation.Expression;
 import org.adjective.stout.operation.Statement;
@@ -48,6 +49,7 @@ import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolut
 import us.terebi.lang.lpc.compiler.util.FunctionCallSupport;
 import us.terebi.lang.lpc.compiler.util.MethodSupport;
 import us.terebi.lang.lpc.compiler.util.Positional;
+import us.terebi.lang.lpc.parser.ast.ASTCompoundExpression;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionLiteral;
 import us.terebi.lang.lpc.parser.ast.ASTImmediateExpression;
 import us.terebi.lang.lpc.parser.ast.ASTParameterDeclarations;
@@ -59,12 +61,14 @@ import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
+import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcFunction;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
+import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -102,14 +106,19 @@ public class FunctionLiteralCompiler
         //        <LEFT_BRACKET> <COLON> Expression() <COLON> <RIGHT_BRACKET>
         ExpressionNode exprNode = node.getExpressionBody();
 
-        // Handle (: someFunction :)
-        if (exprNode instanceof ASTVariableReference)
+        // Handle (: someFunction [ , arg1 , arg2 ] :)
+        LpcExpression expression = checkOldStyleFunctionReference(exprNode, Collections.<ExpressionNode> emptyList());
+        if (expression != null)
         {
-            ASTVariableReference ref = (ASTVariableReference) exprNode;
-            VariableResolution var = _parentScope.variables().findVariable(ref.getVariableName());
-            if (var == null)
+            return expression;
+        }
+        if (exprNode instanceof ASTCompoundExpression)
+        {
+            ASTCompoundExpression compound = (ASTCompoundExpression) exprNode;
+            expression = checkOldStyleFunctionReference(compound.getFirstExpression(), compound.getSubsequentExpressions());
+            if (expression != null)
             {
-                return getFunctionReference(ref);
+                return expression;
             }
         }
 
@@ -149,11 +158,37 @@ public class FunctionLiteralCompiler
         return new LpcExpression(Types.FUNCTION, function);
     }
 
-    private LpcExpression getFunctionReference(ASTVariableReference ref)
+    private LpcExpression checkOldStyleFunctionReference(ExpressionNode exprNode, List<ExpressionNode> arguments)
+    {
+        if (exprNode instanceof ASTVariableReference)
+        {
+            ASTVariableReference ref = (ASTVariableReference) exprNode;
+            VariableResolution var = _parentScope.variables().findVariable(ref.getVariableName());
+            if (var == null)
+            {
+                return getFunctionReference(ref, arguments);
+            }
+        }
+        return null;
+    }
+
+    private LpcExpression getFunctionReference(ASTVariableReference ref, List<ExpressionNode> arguments)
     {
         FunctionCallSupport fcs = new FunctionCallSupport(_scope);
         FunctionReference function = fcs.findFunction(ref, ref.getScope(), ref.getVariableName());
         Expression callable = FunctionCallCompiler.getCallable(function);
+        if (!arguments.isEmpty())
+        {
+            ExpressionCompiler compiler = new ExpressionCompiler(_parentScope, _context);
+            Expression[] elements = new Expression[arguments.size()];
+            for (int i = 0; i < elements.length; i++)
+            {
+                elements[i] = compiler.compile(arguments.get(i)).expression;
+            }
+            Expression array = VM.Expression.array(LpcValue.class, elements);
+            MethodSignature bind = VM.Method.find(CallableSupport.class, "bindArguments", Callable.class, LpcValue[].class);
+            callable = VM.Expression.callStatic(CallableSupport.class, bind, callable, array);
+        }
         return new LpcExpression(function.signature.getReturnType(), callable);
     }
 

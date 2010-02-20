@@ -35,6 +35,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 import static org.junit.Assert.assertEquals;
@@ -78,6 +79,7 @@ public class MethodTestCase implements Callable<Object>
         synchronized (system.lock())
         {
             RuntimeContext.activate(system);
+            new ExecutionTimeCheck(1500).begin();
             instance = method.getDeclaringType().newInstance(Collections.<LpcValue> emptyList());
         }
         

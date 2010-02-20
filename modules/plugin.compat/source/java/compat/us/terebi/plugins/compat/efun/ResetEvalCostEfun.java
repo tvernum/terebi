@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.plugins.compat.efun;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +26,8 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 
@@ -46,7 +48,7 @@ public class ResetEvalCostEfun extends AbstractEfun implements FunctionSignature
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO */
+        ExecutionTimeCheck.get().reset();
         return VoidValue.INSTANCE;
     }
 

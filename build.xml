@@ -16,6 +16,8 @@
         <do-in-module module="engine"             target="@{target}" />
         <do-in-module module="plugin.persist"     target="@{target}" />
         <do-in-module module="plugin.interactive" target="@{target}" />
+        <do-in-module module="plugin.crypt"       target="@{target}" />
+        <do-in-module module="plugin.compat"      target="@{target}" />
     </sequential>
   </macrodef>
 

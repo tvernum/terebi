@@ -26,7 +26,7 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
-import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 
 /**
@@ -46,28 +46,21 @@ public class Apply
         return invoke(instance, Arrays.asList(arguments));
     }
 
-    public LpcValue invoke(ObjectInstance instance, List< ? extends LpcValue> arguments)
+    public LpcValue invoke(final ObjectInstance instance, final List< ? extends LpcValue> arguments)
     {
-        MethodDefinition method = getMethod(instance);
+        final MethodDefinition method = getMethod(instance);
         if (method == null)
         {
             return NilValue.INSTANCE;
         }
 
-        synchronized (RuntimeContext.lock())
+        return InContext.execute(Origin.APPLY, instance, new InContext.Exec<LpcValue>()
         {
-            CallStack stack = RuntimeContext.obtain().callStack();
-            stack.pushFrame(CallStack.Origin.APPLY, instance);
-            try
+            public LpcValue execute()
             {
-                LpcValue value = method.execute(instance, arguments);
-                return value;
+                return method.execute(instance, arguments);
             }
-            finally
-            {
-                stack.popFrame();
-            }
-        }
+        });
     }
 
     public Callable bind(ObjectInstance instance)

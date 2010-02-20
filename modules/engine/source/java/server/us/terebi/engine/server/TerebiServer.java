@@ -17,13 +17,13 @@
  * ------------------------------------------------------------------------
  */
 
-
 package us.terebi.engine.server;
 
 import java.io.IOException;
 
 import us.terebi.engine.config.Config;
 import us.terebi.engine.config.ConfigException;
+import us.terebi.engine.config.ConfigNames;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.net.core.Connection;
@@ -37,7 +37,6 @@ import us.terebi.net.telnet.TelnetChannelConnectionHandler;
  */
 public class TerebiServer
 {
-    public static final String TELNET_PORT_KEY = "telnet.ports";
     private final NetServer _net;
 
     public interface ConnectionObjectFactory
@@ -48,10 +47,10 @@ public class TerebiServer
     public TerebiServer(ConnectionObjectFactory factory, Config config, SystemContext context) throws IOException
     {
         _net = new NetServer();
-        long[] ports = config.getLongs(TELNET_PORT_KEY);
+        long[] ports = config.getLongs(ConfigNames.TELNET_PORT);
         if (ports.length == 0)
         {
-            throw new ConfigException("No telnet ports configured under key '" + TELNET_PORT_KEY + "'");
+            throw new ConfigException("No telnet ports configured under key '" + ConfigNames.TELNET_PORT + "'");
         }
         for (long port : ports)
         {

@@ -17,43 +17,39 @@
 
 package us.terebi.lang.lpc.runtime.util;
 
-import java.util.List;
-
-import us.terebi.lang.lpc.runtime.Callable;
-import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 
-public class StackCall extends CallableProxy implements Callable
+/**
+ * 
+ */
+public class InContext
 {
-    private final Origin _origin;
-
-    public StackCall(Callable function, Origin origin)
+    public interface Exec<T>
     {
-        super(function);
-        _origin = origin;
+        public T execute();
     }
 
-    public LpcValue execute(final List< ? extends LpcValue> arguments)
+    public static <T> T execute(Origin origin, ObjectInstance owner, Exec<T> exec)
     {
-        return InContext.execute(_origin, getOwner(), new InContext.Exec<LpcValue>()
+        ExecutionTimeCheck check = ExecutionTimeCheck.get();
+        synchronized (RuntimeContext.lock())
         {
-            @SuppressWarnings("synthetic-access")
-            public LpcValue execute()
+            CallStack stack = RuntimeContext.obtain().callStack();
+            stack.pushFrame(origin, owner);
+            try
             {
-                return StackCall.super.execute(arguments);
+                check.begin();
+                return exec.execute();
             }
-        });
-    }
-
-    public LpcValue execute(final LpcValue... arguments)
-    {
-        return InContext.execute(_origin, getOwner(), new InContext.Exec<LpcValue>()
-        {
-            @SuppressWarnings("synthetic-access")
-            public LpcValue execute()
+            finally
             {
-                return StackCall.super.execute(arguments);
+                stack.popFrame();
+                check.end();
             }
-        });
+        }
     }
 }

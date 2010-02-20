@@ -19,10 +19,14 @@ package us.terebi.plugins.compat;
 
 import us.terebi.engine.config.Config;
 import us.terebi.engine.config.ConfigException;
+import us.terebi.engine.config.ConfigNames;
 import us.terebi.engine.objects.CompileOptions;
 import us.terebi.engine.plugin.Plugin;
-import us.terebi.engine.server.TerebiServer;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.plugins.compat.efun.MaxEvalCostEfun;
+import us.terebi.plugins.compat.efun.ResetEvalCostEfun;
+import us.terebi.plugins.compat.efun.SetEvalLimitEfun;
 
 /**
  * @version $Revision$
@@ -45,13 +49,18 @@ public class CompatPlugin implements Plugin
         String mudName = config.getString("compat.mud.name");
         compileOptions.defineString("MUD_NAME", mudName);
 
-        long[] ports = config.getLongs(TerebiServer.TELNET_PORT_KEY);
+        long[] ports = config.getLongs(ConfigNames.TELNET_PORT);
         if (ports != null && ports.length > 0)
         {
             compileOptions.defineLong("__PORT__", ports[0]);
         }
 
         compileOptions.defineLong("__LARGEST_PRINTABLE_STRING__", config.getLong("compat.largest.printable.string", 8192));
+
+        Efuns efuns = context.efuns();
+        efuns.define("max_eval_cost", new MaxEvalCostEfun());
+        efuns.define("reset_eval_cost", new ResetEvalCostEfun());
+        efuns.define("set_eval_limit", new SetEvalLimitEfun());
     }
 
     public void run(SystemContext context)

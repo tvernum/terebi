@@ -26,6 +26,7 @@ import java.util.Map;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.MappedEfuns;
 import us.terebi.lang.lpc.runtime.jvm.efun.*;
+import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
@@ -185,9 +186,12 @@ public class StandardEfuns
         public static final Efun ctime = new CtimeEfun();
         public static final Efun localtime = new LocaltimeEfun();
         public static final Efun query_privs = new QueryPrivsEfun();
-        public static final Efun reset_eval_cost = new ResetEvalCostEfun();
-        public static final Efun set_eval_limit = new SetEvalLimitEfun();
-        public static final Efun dump_file_descriptors = new NoOpEfun(new StringValue(""));
+        public static final Efun dump_file_descriptors = new NoOpEfun(LpcConstants.STRING.BLANK);
+        public static final Efun reclaim_objects = new NoOpEfun(LpcConstants.INT.ZERO);
+        
+        public static final Efun get_max_execution_time = new GetMaxExecTimeEfun();
+        public static final Efun set_max_execution_time = new SetMaxExecTimeEfun();
+        public static final Efun get_elapsed_execution_time = new GetElapsedExecTimeEfun();
     }
 
     public static class NET

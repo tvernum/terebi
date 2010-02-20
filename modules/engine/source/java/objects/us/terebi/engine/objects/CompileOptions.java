@@ -16,16 +16,13 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.config.ConfigNames;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
  */
 public class CompileOptions
 {
-    private static final String CONFIG_AUTO_INCLUDE = "compile.include.auto";
-    private static final String CONFIG_INCLUDE_DIRECTORIES = "compile.include.directories";
-    private static final String CONFIG_COMPILE_OUTPUT = "compile.output";
-
     private final File _javaOutputDirectory;
     private final List<Pattern> _debugPatterns;
 
@@ -37,9 +34,9 @@ public class CompileOptions
     public CompileOptions(Config config, MudlibSetup mudlib)
     {
         this( //
-                config.getFile(CONFIG_COMPILE_OUTPUT, Config.FileType.EXISTING_DIRECTORY), //
-                config.getPath(CONFIG_INCLUDE_DIRECTORIES, mudlib.root(), Config.FileType.EXISTING_DIRECTORY), //
-                config.getPath(CONFIG_AUTO_INCLUDE, mudlib.root(), Config.FileType.EXISTING_FILE));
+                config.getFile(ConfigNames.COMPILE_OUTPUT, Config.FileType.EXISTING_DIRECTORY), //
+                config.getPath(ConfigNames.COMPILE_INCLUDE_DIRECTORIES, mudlib.root(), Config.FileType.EXISTING_DIRECTORY), //
+                config.getPath(ConfigNames.COMPILE_AUTO_INCLUDE, mudlib.root(), Config.FileType.EXISTING_FILE));
 
     }
 

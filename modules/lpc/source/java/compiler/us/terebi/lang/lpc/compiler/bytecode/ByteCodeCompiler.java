@@ -81,7 +81,8 @@ public class ByteCodeCompiler implements Compiler
     public static ClassDescriptor store(ClassSpec spec, ClassStore store) throws IOException
     {
         ClassDescriptor cls = spec.create();
-        byte[] bytes = new ByteCodeWriter().write(cls);
+        ByteCodeWriter writer = new LpcByteCodeWriter();
+        byte[] bytes = writer.write(cls);
         OutputStream stream = store.open(cls.getPackage(), cls.getName());
         stream.write(bytes);
         stream.close();

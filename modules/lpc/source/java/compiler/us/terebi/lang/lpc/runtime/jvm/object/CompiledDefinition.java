@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.runtime.jvm.object;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collections;
 import java.util.HashMap;
@@ -244,16 +245,28 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
             Constructor< ? extends T> constructor = _implementation.getConstructor(CompiledObjectDefinition.class);
             synchronized (RuntimeContext.lock())
             {
-                return constructor.newInstance(this);
+                return newInstance(constructor);
             }
         }
         catch (LpcRuntimeException e)
         {
             throw e;
         }
-        catch (Exception e)
+        catch (Throwable e)
         {
             throw new LpcRuntimeException("Internal Error - " + e.getMessage(), e);
+        }
+    }
+
+    private T newInstance(Constructor< ? extends T> constructor) throws Throwable
+    {
+        try
+        {
+            return constructor.newInstance(this);
+        }
+        catch (InvocationTargetException e)
+        {
+            throw e.getCause();
         }
     }
 

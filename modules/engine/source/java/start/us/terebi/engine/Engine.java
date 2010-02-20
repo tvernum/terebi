@@ -25,6 +25,7 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.config.ConfigNames;
 import us.terebi.engine.objects.CoreObjects;
 import us.terebi.engine.objects.EngineInitialiser;
 import us.terebi.engine.plugin.PluginController;
@@ -34,11 +35,12 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
-import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 import us.terebi.lang.lpc.runtime.util.Apply;
 import us.terebi.net.core.NetException;
 
@@ -64,6 +66,8 @@ public class Engine
 
     public void run() throws IOException, NetException, InterruptedException
     {
+        ExecutionTimeCheck.setDefaultEvalTime(_config.getLong(ConfigNames.MAX_EVAL_TIME_MILLIS, ExecutionTimeCheck.DEFAULT_EVAL_TIME_MILLIS));
+
         PluginController plugins = new PluginController(_config);
         EngineInitialiser init = new EngineInitialiser(_config, newContext());
         plugins.load(init.getSystemContext());

@@ -20,16 +20,13 @@
 package us.terebi.engine.objects;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.config.ConfigNames;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
  */
 public class BehaviourOptions
 {
-    private static final String CONFIG_EXTENSION = "save.extension.default";
-    private static final String CONFIX_ADD_EXTENSION = "save.extension.add";
-    private static final String CONFIG_ENFORCE_EXTENSION = "save.extension.enforce";
-    private static final String CONFIG_DISALLOW_EXTENSIONS = "save.extension.disallow";
     private static final String[] DEFAULT_DISALLOW_EXTENSIONS = new String[] { ".c" };
 
     public class SaveBehaviour
@@ -52,10 +49,10 @@ public class BehaviourOptions
 
     public BehaviourOptions(Config config)
     {
-        String extention = config.getString(CONFIG_EXTENSION, ".dat");
-        boolean add = config.getBoolean(CONFIX_ADD_EXTENSION, true);
-        boolean enforce = config.getBoolean(CONFIG_ENFORCE_EXTENSION, false);
-        String[] disallow = config.hasKey(CONFIG_DISALLOW_EXTENSIONS) ? config.getStrings(CONFIG_DISALLOW_EXTENSIONS)
+        String extention = config.getString(ConfigNames.SAVE_EXTENSION, ".dat");
+        boolean add = config.getBoolean(ConfigNames.SAVE_ADD_EXTENSION, true);
+        boolean enforce = config.getBoolean(ConfigNames.SAVE_ENFORCE_EXTENSION, false);
+        String[] disallow = config.hasKey(ConfigNames.SAVE_DISALLOW_EXTENSIONS) ? config.getStrings(ConfigNames.SAVE_DISALLOW_EXTENSIONS)
                 : DEFAULT_DISALLOW_EXTENSIONS;
         _save = new SaveBehaviour(extention, add, enforce, disallow);
     }

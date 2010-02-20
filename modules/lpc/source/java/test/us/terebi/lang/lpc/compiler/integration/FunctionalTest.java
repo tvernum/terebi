@@ -36,6 +36,7 @@ import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 import us.terebi.test.TestSuite;
 import us.terebi.test.TestSuiteRunner;
 
@@ -76,6 +77,7 @@ public class FunctionalTest
             synchronized (system.lock())
             {
                 RuntimeContext.activate(system);
+                new ExecutionTimeCheck(1500).begin();
                 definition = builder.compile(file);
             }
             

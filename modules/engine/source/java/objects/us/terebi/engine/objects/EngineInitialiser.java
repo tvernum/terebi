@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import org.apache.log4j.Logger;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.config.ConfigNames;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectBuilder;
 import us.terebi.lang.lpc.compiler.ObjectBuilderFactory;
@@ -38,6 +39,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.ObjectMap;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
@@ -98,9 +100,18 @@ public class EngineInitialiser
         CompilerObjectManager objectManager = builder.getObjectManager();
         configureSystemContext(objectManager, fileFinder);
 
-        ObjectDefinition sefunDefinition = objectManager.defineSimulatedEfunObject(getLocalPath(_mudlib.sefun()));
-        ObjectDefinition masterDefinition = objectManager.defineMasterObject(getLocalPath(_mudlib.master()));
-        return new CoreObjects(objectManager, masterDefinition.getMasterInstance(), sefunDefinition.getMasterInstance());
+        ExecutionTimeCheck check = new ExecutionTimeCheck(_config.getLong(ConfigNames.MAX_EVAL_TIME_INIT, 30000));
+        try
+        {
+            check.begin();
+            ObjectDefinition sefunDefinition = objectManager.defineSimulatedEfunObject(getLocalPath(_mudlib.sefun()));
+            ObjectDefinition masterDefinition = objectManager.defineMasterObject(getLocalPath(_mudlib.master()));
+            return new CoreObjects(objectManager, masterDefinition.getMasterInstance(), sefunDefinition.getMasterInstance());
+        }
+        finally
+        {
+            check.end();
+        }
     }
 
     private void configureSystemContext(CompilerObjectManager objectManager, ResourceFinder resourceFinder)
