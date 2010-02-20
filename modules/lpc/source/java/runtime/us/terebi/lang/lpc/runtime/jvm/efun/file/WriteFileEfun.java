@@ -16,9 +16,9 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
@@ -26,21 +26,30 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class RemoveFileEfun extends AbstractEfun implements FunctionSignature, Callable
+public class WriteFileEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    // int rm( string file );
+    // int write_file( string file, string str, int flag );
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("file", Types.STRING));
+        ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
+        list.add(new ArgumentSpec("file", Types.STRING));
+        list.add(new ArgumentSpec("content", Types.STRING));
+        list.add(new ArgumentSpec("flag", Types.INT));
+        return list;
     }
 
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
+    
     public LpcType getReturnType()
     {
         return Types.INT;
@@ -48,9 +57,8 @@ public class RemoveFileEfun extends AbstractEfun implements FunctionSignature, C
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        checkArguments(arguments);
-        // @TODO
-        return VoidValue.INSTANCE;
+        // @TODO Auto-generated method stub
+        return null;
     }
 
 }

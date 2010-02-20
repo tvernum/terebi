@@ -95,7 +95,7 @@ public class ObjectSerializer
 
         Resource resource = getResource();
         LOG.info("Saving " + object + " to " + resource);
-        OutputStream output = resource.openOutput();
+        OutputStream output = resource.write();
         try
         {
             Writer writer = new OutputStreamWriter(output);
@@ -123,7 +123,7 @@ public class ObjectSerializer
 
         Resource resource = getResource();
         LOG.info("Restoring " + object + " from " + resource);
-        InputStream input = resource.openInput();
+        InputStream input = resource.read();
         try
         {
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));

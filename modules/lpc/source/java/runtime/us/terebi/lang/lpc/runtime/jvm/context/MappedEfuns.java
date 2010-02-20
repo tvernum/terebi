@@ -36,13 +36,11 @@ public class MappedEfuns implements Efuns
 
     private static class Efun
     {
-        public final String name;
         public final FunctionSignature signature;
         public final Callable implementation;
 
-        public Efun(String nm, FunctionSignature sig, Callable impl)
+        public Efun(FunctionSignature sig, Callable impl)
         {
-            this.name = nm;
             this.signature = sig;
             this.implementation = impl;
         }
@@ -78,7 +76,7 @@ public class MappedEfuns implements Efuns
     public void define(String efun, FunctionSignature signature, Callable implementation)
     {
         LOG.debug("Defining efun " + efun + " - " + signature + " : " + implementation.getClass().getSimpleName());
-        _efuns.put(efun, new Efun(efun, signature, implementation));
+        _efuns.put(efun, new Efun(signature, implementation));
     }
 
     public <E extends FunctionSignature & Callable> void define(String name, E efun)

@@ -32,6 +32,7 @@ import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectSource;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
+import us.terebi.lang.lpc.parser.LineMapping;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
@@ -51,11 +52,12 @@ public class ByteCodeCompiler implements Compiler
         _efuns = efuns;
     }
 
-    public void compile(ObjectSource source, ClassName name, ClassStore store) throws IOException
+    public void compile(ObjectSource source, ClassName name, ClassStore store, LineMapping lineMapping) throws IOException
     {
         ClassSpec spec = new ClassSpec(name.packageName, name.className).withSuperClass(LpcObject.class).withModifiers(ElementModifier.PUBLIC);
+        spec.withSourceCode(source.getFilename());
         ASTObjectDefinition ast = source.getSyntaxTree();
-        CompileContext context = new CompileContext(store, new CompileOptions(), ast, spec);
+        CompileContext context = new CompileContext(store, new CompileOptions(), ast, spec, lineMapping);
 
         compile(context, spec);
         store(spec, context);

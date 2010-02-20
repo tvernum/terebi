@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,32 +26,32 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class ReadFileEfun extends AbstractEfun implements FunctionSignature, Callable
+public class CopyFileEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    //    string read_file( string file, int start_line, int number_of_lines );
+    // int cp(string src, string dst);
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
-        list.add(new ArgumentSpec("file", Types.STRING));
-        list.add(new ArgumentSpec("start_line", Types.INT));
-        list.add(new ArgumentSpec("number_of_lines", Types.INT));
+        list.add(new ArgumentSpec("src", Types.STRING));
+        list.add(new ArgumentSpec("dst", Types.STRING));
         return list;
     }
 
     public boolean acceptsLessArguments()
     {
-        return true;
+        return false;
     }
-
+    
     public LpcType getReturnType()
     {
-        return Types.STRING;
+        return Types.INT;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)

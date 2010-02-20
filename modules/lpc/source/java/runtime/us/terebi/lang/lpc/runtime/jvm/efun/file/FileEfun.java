@@ -1,6 +1,5 @@
 /* ------------------------------------------------------------------------
- * $Id$
- * Copyright 2009 Tim Vernum
+ * Copyright 2010 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +15,38 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.io;
+package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+
+import us.terebi.lang.lpc.io.Resource;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
  * 
  */
-public interface Resource
+public abstract class FileEfun extends AbstractEfun
 {
-    public Resource getChild(String name);
-    public Resource getParent();
-    public String getName();
-    public String getPath();
-    public String getParentName();
-    public boolean isFile();
-    public boolean isDirectory();
-    public boolean exists();
-    public long getSizeInBytes();
-    public InputStream read() throws IOException;
-    public OutputStream write() throws IOException;
-    public OutputStream append() throws IOException;
-    public void mkdir() throws IOException;
-    public void delete() throws IOException;
-    
-    public boolean newerThan(long mod);
+    private final GameIO _io;
+    private final StringValue _efunName;
+
+    public FileEfun()
+    {
+        super();
+        _io = GameIO.INSTANCE;
+        _efunName = new StringValue(getName());
+    }
+
+    protected Resource getResource(String name) throws IOException
+    {
+        return _io.getResource(name, ThisObjectEfun.this_object(), getEfunNameAsLpcValue());
+    }
+
+    private StringValue getEfunNameAsLpcValue()
+    {
+        return _efunName;
+    }
+
 }

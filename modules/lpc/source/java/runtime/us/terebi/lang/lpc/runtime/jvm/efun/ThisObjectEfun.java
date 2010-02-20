@@ -51,9 +51,14 @@ public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, C
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         // @TODO - This can be optimised drastically, if we assume there is no sefun overriding this_object(), and make "this_object()" a local call in LpcObject
-        ThreadContext context = RuntimeContext.obtain();
-        ObjectInstance instance = this_object(context);
+        ObjectInstance instance = this_object();
         return new ObjectValue(instance);
+    }
+
+    public static ObjectInstance this_object()
+    {
+        ThreadContext context = RuntimeContext.obtain();
+        return this_object(context);
     }
 
     public static ObjectInstance this_object(ThreadContext context)

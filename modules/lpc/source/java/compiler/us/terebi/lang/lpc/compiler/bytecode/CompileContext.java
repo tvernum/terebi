@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.compiler.bytecode;
 import org.adjective.stout.builder.ClassSpec;
 
 import us.terebi.lang.lpc.compiler.ClassStore;
+import us.terebi.lang.lpc.parser.LineMapping;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.util.collection.ArrayStack;
 import us.terebi.util.collection.Stack;
@@ -34,13 +35,15 @@ public class CompileContext
     private final ASTObjectDefinition _tree;
     private final ClassSpec _publicClass;
     private final Stack<ClassSpec> _classes;
+    private final LineMapping _lineMapping;
 
-    public CompileContext(ClassStore store, CompileOptions options, ASTObjectDefinition tree, ClassSpec classSpec)
+    public CompileContext(ClassStore store, CompileOptions options, ASTObjectDefinition tree, ClassSpec classSpec, LineMapping lineMapping)
     {
         _store = store;
         _options = options;
         _tree = tree;
         _publicClass = classSpec;
+        _lineMapping = lineMapping;
         _classes = new ArrayStack<ClassSpec>();
         _classes.push(classSpec);
     }
@@ -79,5 +82,10 @@ public class CompileContext
     {
         ClassSpec pop = _classes.pop();
         assert pop == spec;
+    }
+    
+    public LineMapping getLineMapping()
+    {
+        return _lineMapping;
     }
 }

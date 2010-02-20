@@ -1,6 +1,5 @@
 /* ------------------------------------------------------------------------
- * $Id$
- * Copyright 2009 Tim Vernum
+ * Copyright 2010 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,31 +15,15 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.io;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+package us.terebi.lang.lpc.runtime.jvm.exception;
 
 /**
  * 
  */
-public interface Resource
+public class LpcSecurityException extends LpcRuntimeException
 {
-    public Resource getChild(String name);
-    public Resource getParent();
-    public String getName();
-    public String getPath();
-    public String getParentName();
-    public boolean isFile();
-    public boolean isDirectory();
-    public boolean exists();
-    public long getSizeInBytes();
-    public InputStream read() throws IOException;
-    public OutputStream write() throws IOException;
-    public OutputStream append() throws IOException;
-    public void mkdir() throws IOException;
-    public void delete() throws IOException;
-    
-    public boolean newerThan(long mod);
+    public LpcSecurityException(String message)
+    {
+        super(message);
+    }
 }

@@ -24,6 +24,7 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
@@ -51,5 +52,7 @@ public class LpcConstants
     {
         public static final ArrayValue EMPTY = new ArrayValue(Types.MIXED_ARRAY, Collections.<LpcValue> emptyList());
     }
+    
+    public static final NilValue NIL = NilValue.INSTANCE;
 
 }

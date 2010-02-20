@@ -20,11 +20,13 @@ package us.terebi.lang.lpc.compiler;
 
 import java.io.IOException;
 
+import us.terebi.lang.lpc.parser.LineMapping;
+
 
 /**
  * 
  */
 public interface Compiler
 {
-    public void compile(ObjectSource source, ClassName name, ClassStore store) throws IOException;
+    public void compile(ObjectSource source, ClassName name, ClassStore store, LineMapping lineMapping) throws IOException;
 }

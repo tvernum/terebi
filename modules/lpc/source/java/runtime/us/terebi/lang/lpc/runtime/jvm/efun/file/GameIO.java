@@ -1,6 +1,5 @@
 /* ------------------------------------------------------------------------
- * $Id$
- * Copyright 2009 Tim Vernum
+ * Copyright 2009,2010 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,39 +15,29 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.io;
+package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 
-import us.terebi.lang.lpc.preprocessor.LexerSource;
+import us.terebi.lang.lpc.io.Resource;
+import us.terebi.lang.lpc.io.ResourceFinder;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
  * 
  */
-public class ResourceLexerSource extends LexerSource
+public class GameIO
 {
-    private final Resource _resource;
+    public static final GameIO INSTANCE = new GameIO();
 
-    public ResourceLexerSource(Resource resource) throws IOException
+    public Resource getResource(String name, ObjectInstance object, StringValue efun) throws IOException
     {
-        super(new BufferedReader(new InputStreamReader(resource.read())), true);
-        _resource = resource;
-    }
-
-    protected String getPath()
-    {
-        return _resource.getPath();
-    }
-
-    protected String getName()
-    {
-        return _resource.getName();
-    }
-
-    public String toString()
-    {
-        return getClass().getSimpleName() + "{" + _resource + "}";
+        SystemContext system = RuntimeContext.obtain().system();
+        ResourceFinder resourceFinder = system.resourceFinder();
+        Resource resource = resourceFinder.getResource(name);
+        return new GameResource(resource, object, efun);
     }
 }

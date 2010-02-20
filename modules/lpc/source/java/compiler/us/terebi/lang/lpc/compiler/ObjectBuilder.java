@@ -123,19 +123,28 @@ public class ObjectBuilder implements ObjectCompiler
 
     private CompiledObjectDefinition doCompilation(Resource resource)
     {
+        ClassName name = getOutputName(resource);
+        long mod = _store.getLastModified(name.packageName, name.className);
+        ASTObjectDefinition ast = null;
+        if (resource.newerThan(mod))
+        {
+            ast = compile(resource, name);
+        }
+
+        Class< ? extends LpcObject> cls = loadClass(ast, name);
+        CompiledDefinition<LpcObject> definition = loadObjectDefinition(resource, cls);
+
+        return definition;
+    }
+
+    private ASTObjectDefinition compile(Resource resource, ClassName name)
+    {
         ASTObjectDefinition ast = getAST(resource);
+        Source source = getSource(resource, ast);
         LineMapping lineMapping = ParserState.getState().getLineMapping();
         try
         {
-            Source source = getSource(resource, ast);
-            ClassName name = getOutputName(resource);
-            compile(source, name);
-
-            Class< ? extends LpcObject> cls = loadClass(ast, name);
-
-            CompiledDefinition<LpcObject> definition = loadObjectDefinition(resource, cls);
-
-            return definition;
+            compile(source, name, lineMapping);
         }
         catch (IOException e)
         {
@@ -153,6 +162,7 @@ public class ObjectBuilder implements ObjectCompiler
             int mappedLine = lineMapping.getLine(rawLine);
             throw new CompileException(file, mappedLine, e);
         }
+        return ast;
     }
 
     private CompiledDefinition<LpcObject> loadObjectDefinition(Resource resource, Class< ? extends LpcObject> cls)
@@ -251,10 +261,10 @@ public class ObjectBuilder implements ObjectCompiler
         }
     }
 
-    private void compile(Source source, ClassName name) throws IOException
+    private void compile(Source source, ClassName name, LineMapping lineMapping) throws IOException
     {
         long start = System.currentTimeMillis();
-        _compiler.compile(source, name, _store);
+        _compiler.compile(source, name, _store, lineMapping);
         long end = System.currentTimeMillis();
 
         if (LOG.isDebugEnabled())
@@ -286,7 +296,6 @@ public class ObjectBuilder implements ObjectCompiler
 
         String cls = dropExtension(resource.getName());
         cls = cls.replaceAll("[^A-Za-z0-9]", "_");
-
 
         return new ClassName(pkg, cls);
     }

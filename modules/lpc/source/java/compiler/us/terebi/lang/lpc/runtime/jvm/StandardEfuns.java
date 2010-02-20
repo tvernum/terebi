@@ -26,8 +26,12 @@ import java.util.Map;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.MappedEfuns;
 import us.terebi.lang.lpc.runtime.jvm.efun.*;
-import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
-import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.file.CopyFileEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.file.FileSizeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.file.ReadBytesEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.file.ReadFileEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.file.RemoveFileEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.file.WriteFileEfun;
 
 /**
  * 

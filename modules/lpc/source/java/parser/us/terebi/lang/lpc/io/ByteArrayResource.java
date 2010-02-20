@@ -54,16 +54,21 @@ public class ByteArrayResource implements Resource
         return new NoSuchResource(getParentName());
     }
 
-    public InputStream openInput()
+    public InputStream read()
     {
         return new ByteArrayInputStream(_bytes);
     }
 
-    public OutputStream openOutput() throws IOException
+    public OutputStream write() throws IOException
     {
         throw new IOException(getClass().getSimpleName() + " is read-only");
     }
-    
+
+    public OutputStream append() throws IOException
+    {
+        throw new IOException(getClass().getSimpleName() + " is read-only");
+    }
+
     public boolean exists()
     {
         return true;
@@ -72,6 +77,11 @@ public class ByteArrayResource implements Resource
     public boolean isFile()
     {
         return true;
+    }
+    
+    public boolean isDirectory()
+    {
+        return false;
     }
 
     public String toString()
@@ -89,8 +99,23 @@ public class ByteArrayResource implements Resource
         return _name;
     }
 
-    public long getSize()
+    public long getSizeInBytes()
     {
         return _bytes.length;
+    }
+
+    public void delete() throws IOException
+    {
+        throw new IOException(getClass().getSimpleName() + " is read-only");
+    }
+
+    public void mkdir() throws IOException
+    {
+        throw new IOException(getClass().getSimpleName() + " is read-only");
+    }
+
+    public boolean newerThan(long mod)
+    {
+        return true;
     }
 }

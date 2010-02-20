@@ -25,7 +25,6 @@ import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionArguments;
 import us.terebi.lang.lpc.parser.ast.ParserVisitor;
-import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.ast.TokenNode;
 import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.parser.util.BaseASTVisitor;

@@ -34,8 +34,9 @@ import org.adjective.stout.core.MethodSignature;
 import org.adjective.stout.core.Parameter;
 import org.adjective.stout.impl.MethodSignatureImpl;
 import org.adjective.stout.loop.Condition;
+import org.adjective.stout.operation.EmptyExpression;
 import org.adjective.stout.operation.Expression;
-import org.adjective.stout.operation.NothingExpression;
+import org.adjective.stout.operation.LineNumberExpression;
 import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.TryCatchSpec;
 import org.adjective.stout.operation.VM;
@@ -159,7 +160,15 @@ public class ExpressionCompiler extends BaseASTVisitor
         {
             throw new CompileException(expr, "Internal Error - No expression returned from visiting " + expr);
         }
-        return (LpcExpression) result;
+
+        LpcExpression lpcExpr = (LpcExpression) result;
+        Token token = expr.jjtGetFirstToken();
+        if (token == null)
+        {
+            return lpcExpr;
+        }
+        int line = _context.getLineMapping().getLine(token.beginLine);
+        return new LpcExpression(lpcExpr.type, new LineNumberExpression(lpcExpr.expression, line), lpcExpr.reference);
     }
 
     private LpcExpression expression(Expression expr, LpcType type)
@@ -1012,7 +1021,7 @@ public class ExpressionCompiler extends BaseASTVisitor
 
         TryCatchSpec tryCatch = VM.Statement.attempt(bodyStmt);
         String exceptionName = _scope.variables().allocateInternalVariableName();
-        ElementBuilder<Statement> storeException = VM.Statement.assignVariable(exceptionName, (Expression) new NothingExpression());
+        ElementBuilder<Statement> storeException = VM.Statement.assignVariable(exceptionName, EmptyExpression.INSTANCE);
         Expression message = VM.Expression.callMethod(VM.Expression.variable(exceptionName), LPC_RUNTIME_EXCEPTION, EXCEPTION_GET_LPC_MESSAGE);
         Expression string = makeLpcString(message);
         ElementBuilder<Statement> block = VM.Statement.block( //

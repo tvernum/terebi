@@ -22,6 +22,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -96,16 +97,16 @@ public class FileResource implements Resource
         }
     }
 
-    public InputStream openInput() throws FileNotFoundException
+    public InputStream read() throws FileNotFoundException
     {
         return new FileInputStream(_file);
     }
 
-    public OutputStream openOutput() throws FileNotFoundException
+    public OutputStream write() throws FileNotFoundException
     {
-        return new FileOutputStream(_file);
+        return new FileOutputStream(_file, false);
     }
-    
+
     public boolean exists()
     {
         return _file.exists();
@@ -127,10 +128,52 @@ public class FileResource implements Resource
                 + (_file.isFile() ? 'f' : _file.isDirectory() ? 'd' : _file.exists() ? "s" : '-')
                 + ")";
     }
-    
-    public long getSize()
+
+    public long getSizeInBytes()
     {
         return _file.length();
     }
 
+    public OutputStream append() throws IOException
+    {
+        return new FileOutputStream(_file, true);
+    }
+
+    public boolean isDirectory()
+    {
+        return _file.isDirectory();
+    }
+
+    public void delete() throws IOException
+    {
+        if (!exists())
+        {
+            throw new IOException("File " + getPath() + " does not exist");
+        }
+        if (!_file.delete())
+        {
+            throw new IOException("Cannot delete " + getPath());
+        }
+    }
+
+    public void mkdir() throws IOException
+    {
+        if (exists())
+        {
+            throw new IOException("File " + getPath() + " already exists");
+        }
+        if (!_file.mkdir())
+        {
+            throw new IOException("Cannot create directory " + getPath());
+        }
+    }
+
+    public boolean newerThan(long mod)
+    {
+        if (!exists() || mod <= 0)
+        {
+            return true;
+        }
+        return _file.lastModified() >= mod;
+    }
 }

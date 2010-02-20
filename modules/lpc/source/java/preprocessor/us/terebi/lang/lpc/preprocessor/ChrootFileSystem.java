@@ -27,59 +27,68 @@ import us.terebi.lang.lpc.preprocessor.Source;
  * A virtual filesystem implementation using java.io in a virtual
  * chroot.
  */
-public class ChrootFileSystem implements VirtualFileSystem {
-	private File	root;
+public class ChrootFileSystem implements VirtualFileSystem
+{
+    File _root;
 
-	public ChrootFileSystem(File root) {
-		this.root = root;
-	}
+    public ChrootFileSystem(File root)
+    {
+        this._root = root;
+    }
 
-	public VirtualFile getFile(String path) {
-		return new ChrootFile(path);
-	}
+    public VirtualFile getFile(String path)
+    {
+        return new ChrootFile(path);
+    }
 
-	public VirtualFile getFile(String dir, String name) {
-		return new ChrootFile(dir, name);
-	}
+    public VirtualFile getFile(String dir, String name)
+    {
+        return new ChrootFile(dir, name);
+    }
 
-	private class ChrootFile extends File implements VirtualFile {
-		private File	rfile;
+    private class ChrootFile extends File implements VirtualFile
+    {
+        public ChrootFile(String path)
+        {
+            super(path);
+        }
 
-		public ChrootFile(String path) {
-			super(path);
-		}
+        public ChrootFile(String dir, String name)
+        {
+            super(dir, name);
+        }
 
-		public ChrootFile(String dir, String name) {
-			super(dir, name);
-		}
+        /* private */
+        public ChrootFile(File dir, String name)
+        {
+            super(dir, name);
+        }
 
-		/* private */
-		public ChrootFile(File dir, String name) {
-			super(dir, name);
-		}
+        public ChrootFile getParentFile()
+        {
+            return new ChrootFile(getParent());
+        }
 
-		public ChrootFile getParentFile() {
-			return new ChrootFile(getParent());
-		}
+        public ChrootFile getChildFile(String name)
+        {
+            return new ChrootFile(this, name);
+        }
 
-		public ChrootFile getChildFile(String name) {
-			return new ChrootFile(this, name);
-		}
-
-		public Source getSource() throws IOException {
-			return new FileLexerSource(getFile(), getPath());
-		}
+        public Source getSource() throws IOException
+        {
+            return new FileLexerSource(getFile(), getPath());
+        }
 
         private File getFile()
         {
-            return new File(root, getPath());
+            return new File(_root, getPath());
         }
-        
+
         public boolean isFile()
         {
             return getFile().isFile();
         }
 
-	}
+    }
 
 }

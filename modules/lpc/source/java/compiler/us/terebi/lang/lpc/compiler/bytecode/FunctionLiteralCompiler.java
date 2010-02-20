@@ -70,6 +70,7 @@ import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.FunctionValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -189,7 +190,9 @@ public class FunctionLiteralCompiler
             MethodSignature bind = VM.Method.find(CallableSupport.class, "bindArguments", Callable.class, LpcValue[].class);
             callable = VM.Expression.callStatic(CallableSupport.class, bind, callable, array);
         }
-        return new LpcExpression(function.signature.getReturnType(), callable);
+
+        Expression value = VM.Expression.construct(VM.Method.constructor(FunctionValue.class, Callable.class), callable);
+        return new LpcExpression(function.signature.getReturnType(), value);
     }
 
     private LpcExpression compile(ExpressionNode exprNode, ExpressionCompiler compiler)

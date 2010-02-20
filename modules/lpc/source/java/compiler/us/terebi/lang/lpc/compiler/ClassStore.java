@@ -26,4 +26,5 @@ import java.io.OutputStream;
 public interface ClassStore
 {
     public OutputStream open(String packageName, String className) throws IOException;
+    public long getLastModified(String packageName, String className);
 }

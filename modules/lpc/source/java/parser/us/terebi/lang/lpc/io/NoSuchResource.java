@@ -78,12 +78,22 @@ public class NoSuchResource implements Resource
         return false;
     }
 
-    public InputStream openInput() throws IOException
+    public boolean isDirectory()
+    {
+        return false;
+    }
+
+    public InputStream read() throws IOException
     {
         throw new FileNotFoundException(getPath());
     }
-    
-    public OutputStream openOutput() throws IOException
+
+    public OutputStream write() throws IOException
+    {
+        throw new FileNotFoundException(getPath());
+    }
+
+    public OutputStream append() throws IOException
     {
         throw new FileNotFoundException(getPath());
     }
@@ -93,9 +103,24 @@ public class NoSuchResource implements Resource
         return getClass().getSimpleName() + "(" + getPath() + ")";
     }
 
-    public long getSize()
+    public long getSizeInBytes()
     {
         return 0;
+    }
+
+    public void delete() throws IOException
+    {
+        throw new FileNotFoundException(getPath());
+    }
+
+    public void mkdir() throws IOException
+    {
+        throw new FileNotFoundException(getPath());
+    }
+
+    public boolean newerThan(long mod)
+    {
+        return false;
     }
 
 }

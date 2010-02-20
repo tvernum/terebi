@@ -36,11 +36,22 @@ public class FileStore implements ClassStore
 
     public OutputStream open(String packageName, String className) throws FileNotFoundException
     {
+        File classFile = getFile(packageName, className);
+        classFile.getParentFile().mkdirs();
+        return new FileOutputStream(classFile);
+    }
+
+    private File getFile(String packageName, String className)
+    {
         String path = packageName.replace('.', '/');
         String fileName = path + '/' + className + ".class";
         File classFile = new File(_directory, fileName);
-        classFile.getParentFile().mkdirs();
-        return new FileOutputStream(classFile);
+        return classFile;
+    }
+
+    public long getLastModified(String packageName, String className)
+    {
+        return getFile(packageName, className).lastModified();
     }
 
 }

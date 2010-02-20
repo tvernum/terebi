@@ -71,6 +71,7 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
     private final String _name;
 
     private CompiledObjectInstance _master;
+    private boolean _loadingMaster;
 
     public CompiledDefinition(CompilerObjectManager manager, ScopeLookup lookup, String name, Class< ? extends T> implementation)
     {
@@ -83,6 +84,8 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         _classes = new LinkedHashMap<String, ClassDefinition>();
         _methods = new LinkedHashMap<String, CompiledMethod>();
         introspect(manager);
+        _master = null;
+        _loadingMaster = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -178,9 +181,15 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
 
     public CompiledObjectInstance getMasterInstance()
     {
+        if (_loadingMaster)
+        {
+            return null;
+        }
         if (_master == null)
         {
+            _loadingMaster = true;
             _master = newInstance(0, false, Collections.<LpcValue> emptyList());
+            _loadingMaster = false;
         }
         return _master;
     }

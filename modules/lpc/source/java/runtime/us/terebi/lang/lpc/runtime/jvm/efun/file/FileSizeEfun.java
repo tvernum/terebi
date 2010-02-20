@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
 import java.io.IOException;
 import java.util.Collections;
@@ -25,15 +25,12 @@ import java.util.List;
 import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.io.Resource;
-import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
-import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
-import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -41,10 +38,9 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 /**
  * 
  */
-public class FileSizeEfun extends AbstractEfun implements FunctionSignature, Callable
+public class FileSizeEfun extends FileEfun implements FunctionSignature, Callable
 {
     private final Logger LOG = Logger.getLogger(FileSizeEfun.class);
-
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("file", Types.STRING));
@@ -61,7 +57,8 @@ public class FileSizeEfun extends AbstractEfun implements FunctionSignature, Cal
         String name = arguments.get(0).asString();
         try
         {
-            long fs = file_size(name);
+            Resource resource = getResource(name);
+            long fs = getSizeOfFile(resource);
             return ValueSupport.intValue(fs);
         }
         catch (IOException e)
@@ -71,11 +68,8 @@ public class FileSizeEfun extends AbstractEfun implements FunctionSignature, Cal
         }
     }
 
-    public long file_size(String name) throws IOException
+    private long getSizeOfFile(Resource resource)
     {
-        SystemContext system = RuntimeContext.obtain().system();
-        ResourceFinder resourceFinder = system.resourceFinder();
-        Resource resource = resourceFinder.getResource(name);
         if (!resource.exists())
         {
             return -1;
@@ -86,7 +80,7 @@ public class FileSizeEfun extends AbstractEfun implements FunctionSignature, Cal
         }
         else
         {
-            return resource.getSize();
+            return resource.getSizeInBytes();
         }
     }
 
