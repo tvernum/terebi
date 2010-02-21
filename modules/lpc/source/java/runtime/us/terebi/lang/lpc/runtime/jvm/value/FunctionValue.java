@@ -58,5 +58,10 @@ public class FunctionValue extends AbstractValue implements LpcValue
     {
         return Types.FUNCTION;
     }
+    
+    public Callable asCallable()
+    {
+        return _function;
+    }
 
 }

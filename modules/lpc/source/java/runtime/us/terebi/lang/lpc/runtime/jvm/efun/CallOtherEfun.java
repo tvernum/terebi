@@ -28,9 +28,13 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
+import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -43,7 +47,7 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
-        list.add(new ArgumentSpec("object", Types.OBJECT));
+        list.add(new ArgumentSpec("object", Types.MIXED));
         list.add(new ArgumentSpec("method", Types.STRING));
         list.add(new ArgumentSpec("arguments", Types.MIXED, true));
         return list;
@@ -66,7 +70,22 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
         LpcValue arg2 = arguments.get(1);
         List< ? extends LpcValue> args = arguments.get(2).asList();
 
-        ObjectInstance target = arg1.asObject();
+        ObjectInstance target;
+        if (MiscSupport.isString(arg1))
+        {
+            ObjectManager objectManager = RuntimeContext.obtain().system().objectManager();
+            String objectName = arg1.asString();
+            ObjectDefinition objectDefinition = objectManager.findObject(objectName);
+            if (objectDefinition == null)
+            {
+                throw new LpcRuntimeException("No such object " + objectName);
+            }
+            target = objectDefinition.getMasterInstance();
+        }
+        else
+        {
+            target = arg1.asObject();
+        }
         String name = arg2.asString();
 
         return callOther(target, name, args);

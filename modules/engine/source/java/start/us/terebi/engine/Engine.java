@@ -34,6 +34,7 @@ import us.terebi.engine.server.TerebiServer;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
@@ -101,7 +102,7 @@ public class Engine
     private void preload(ObjectInstance master)
     {
         Apply epilogApply = new Apply(EPILOG_APPLY);
-        LpcValue epilogValue = epilogApply.invoke(master);
+        LpcValue epilogValue = epilogApply.invoke(master, LpcConstants.INT.ZERO);
         if (isNil(epilogValue))
         {
             return;
