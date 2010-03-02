@@ -36,10 +36,8 @@ import us.terebi.lang.lpc.runtime.util.Destructable;
 /**
  * 
  */
-public class CompiledObject<T extends LpcObject> implements CompiledObjectInstance
+public class CompiledObject<T extends LpcObject> extends AbstractCompiledObjectInstance implements CompiledObjectInstance
 {
-    private final CompiledObjectDefinition _definition;
-    private final long _id;
     private final Destructable<T> _object;
     private final Map<String, ? extends ObjectInstance> _parents;
     private final AttributeMap _attributes;
@@ -47,8 +45,7 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
 
     public CompiledObject(CompiledObjectDefinition definition, long id, T object, Map<String, ? extends ObjectInstance> parents)
     {
-        _definition = definition;
-        _id = id;
+        super(definition, id);
         _object = new Destructable<T>(object);
         _parents = Collections.unmodifiableMap(parents);
         _attributes = new Attributes();
@@ -70,7 +67,7 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
                 ((DestructListener) object).instanceDestructed(this);
             }
         }
-        _definition.instanceDestructed(this);
+        getDefinition().instanceDestructed(this);
         _attributes.asMap().clear();
         for (ObjectInstance parent : _parents.values())
         {
@@ -84,11 +81,6 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
         return _destructed;
     }
 
-    public CompiledObjectDefinition getDefinition()
-    {
-        return _definition;
-    }
-
     public T getImplementingObject()
     {
         return _object.get();
@@ -99,32 +91,15 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
         return _attributes;
     }
 
-    public long getId()
-    {
-        return _id;
-    }
-
     public Map<String, ? extends ObjectInstance> getInheritedObjects()
     {
         return _parents;
     }
 
-    public String getCanonicalName()
-    {
-        if (_id == 0)
-        {
-            return _definition.getName();
-        }
-        else
-        {
-            return _definition.getName() + "#" + _id;
-        }
-    }
-
     public Map<FieldDefinition, LpcValue> getFieldValues()
     {
         Map<FieldDefinition, LpcValue> values = new HashMap<FieldDefinition, LpcValue>();
-        Collection< ? extends FieldDefinition> definitions = _definition.getFields().values();
+        Collection< ? extends FieldDefinition> definitions = getDefinition().getFields().values();
         for (FieldDefinition definition : definitions)
         {
             values.put(definition, definition.getValue(this));
@@ -132,9 +107,9 @@ public class CompiledObject<T extends LpcObject> implements CompiledObjectInstan
         return values;
     }
 
-    public String toString()
+    public boolean isVirtual()
     {
-        return getCanonicalName();
+        return false;
     }
 
 }

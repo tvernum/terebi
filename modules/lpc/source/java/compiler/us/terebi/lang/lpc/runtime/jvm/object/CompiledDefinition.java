@@ -28,12 +28,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
-import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
@@ -50,42 +48,31 @@ import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
-import us.terebi.lang.lpc.runtime.util.Apply;
 
 /**
  * 
  */
-public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDefinition
+public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefinition implements CompiledObjectDefinition
 {
-    private final Logger LOG = Logger.getLogger(CompiledDefinition.class);
+    final Logger LOG = Logger.getLogger(CompiledDefinition.class);
 
-    private static final Apply CREATE = new Apply("create");
-
-    private final CompilerObjectManager _manager;
     private final ScopeLookup _lookup;
     private final Class< ? extends T> _implementation;
     private final Map<String, CompiledObjectDefinition> _inherited;
     private final Map<String, CompiledField> _fields;
     private final Map<String, ClassDefinition> _classes;
     private final Map<String, CompiledMethod> _methods;
-    private final String _name;
-
-    private CompiledObjectInstance _master;
-    private boolean _loadingMaster;
 
     public CompiledDefinition(CompilerObjectManager manager, ScopeLookup lookup, String name, Class< ? extends T> implementation)
     {
-        _manager = manager;
+        super(manager, name);
         _lookup = lookup;
-        _name = name;
         _implementation = implementation;
         _inherited = new LinkedHashMap<String, CompiledObjectDefinition>();
         _fields = new LinkedHashMap<String, CompiledField>();
         _classes = new LinkedHashMap<String, ClassDefinition>();
         _methods = new LinkedHashMap<String, CompiledMethod>();
         introspect(manager);
-        _master = null;
-        _loadingMaster = false;
     }
 
     @SuppressWarnings("unchecked")
@@ -169,64 +156,45 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         return Collections.unmodifiableMap(_classes);
     }
 
-    public CompiledObjectInstance getInheritableInstance()
-    {
-        return newInstance(0, true, Collections.<LpcValue> emptyList());
-    }
-
     public Map<String, ? extends ObjectDefinition> getInheritedObjects()
     {
         return Collections.unmodifiableMap(_inherited);
     }
 
-    public CompiledObjectInstance getMasterInstance()
+    protected CompiledObject<T> newInstance(long id, InstanceType type, Object forThis, List< ? extends LpcValue> createArguments)
     {
-        if (_loadingMaster)
-        {
-            return null;
-        }
-        if (_master == null)
-        {
-            _loadingMaster = true;
-            _master = newInstance(0, false, Collections.<LpcValue> emptyList());
-            _loadingMaster = false;
-        }
-        return _master;
-    }
-
-    private CompiledObject<T> newInstance(long id, boolean forInherit, List< ? extends LpcValue> createArguments)
-    {
-        if (id != 0 && _master == null)
+        if (id != 0)
         {
             getMasterInstance();
         }
 
-        T object = createObject();
+        T object = createObject(forThis);
 
         Map<String, ObjectInstance> parents = new HashMap<String, ObjectInstance>();
+
+        CompiledObject<T> instance = new CompiledObject<T>(this, id, object, parents);
 
         Field[] fields = object.getClass().getDeclaredFields();
         for (Field field : fields)
         {
-            InheritedObject< ? > inherited = setInheritedField(object, field);
+            InheritedObject< ? > inherited = setInheritedField(instance, field);
             if (inherited != null)
             {
                 parents.put(inherited.getName(), inherited.getObjectInstance());
             }
         }
 
-        CompiledObject<T> instance = new CompiledObject<T>(this, id, object, parents);
         object.setDefinition(this);
         object.setInstance(instance);
-        if (!forInherit)
+        if (type == InstanceType.MASTER || type == InstanceType.INSTANCE)
         {
-            objectManager().registerObject(instance);
-            CREATE.invoke(instance, createArguments);
+            register(instance);
+            create(instance, createArguments);
         }
         return instance;
     }
 
-    private InheritedObject< ? > setInheritedField(LpcObject object, Field field)
+    private InheritedObject< ? > setInheritedField(CompiledObject<T> instance, Field field)
     {
         LpcInherited annotation = field.getAnnotation(LpcInherited.class);
         if (annotation == null)
@@ -234,11 +202,11 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
             return null;
         }
         CompiledObjectDefinition definition = _inherited.get(annotation.name());
-        InheritedObject< ? > inherited = new InheritedObject<Object>(annotation.name(), definition.getImplementationClass(), definition);
+        InheritedObject< ? > inherited = new InheritedObject<Object>(annotation.name(), definition.getImplementationClass(), definition, instance);
         try
         {
             field.setAccessible(true);
-            field.set(object, inherited);
+            field.set(instance.getImplementingObject(), inherited);
         }
         catch (Exception e)
         {
@@ -247,14 +215,16 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         return inherited;
     }
 
-    private T createObject()
+    private T createObject(Object forThis)
     {
         try
         {
-            Constructor< ? extends T> constructor = _implementation.getConstructor(CompiledObjectDefinition.class);
+            Class< ? >[] interfaces = _implementation.getInterfaces();
+            assert interfaces.length == 1;
+            Constructor< ? extends T> constructor = _implementation.getConstructor(interfaces[0], CompiledObjectDefinition.class);
             synchronized (RuntimeContext.lock())
             {
-                return newInstance(constructor);
+                return newInstance(forThis, constructor);
             }
         }
         catch (LpcRuntimeException e)
@@ -267,11 +237,11 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         }
     }
 
-    private T newInstance(Constructor< ? extends T> constructor) throws Throwable
+    private T newInstance(Object forThis, Constructor< ? extends T> constructor) throws Throwable
     {
         try
         {
-            return constructor.newInstance(this);
+            return constructor.newInstance(forThis, this);
         }
         catch (InvocationTargetException e)
         {
@@ -284,51 +254,13 @@ public class CompiledDefinition<T extends LpcObject> implements CompiledObjectDe
         return Collections.unmodifiableMap(_methods);
     }
 
-    public CompiledObject<T> newInstance(List< ? extends LpcValue> arguments)
-    {
-        return newInstance(objectManager().allocateObjectIdentifier(), false, arguments);
-    }
-
-    private CompilerObjectManager objectManager()
-    {
-        CompilerObjectManager objectManager = _lookup.objectManager();
-        if (objectManager == null)
-        {
-            LOG.error("No object manager in " + this + " (" + getClass() + ")");
-            LOG.info("Name is " + _name);
-            LOG.info("Implementation is " + _implementation);
-            LOG.info("Lookup is " + _lookup + " (" + _lookup.getClass() + ")");
-            throw new IllegalStateException("No object manager in " + this);
-        }
-        return objectManager;
-    }
-
     public Map<String, ? extends FieldDefinition> getFields()
     {
         return Collections.unmodifiableMap(_fields);
     }
 
-    public String getName()
-    {
-        return _name;
-    }
-
     public String toString()
     {
-        return getClass().getSimpleName() + "{" + _name + ":" + _implementation + "}";
-    }
-
-    public void instanceDestructed(ObjectInstance instance)
-    {
-        if (instance == _master)
-        {
-            _master = null;
-        }
-        _manager.instanceDestructed(instance);
-    }
-
-    public String getBaseName()
-    {
-        return FilenameUtils.getBaseName(getName());
+        return getClass().getSimpleName() + "{" + getName() + ":" + _implementation + "}";
     }
 }

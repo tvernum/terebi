@@ -166,3 +166,14 @@ public string str_xyzzy()
 }
 
 
+public string str_abc()
+{
+    string str = "";
+    string * arr = ({ "a", "b", "c" , "d" , "e" });
+    foreach ( string e in arr )
+    {
+        str += e;
+        if(e == "c") break;
+    }
+    return str;
+}

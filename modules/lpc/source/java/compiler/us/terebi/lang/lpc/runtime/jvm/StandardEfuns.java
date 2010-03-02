@@ -25,13 +25,126 @@ import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.MappedEfuns;
-import us.terebi.lang.lpc.runtime.jvm.efun.*;
+import us.terebi.lang.lpc.runtime.jvm.efun.AllocateEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.AllocateMappingEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ArraypEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.BindEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.BufferpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.CallOtherEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.CallStackEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ClasspEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.CloneObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ClonepEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.CreateDirectoryEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.CtimeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.DebugInfoEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.DebugMessageEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.DestructEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ErrorEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.EvaluateEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ExecEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FetchVariableEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FileNameEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FilterEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FilterMappingEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FindLivingEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FindObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FindPlayerEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FlushMessagesEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FunctionExistsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FunctionOwnerEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FunctionpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.FunctionsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.GetDirectoryInfoEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.GetElapsedExecTimeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.GetMaxExecTimeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.InheritListEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.InheritsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.IntpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.KeysEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.LivingEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.LivingsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.LoadObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.LocaltimeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MapArrayEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MapDeleteEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MapEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MapMappingEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MappEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MasterEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MatchPathEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MemberArrayEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.MessageEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.NoOpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.NullpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ObjectpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ObjectsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.PreviousObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.QueryIdleEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.QueryIpNameEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.QueryIpNumberEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.QueryPrivsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.QuerySnoopEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.QuerySnoopingEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.RandomEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.RenameEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.SetMaxExecTimeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ShutdownEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.SizeofEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.SnoopEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.SortArrayEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.StoreVariableEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.StringpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.TerminalColourEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.TimeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ToFloatEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ToIntEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.TrimEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.TypeofEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.UniqueArrayEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.UserpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.UsersEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ValuesEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.VirtualpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.WriteEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.action.AddActionEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.action.CommandEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.action.CommandsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.action.EnableCommandsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.action.QueryVerbEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.action.SetLivingNameEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.callout.CallOutEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.callout.CallOutInfoEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.callout.RemoveCallOutEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.environment.EnvironmentEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.environment.InventoryEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.environment.MoveObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.environment.PresentEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.CopyFileEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.FileSizeEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.ReadBytesEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.ReadFileEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.RemoveFileEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.WriteFileEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.heartbeat.HeartBeatsEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.heartbeat.QueryHeartBeatEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.heartbeat.SetHeartBeatEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.CapitalizeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.ExplodeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.ImplodeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.LowerCaseEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.PluralizeEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.RegexpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.RepeatStringEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.ReplaceStringEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.SprintfEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.SscanfEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.StrcmpEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.StrlenEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.StrsrchEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.string.UpperCaseEfun;
 
 /**
  * 
@@ -53,6 +166,7 @@ public class StandardEfuns
         public static final Efun strlen = new StrlenEfun();
         public static final Efun sscanf = new SscanfEfun();
         public static final Efun sprintf = new SprintfEfun();
+        public static final Efun strcmp  = new StrcmpEfun();
         public static final Efun strsrch = new StrsrchEfun();
         public static final Efun replace_string = new ReplaceStringEfun();
         public static final Efun repeat_string = new RepeatStringEfun();
@@ -104,6 +218,8 @@ public class StandardEfuns
         public static final Efun destruct = new DestructEfun();
         public static final Efun clonep = new ClonepEfun();
         public static final Efun virtualp = new VirtualpEfun();
+        public static final Efun store_variable = new StoreVariableEfun();
+        public static final Efun fetch_variable = new FetchVariableEfun();
     }
 
     public static class CLASS
@@ -122,6 +238,7 @@ public class StandardEfuns
         public static final Efun present = new PresentEfun();
         public static final Efun all_inventory = new InventoryEfun(false);
         public static final Efun deep_inventory = new InventoryEfun(true);
+        public static final Efun move_object = new MoveObjectEfun();
     }
 
     public static class INTERACTIVE
@@ -140,6 +257,7 @@ public class StandardEfuns
         public static final Efun snoop = new SnoopEfun();
         public static final Efun query_snoop = new QuerySnoopEfun();
         public static final Efun query_snooping = new QuerySnoopingEfun();
+        public static final Efun query_idle= new QueryIdleEfun();
     }
 
     public static class MATH
@@ -155,6 +273,7 @@ public class StandardEfuns
     {
         public static final Efun call_out = new CallOutEfun();
         public static final Efun call_out_info = new CallOutInfoEfun();
+        public static final Efun remove_call_out = new RemoveCallOutEfun();
         public static final Efun call_other = new CallOtherEfun();
         public static final Efun functions = new FunctionsEfun();
         public static final Efun function_exists = new FunctionExistsEfun();
@@ -164,6 +283,9 @@ public class StandardEfuns
         public static final Efun bind = new BindEfun();
         public static final Efun function_owner = new FunctionOwnerEfun();
         public static final Efun call_stack = new CallStackEfun();
+        public static final Efun set_heart_beat = new SetHeartBeatEfun();
+        public static final Efun query_heart_beat = new QueryHeartBeatEfun();
+        public static final Efun heart_beats = new HeartBeatsEfun();
     }
 
     public static class FILE
@@ -192,10 +314,20 @@ public class StandardEfuns
         public static final Efun query_privs = new QueryPrivsEfun();
         public static final Efun dump_file_descriptors = new NoOpEfun(LpcConstants.STRING.BLANK);
         public static final Efun reclaim_objects = new NoOpEfun(LpcConstants.INT.ZERO);
-        
+
         public static final Efun get_max_execution_time = new GetMaxExecTimeEfun();
         public static final Efun set_max_execution_time = new SetMaxExecTimeEfun();
         public static final Efun get_elapsed_execution_time = new GetElapsedExecTimeEfun();
+    }
+
+    public static class ACTION
+    {
+        public static final Efun query_verb = new QueryVerbEfun();
+        public static final Efun add_action = new AddActionEfun();
+        public static final Efun enable_commands = new EnableCommandsEfun();
+        public static final Efun command = new CommandEfun();
+        public static final Efun commands = new CommandsEfun();
+        public static final Efun set_living_name = new SetLivingNameEfun();
     }
 
     public static class NET
@@ -226,7 +358,7 @@ public class StandardEfuns
             {
                 populate(_efuns, MISC.class);
                 populate(_efuns, STRING.class);
-                populate(_efuns, OBJECT.class);
+                populate(_efuns, OBJECT.class); 
                 populate(_efuns, CLASS.class);
                 populate(_efuns, BUFFER.class);
                 populate(_efuns, ENVIRONMENT.class);
@@ -236,6 +368,7 @@ public class StandardEfuns
                 populate(_efuns, CALLS.class);
                 populate(_efuns, FILE.class);
                 populate(_efuns, SYSTEM.class);
+                populate(_efuns, ACTION.class);
                 populate(_efuns, NET.class);
             }
         }

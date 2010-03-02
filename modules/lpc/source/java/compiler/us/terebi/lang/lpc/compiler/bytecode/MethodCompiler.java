@@ -86,19 +86,29 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
         }
         support.declareParameters();
 
+        Modifier[] modifiers = super.getModifiers(Kind.METHOD).toArray(MODIFIER_ARRAY);
+        LpcType type = getType();
         String name = support.getMethodName();
+        List< ? extends ArgumentDefinition> arguments = support.getArgumentDefinitions();
+        List< ? extends ElementBuilder< ? extends Statement>> body = buildBody(support);
+
+        MethodSpec method = buildMethodSpec(modifiers, type, name, arguments, body);
+
+        return method;
+    }
+
+    public static MethodSpec buildMethodSpec(Modifier[] modifiers, LpcType type, String name, List< ? extends ArgumentDefinition> arguments,
+            List< ? extends ElementBuilder< ? extends Statement>> body)
+    {
         MethodSpec method = new MethodSpec(name);
         method.withModifiers(ElementModifier.PUBLIC).withReturnType(LpcValue.class);
 
-        Modifier[] modifiers = super.getModifiers(Kind.METHOD).toArray(MODIFIER_ARRAY);
-        method.withAnnotation(new AnnotationSpec(LpcMember.class).withRuntimeVisibility(true).withAttribute("name", name).withAttribute(
-                "modifiers", modifiers));
+        method.withAnnotation(new AnnotationSpec(LpcMember.class).withRuntimeVisibility(true).withAttribute("name", name).withAttribute("modifiers",
+                modifiers));
 
-        LpcType type = getType();
         AnnotationSpec typeAnnotation = getMemberTypeAnnotation(type);
         method.withAnnotation(typeAnnotation);
 
-        List< ? extends ArgumentDefinition> arguments = support.getArgumentDefinitions();
         ParameterSpec[] parameters = new ParameterSpec[arguments.size()];
 
         for (int i = 0; i < arguments.size(); i++)
@@ -119,8 +129,7 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
         }
         method.withParameters(parameters);
 
-        method.withBody(buildBody(support));
-
+        method.withBody(body);
         return method;
     }
 

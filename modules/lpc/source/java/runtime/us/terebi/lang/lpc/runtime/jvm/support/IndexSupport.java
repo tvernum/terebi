@@ -88,7 +88,7 @@ public class IndexSupport
 
     public static LpcReference index(LpcReference element, LpcValue startIndex, boolean startReverse, LpcValue endIndex, boolean endReverse)
     {
-        LpcType type = element.getType();
+        LpcType type = element.get().getActualType();
         if (Types.STRING.equals(type))
         {
             return new StringSubstring(element, new Index(startIndex, startReverse), new Index(endIndex, endReverse));
@@ -100,11 +100,18 @@ public class IndexSupport
         throw new UnsupportedOperationException("index (" + type + ") - Not implemented");
     }
 
-    @SuppressWarnings("unused")
-    public static LpcValue index(LpcValue element, LpcValue startIndex, boolean startReverse, LpcValue endElement, boolean endReverse)
+    public static LpcValue index(LpcValue element, LpcValue startIndex, boolean startReverse, LpcValue endIndex, boolean endReverse)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        LpcType type = element.getActualType();
+        if (Types.STRING.equals(type))
+        {
+            return StringSubstring.substring(element, new Index(startIndex, startReverse), new Index(endIndex, endReverse));
+        }
+        if (type.getArrayDepth() > 0)
+        {
+            return SubArray.subArray(element, new Index(startIndex, startReverse), new Index(endIndex, endReverse));
+        }
+        throw new UnsupportedOperationException("index (" + type + ") - Not implemented");
     }
 
 }

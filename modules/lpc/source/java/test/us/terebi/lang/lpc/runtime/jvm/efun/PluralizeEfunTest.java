@@ -20,6 +20,8 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 
 import org.junit.Test;
 
+import us.terebi.lang.lpc.runtime.jvm.efun.string.PluralizeEfun;
+
 import static org.junit.Assert.assertEquals;
 
 

@@ -17,6 +17,9 @@
 
 package us.terebi.lang.lpc.compiler.bytecode;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import org.adjective.stout.core.UnresolvedType;
 
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
@@ -72,6 +75,16 @@ public class InnerClassScopeLookup implements ScopeLookup
     public VariableLookup variables()
     {
         return _variables;
+    }
+
+    public ObjectDefinition getInherit(String name)
+    {
+        return null;
+    }
+
+    public Collection<String> getInheritNames()
+    {
+        return Collections.emptySet();
     }
 
 }

@@ -17,6 +17,9 @@
 
 package us.terebi.lang.lpc.compiler.bytecode;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
 import org.adjective.stout.builder.ClassSpec;
 
 import us.terebi.lang.lpc.compiler.ClassStore;
@@ -36,14 +39,19 @@ public class CompileContext
     private final ClassSpec _publicClass;
     private final Stack<ClassSpec> _classes;
     private final LineMapping _lineMapping;
+    private final List<Pattern> _debugPatterns;
+    private final boolean _timeCheck;
 
-    public CompileContext(ClassStore store, CompileOptions options, ASTObjectDefinition tree, ClassSpec classSpec, LineMapping lineMapping)
+    public CompileContext(ClassStore store, CompileOptions options, ASTObjectDefinition tree, ClassSpec classSpec, LineMapping lineMapping,
+            List<Pattern> debugPatterns, boolean timeCheck)
     {
         _store = store;
         _options = options;
         _tree = tree;
         _publicClass = classSpec;
         _lineMapping = lineMapping;
+        _debugPatterns = debugPatterns;
+        _timeCheck = timeCheck;
         _classes = new ArrayStack<ClassSpec>();
         _classes.push(classSpec);
     }
@@ -83,9 +91,19 @@ public class CompileContext
         ClassSpec pop = _classes.pop();
         assert pop == spec;
     }
-    
+
     public LineMapping getLineMapping()
     {
         return _lineMapping;
+    }
+
+    public List<Pattern> getDebugPatterns()
+    {
+        return _debugPatterns;
+    }
+
+    public boolean isTimeCheckEnabled()
+    {
+        return _timeCheck;
     }
 }

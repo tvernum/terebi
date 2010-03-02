@@ -26,6 +26,7 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -52,8 +53,8 @@ public class VirtualpEfun extends AbstractEfun implements FunctionSignature, Cal
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO Virtual objects not implemented yet
-        return getValue(false);
+        ObjectInstance object = arguments.get(0).asObject();
+        return getValue(object.isVirtual());
     }
 
 }

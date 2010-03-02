@@ -18,6 +18,8 @@
         <do-in-module module="plugin.interactive" target="@{target}" />
         <do-in-module module="plugin.crypt"       target="@{target}" />
         <do-in-module module="plugin.compat"      target="@{target}" />
+        <do-in-module module="plugin.parser"      target="@{target}" />
+        <do-in-module module="plugin.ed"          target="@{target}" />
     </sequential>
   </macrodef>
 

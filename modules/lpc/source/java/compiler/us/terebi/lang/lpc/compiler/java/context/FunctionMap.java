@@ -28,13 +28,15 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 /**
  * 
  */
-public class FunctionMap implements Map<String, FunctionSignature>
+public class FunctionMap<T> implements Map<String, FunctionSignature>
 {
     private final Map<String, FunctionSignature> _map;
+    private final Map<String, T> _secondary;
 
     public FunctionMap()
     {
         _map = new HashMap<String, FunctionSignature>();
+        _secondary = new HashMap<String, T>();
     }
 
     public FunctionMap(Map<String, ? extends FunctionSignature> signatures)
@@ -93,6 +95,12 @@ public class FunctionMap implements Map<String, FunctionSignature>
         return _map.put(key, value);
     }
 
+    public void putAll(FunctionMap<T> t)
+    {
+        _map.putAll(t._map);
+        _secondary.putAll(t._secondary);
+    }
+
     public void putAll(Map< ? extends String, ? extends FunctionSignature> t)
     {
         _map.putAll(t);
@@ -111,6 +119,17 @@ public class FunctionMap implements Map<String, FunctionSignature>
     public Collection<FunctionSignature> values()
     {
         return _map.values();
+    }
+
+    public void put(String name, FunctionSignature signature, T secondary)
+    {
+        put(name, signature);
+        _secondary.put(name, secondary);
+    }
+
+    public T getSecondary(String name)
+    {
+        return _secondary.get(name);
     }
 
 }

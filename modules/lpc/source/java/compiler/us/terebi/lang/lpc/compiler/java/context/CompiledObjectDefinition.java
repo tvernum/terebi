@@ -34,7 +34,8 @@ public interface CompiledObjectDefinition extends ObjectDefinition, ObjectInstan
     public Class<?> getImplementationClass(); 
     public CompiledObjectInstance getMasterInstance();
     public CompiledObjectInstance newInstance(List<? extends LpcValue> arguments);
-    public CompiledObjectInstance getInheritableInstance();
+    public CompiledObjectInstance getInheritableInstance(ObjectInstance forInstance);
+    public CompiledObjectInstance getPrototypeInstance();
     public Map<String, ? extends CompiledMethodDefinition> getMethods();
     public String getBaseName();
 }

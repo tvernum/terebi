@@ -36,4 +36,5 @@ public interface ObjectInstance extends UserTypeInstance
     public String getCanonicalName();
     public void destruct();
     public boolean isDestructed();
+    public boolean isVirtual();
 }

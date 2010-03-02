@@ -36,39 +36,28 @@ public class CompileOptions
         this( //
                 config.getFile(ConfigNames.COMPILE_OUTPUT, Config.FileType.EXISTING_DIRECTORY), //
                 config.getPath(ConfigNames.COMPILE_INCLUDE_DIRECTORIES, mudlib.root(), Config.FileType.EXISTING_DIRECTORY), //
-                config.getPath(ConfigNames.COMPILE_AUTO_INCLUDE, mudlib.root(), Config.FileType.EXISTING_FILE));
+                config.getPath(ConfigNames.COMPILE_AUTO_INCLUDE, mudlib.root(), Config.FileType.EXISTING_FILE), //
+                config.getStrings(ConfigNames.COMPILE_DEBUG) //        
+        );
 
     }
 
-    public CompileOptions(File javaOutputDirectory, File[] include, File[] autoInclude)
+    public CompileOptions(File javaOutputDirectory, File[] include, File[] autoInclude, String[] debugPatterns)
     {
         _javaOutputDirectory = javaOutputDirectory;
-        _debugPatterns = new ArrayList<Pattern>();
         _includeDirectories = include;
         _autoIncludeFiles = autoInclude;
+        _debugPatterns = new ArrayList<Pattern>(debugPatterns.length);
+        for (String pattern : debugPatterns)
+        {
+            _debugPatterns.add(Pattern.compile(pattern));
+        }
         _preprocessorDefinitions = new HashMap<String, String>();
     }
 
     public File compilerOutputDirectory()
     {
         return _javaOutputDirectory;
-    }
-
-    public boolean isDebugEnabled(String file)
-    {
-        for (Pattern pattern : _debugPatterns)
-        {
-            if (pattern.matcher(file).matches())
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public void enableDebug(Pattern pattern)
-    {
-        _debugPatterns.add(pattern);
     }
 
     public File[] includeDirectories()
@@ -110,6 +99,11 @@ public class CompileOptions
     public void defineTrue(String word)
     {
         defineLong(word, 1);
+    }
+    
+    public List<Pattern> getDebugPatterns()
+    {
+        return _debugPatterns;
     }
 
 }

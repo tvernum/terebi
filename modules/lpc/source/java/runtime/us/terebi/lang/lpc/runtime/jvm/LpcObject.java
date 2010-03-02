@@ -39,12 +39,12 @@ public class LpcObject extends LpcRuntimeSupport
 
     public LpcObject()
     {
-        this(null, null);
+        this((CompiledObjectDefinition) null, (CompiledObjectInstance) null);
     }
 
     public LpcObject(CompiledObjectDefinition definition)
     {
-        this(definition, null);
+        this(definition, (CompiledObjectInstance) null);
     }
 
     public LpcObject(CompiledObjectDefinition definition, CompiledObjectInstance instance)

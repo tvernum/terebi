@@ -26,7 +26,9 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -44,10 +46,24 @@ public class FileNameEfun extends AbstractEfun implements FunctionSignature, Cal
         return Types.STRING;
     }
 
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
+
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        ObjectInstance obj;
+        if (arguments.isEmpty())
+        {
+            obj = ThisObjectEfun.this_object();
+        }
+        else
+        {
+            obj = arguments.get(0).asObject();
+        }
+        String name = obj.getCanonicalName();
+        return new StringValue(name);
     }
 
 }

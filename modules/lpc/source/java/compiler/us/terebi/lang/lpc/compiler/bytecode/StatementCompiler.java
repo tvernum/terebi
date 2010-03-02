@@ -254,11 +254,11 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
         ElementBuilder<Condition> condition = getLoopCondition(exprNode);
 
         List<ElementBuilder< ? extends Statement>> body = new ArrayList<ElementBuilder< ? extends Statement>>();
-        StatementResult result = compileStatement(stmtNode, body);
+        compileStatement(stmtNode, body);
 
         DoWhileLoopSpec loop = VM.Condition.doWhile().withCondition(condition).withBody(body);
         _statements.add(loop);
-        return loopReturn(result);
+        return StatementResult.NON_TERMINAL;
     }
 
     protected StatementResult visitFor(ASTLoopStatement node)
@@ -271,12 +271,12 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
         ElementBuilder<Statement> increment = VM.Statement.ignore(processExpression(node.jjtGetChild(2)).expression);
 
         List<ElementBuilder< ? extends Statement>> body = new ArrayList<ElementBuilder< ? extends Statement>>();
-        StatementResult result = compileStatement((StatementNode) node.jjtGetChild(3), body);
+        compileStatement((StatementNode) node.jjtGetChild(3), body);
 
         ForLoopSpec loop = VM.Condition.forLoop().withInitialiser(initialiser).withCondition(condition).withIncrement(increment).withBody(body);
 
         _statements.add(loop);
-        return loopReturn(result);
+        return StatementResult.NON_TERMINAL;
     }
 
     protected StatementResult visitForeach(ASTFullType typeNode1, ASTIdentifier identNode1, ASTFullType typeNode2, ASTIdentifier identNode2,
@@ -309,7 +309,7 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
         {
             TypeSupport.checkType(expr, collection.type, Types.MIXED_ARRAY, Types.STRING);
             iterable = VM.Expression.callMethod(collection.expression, LpcValue.class, VALUE_AS_LIST);
-            assignVariable(body, ident1, VM.Expression.variable(var));
+            assignVariable(body, ident1, VM.Expression.cast(ByteCodeConstants.LPC_VALUE, VM.Expression.variable(var)));
         }
         else
         {
@@ -321,13 +321,13 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
             assignVariable(body, ident2, VM.Expression.callMethod(VM.Expression.variable(var), Map.Entry.class, MAP_ENTRY_GET_VALUE));
         }
 
-        StatementResult result = compileStatement(bodyNode, body);
+        compileStatement(bodyNode, body);
         _scope.variables().popScope();
 
         IterableLoopSpec loop = VM.Condition.iterable().withVariableName(var).withIterable(iterable).withBody(body);
         _statements.add(loop);
 
-        return loopReturn(result);
+        return StatementResult.NON_TERMINAL;
     }
 
     protected StatementResult visitWhile(ASTLoopStatement node)
@@ -336,30 +336,18 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
         StatementNode stmtNode = (StatementNode) node.jjtGetChild(1);
 
         List<ElementBuilder< ? extends Statement>> body = new ArrayList<ElementBuilder< ? extends Statement>>();
-        StatementResult result = compileStatement(stmtNode, body);
+        compileStatement(stmtNode, body);
         ElementBuilder<Condition> condition = getLoopCondition(exprNode);
         WhileLoopSpec loop = VM.Condition.whileLoop().withCondition(condition).withBody(body);
 
         _statements.add(loop);
 
-        return loopReturn(result);
+        return StatementResult.NON_TERMINAL;
     }
 
     private ElementBuilder<Condition> getLoopCondition(Node exprNode)
     {
         return VM.Condition.expression(ExpressionCompiler.toBoolean(processExpression(exprNode)));
-    }
-
-    private StatementResult loopReturn(StatementResult result)
-    {
-        if (result.termination == StatementResult.TerminationType.RETURN)
-        {
-            return result;
-        }
-        else
-        {
-            return StatementResult.NON_TERMINAL;
-        }
     }
 
     public StatementResult visit(ASTOptVariableOrExpression node, Object data)

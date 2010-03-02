@@ -94,6 +94,10 @@ public class ObjectBuilder implements ObjectCompiler
     public CompiledObjectDefinition compile(String objectSource)
     {
         Resource resource = getResource(objectSource);
+        if (!resource.exists())
+        {
+            return null;
+        }
         return compile(resource);
     }
 
@@ -128,7 +132,12 @@ public class ObjectBuilder implements ObjectCompiler
         ASTObjectDefinition ast = null;
         if (resource.newerThan(mod))
         {
+            LOG.info("Compiling " + resource + " to bytecode (" + name + ")");
             ast = compile(resource, name);
+        }
+        else
+        {
+            LOG.info("Bytecode (" + name + ") for " + resource + " is up to date");
         }
 
         Class< ? extends LpcObject> cls = loadClass(ast, name);
@@ -248,6 +257,10 @@ public class ObjectBuilder implements ObjectCompiler
             }
         }
         catch (ClassNotFoundException e)
+        {
+            throw new CompileException(ast, "Internal Error - Failed to load generated class " + fqn, e);
+        }
+        catch (ClassFormatError e)
         {
             throw new CompileException(ast, "Internal Error - Failed to load generated class " + fqn, e);
         }

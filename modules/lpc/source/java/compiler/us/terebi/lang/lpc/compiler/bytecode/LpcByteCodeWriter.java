@@ -17,16 +17,24 @@
 
 package us.terebi.lang.lpc.compiler.bytecode;
 
+import java.util.List;
+import java.util.regex.Pattern;
+
+import org.apache.log4j.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.objectweb.asm.Type;
 
+import org.adjective.stout.core.ClassDescriptor;
 import org.adjective.stout.core.MethodDescriptor;
+import org.adjective.stout.instruction.LoadConstantInstruction;
 import org.adjective.stout.instruction.MethodInstruction;
+import org.adjective.stout.operation.ConstantIntegerExpression;
 import org.adjective.stout.operation.VM;
 import org.adjective.stout.writer.ByteCodeWriter;
 
@@ -37,17 +45,40 @@ import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
  */
 public class LpcByteCodeWriter extends ByteCodeWriter
 {
+    private final Logger LOG = Logger.getLogger(LpcByteCodeWriter.class);
+
+    private final List<Pattern> _debugPatterns;
+    private final boolean _insertTimeChecks;
+    private ClassDescriptor _class;
+
+    public LpcByteCodeWriter(List<Pattern> debugPatterns, boolean insertTimeChecks)
+    {
+        _debugPatterns = debugPatterns;
+        _insertTimeChecks = insertTimeChecks;
+    }
+
     protected static final class LpcMethodVisitor implements MethodVisitor
     {
         private final MethodVisitor _delegate;
+        private final boolean _debug;
+        private final boolean _timeCheck;
+        private int _count;
+        private final ClassDescriptor _class;
+        private final MethodDescriptor _method;
 
-        public LpcMethodVisitor(MethodVisitor delegate)
+        public LpcMethodVisitor(MethodVisitor delegate, ClassDescriptor cls, MethodDescriptor method, boolean timeCheck, boolean debug)
         {
             _delegate = delegate;
+            _class = cls;
+            _method = method;
+            _timeCheck = timeCheck;
+            _debug = debug;
+            _count = 0;
         }
 
         public void visitCode()
         {
+            insertDebugPoint();
             _delegate.visitCode();
             insertTimeCheck();
         }
@@ -55,12 +86,33 @@ public class LpcByteCodeWriter extends ByteCodeWriter
         public void visitLabel(Label label)
         {
             _delegate.visitLabel(label);
+            insertDebugPoint();
             insertTimeCheck();
+        }
+
+        private void insertDebugPoint()
+        {
+            if (!_debug)
+            {
+                return;
+            }
+            new LoadConstantInstruction(_class.getPackage() + "." + _class.getName()).accept(_delegate);
+            new LoadConstantInstruction(_method.getName()).accept(_delegate);
+            ConstantIntegerExpression.getInstruction(_count).accept(_delegate);
+            MethodInstruction instruction = new MethodInstruction(Opcodes.INVOKESTATIC, Type.getInternalName(DebugPoint.class),//
+                    VM.Method.find(DebugPoint.class, "breakpoint", String.class, String.class, Integer.TYPE));
+            instruction.accept(_delegate);
+            _count++;
         }
 
         private void insertTimeCheck()
         {
-            MethodInstruction instruction = new MethodInstruction(Opcodes.INVOKESTATIC, Type.getInternalName(ExecutionTimeCheck.class), VM.Method.find(ExecutionTimeCheck.class, "check"));
+            if (!_timeCheck)
+            {
+                return;
+            }
+            MethodInstruction instruction = new MethodInstruction(Opcodes.INVOKESTATIC, Type.getInternalName(ExecutionTimeCheck.class),
+                    VM.Method.find(ExecutionTimeCheck.class, "check"));
             instruction.accept(_delegate);
         }
 
@@ -176,8 +228,41 @@ public class LpcByteCodeWriter extends ByteCodeWriter
 
     }
 
+    @Override
+    protected void begin(ClassDescriptor cls)
+    {
+        _class = cls;
+    }
+
+    @Override
     protected MethodVisitor visitMethod(ClassVisitor cv, MethodDescriptor method, String[] exceptions, String signature)
     {
-        return new LpcMethodVisitor(super.visitMethod(cv, method, exceptions, signature));
+        boolean debug = isDebug(method);
+        return new LpcMethodVisitor(super.visitMethod(cv, method, exceptions, signature), _class, method, _insertTimeChecks, debug);
+    }
+
+    private boolean isDebug(MethodDescriptor method)
+    {
+        if (_debugPatterns == null)
+        {
+            return false;
+        }
+
+        // @TODO clean this up...
+        String spec = _class.getInternalName().substring(3) + ":" + method.getName();
+        for (Pattern pattern : _debugPatterns)
+        {
+            if (pattern.matcher(spec).matches())
+            {
+                LOG.info("Enabling debug for " + _class + " " + method + " [pattern:" + pattern + "]");
+                return true;
+            }
+        }
+        return false;
+    }
+
+    protected ClassWriter createClassWriter(int flags)
+    {
+        return new LpcClassWriter(flags);
     }
 }

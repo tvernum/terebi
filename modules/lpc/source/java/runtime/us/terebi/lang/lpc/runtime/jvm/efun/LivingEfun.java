@@ -43,11 +43,16 @@ public class LivingEfun extends AbstractEfun implements FunctionSignature, Calla
     {
         return Types.INT;
     }
+    
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         // @TODO Auto-generated method stub
-        return null;
+        return getValue(false);
     }
 
 }

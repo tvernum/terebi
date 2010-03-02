@@ -23,5 +23,12 @@ echo "Config = ${CONFIG_FILE}"
 
 [ -d ${WORK_DIR} ] || mkdir ${WORK_DIR}
 
+if [ "$1" = "-d" ]
+then
+    JAVA_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=9800,server=y,suspend=n"
+else
+    JAVA_OPTS=""
+fi
+
 set -x
-java -cp ${CP} ${MAIN} ${CONFIG_FILE}
+java -cp ${CP} ${JAVA_OPTS} ${MAIN} ${CONFIG_FILE}

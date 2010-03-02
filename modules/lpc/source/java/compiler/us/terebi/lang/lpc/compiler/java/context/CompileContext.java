@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.compiler.java.context;
 
 import java.io.Closeable;
 import java.io.PrintWriter;
+import java.util.Collection;
 
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
@@ -77,6 +78,16 @@ public class CompileContext implements Closeable, ScopeLookup
     public VariableResolver variables()
     {
         return _scope.variables();
+    }
+
+    public ObjectDefinition getInherit(String name)
+    {
+        return _scope.getInherit(name);
+    }
+
+    public Collection<String> getInheritNames()
+    {
+        return _scope.getInheritNames();
     }
     
     

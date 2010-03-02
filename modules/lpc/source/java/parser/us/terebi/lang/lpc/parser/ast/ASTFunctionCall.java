@@ -30,7 +30,8 @@ public class ASTFunctionCall extends ExpressionNode
         }
         else
         {
-            return (resolution.jjtGetNumChildren() == 0) ? "" : ASTUtil.getImage(resolution);
+            Token token = resolution.jjtGetFirstToken();
+            return (token.kind == ParserConstants.SCOPE) ? "" : token.image;
         }
     }
 

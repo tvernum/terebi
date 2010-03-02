@@ -34,6 +34,7 @@ public class Types
 
     public static final LpcType MIXED = new SimpleType(Kind.MIXED);
     public static final LpcType MIXED_ARRAY = new SimpleType(Kind.MIXED, 1);
+    public static final LpcType MIXED_ARRAY_ARRAY = new SimpleType(Kind.MIXED, 2);
 
     public static final LpcType STRING = new SimpleType(Kind.STRING);
     public static final LpcType STRING_ARRAY = new SimpleType(Kind.STRING, 1);

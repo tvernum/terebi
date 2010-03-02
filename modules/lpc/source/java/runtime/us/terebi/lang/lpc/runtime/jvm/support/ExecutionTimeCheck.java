@@ -42,7 +42,7 @@ public class ExecutionTimeCheck
         }
         if (System.currentTimeMillis() > evalCheck._endTime)
         {
-            throw new EvalCostTooHighException();
+            throw new ExecutionTimeTooHighException(evalCheck._startTime, evalCheck.getAllowedTime());
         }
     }
 
@@ -117,6 +117,11 @@ public class ExecutionTimeCheck
     public long getElapsedTime()
     {
         return System.currentTimeMillis() - _startTime;
+    }
+
+    public long getAllowedTime()
+    {
+        return _endTime - _startTime;
     }
 
 }

@@ -43,7 +43,7 @@ public abstract class AbstractValue implements LpcValue
 
     protected LpcRuntimeException isNot(String kind)
     {
-        return new LpcRuntimeException(getDescription() + " is not " + kind);
+        return new LpcRuntimeException(getActualType().toString() + ' ' + getDescription() + " is not " + kind);
     }
 
     public boolean asBoolean()

@@ -21,3 +21,7 @@ public int state9()
     b = get_int();
     return a+b;
 }
+
+protected string callback() { return "inherit"; }
+
+public string str_inherit() { return call_callback() ; }

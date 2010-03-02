@@ -29,6 +29,7 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -42,6 +43,11 @@ public class InteractiveEfun extends AbstractEfun implements FunctionSignature, 
         return Collections.singletonList(new ArgumentSpec("ob", Types.OBJECT));
     }
 
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
+
     public LpcType getReturnType()
     {
         return Types.INT;
@@ -50,7 +56,7 @@ public class InteractiveEfun extends AbstractEfun implements FunctionSignature, 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        ObjectInstance instance = arguments.get(0).asObject();
+        ObjectInstance instance = (arguments.isEmpty() ? ThisObjectEfun.this_object() : arguments.get(0).asObject());
         return getValue(ObjectShell.isConnectionObject(instance));
     }
 

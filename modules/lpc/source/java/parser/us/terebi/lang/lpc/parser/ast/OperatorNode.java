@@ -18,6 +18,7 @@
 package us.terebi.lang.lpc.parser.ast;
 
 import us.terebi.lang.lpc.parser.jj.Parser;
+import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.parser.util.ASTUtil;
 
 /**
@@ -38,6 +39,11 @@ public class OperatorNode extends SimpleNode
     public String toString()
     {
         return super.toString() + " '" + ASTUtil.getImage(this) + "'";
+    }
+
+    public Token getOperator()
+    {
+        return jjtGetFirstToken();
     }
 
 }

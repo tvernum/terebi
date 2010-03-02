@@ -18,6 +18,10 @@
 
 package us.terebi.lang.lpc.compiler.java.context;
 
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 
@@ -26,7 +30,8 @@ import us.terebi.lang.lpc.runtime.ObjectDefinition;
  */
 public class BasicScopeLookup implements ScopeLookup
 {
-    protected final CompilerObjectManager _manager;
+    private final CompilerObjectManager _manager;
+    private final Map<String, ObjectDefinition> _inherit;
     protected final FunctionLookup _functions;
     protected final VariableLookup _variables;
     protected final ClassLookup _classes;
@@ -39,6 +44,7 @@ public class BasicScopeLookup implements ScopeLookup
             throw new IllegalArgumentException("No " + CompilerObjectManager.class.getSimpleName() + " supplied to " + getClass().getName());
         }
         _manager = manager;
+        _inherit = new HashMap<String, ObjectDefinition>();
         _functions = new FunctionLookup();
         _variables = new VariableLookup();
         _classes = new ClassLookup();
@@ -72,9 +78,20 @@ public class BasicScopeLookup implements ScopeLookup
 
     public void addInherit(String name, ObjectDefinition parent)
     {
+        _inherit.put(name, parent);
         _classes.addInherit(name, parent);
         _functions.addInherit(name, parent);
         _variables.addInherit(name, parent);
+    }
+
+    public ObjectDefinition getInherit(String name)
+    {
+        return _inherit.get(name);
+    }
+
+    public Collection<String> getInheritNames()
+    {
+        return _inherit.keySet();
     }
 
 }

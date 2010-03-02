@@ -64,5 +64,10 @@ public class ObjectValue extends AbstractValue implements LpcValue
     {
         return getDescription();
     }
+    
+    public String asString()
+    {
+        return _object.getCanonicalName();
+    }
 
 }

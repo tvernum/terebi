@@ -83,16 +83,12 @@ public class FilterEfun extends AbstractEfun implements FunctionSignature, Calla
 
         LpcValue func = arguments.get(1);
 
-        if (isFunction(func))
-        {
-            Callable callable = func.asCallable();
-            List< ? extends LpcValue> args = arguments.get(2).asList();
-            List< ? extends LpcValue> result = filter(list, callable, args);
-            return new ArrayValue(array.getActualType(), result);
-        }
+        Callable callable = getFunctionReference(func);
+        List< ? extends LpcValue> args = arguments.get(2).asList();
+        List< ? extends LpcValue> result = filter(list, callable, args);
+        return new ArrayValue(array.getActualType(), result);
 
         // @TODO
-        throw new UnsupportedOperationException(getName() + "(array," + func.getActualType() + ", ..) - Not implemented");
     }
 
     private List< ? extends LpcValue> filter(List<LpcValue> list, Callable function, List< ? extends LpcValue> additionalArguments)
@@ -135,8 +131,7 @@ public class FilterEfun extends AbstractEfun implements FunctionSignature, Calla
         throw new UnsupportedOperationException(getName() + "(mapping," + func.getActualType() + ", ..) - Not implemented");
     }
 
-    private Map<LpcValue, LpcValue> filter(Map<LpcValue, LpcValue> map, Callable function,
-            List< ? extends LpcValue> additionalArguments)
+    private Map<LpcValue, LpcValue> filter(Map<LpcValue, LpcValue> map, Callable function, List< ? extends LpcValue> additionalArguments)
     {
         HashMap<LpcValue, LpcValue> result = new HashMap<LpcValue, LpcValue>(map.size());
 

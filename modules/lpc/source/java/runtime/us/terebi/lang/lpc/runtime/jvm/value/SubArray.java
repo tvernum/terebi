@@ -44,10 +44,14 @@ public class SubArray implements LpcReference
 
     public LpcValue get()
     {
-        LpcValue value = _array.get();
+        return subArray(_array.get(), _start, _end);
+    }
+
+    public static ArrayValue subArray(LpcValue value, Index startIndex, Index endIndex)
+    {
         List<LpcValue> list = value.asList();
-        int start = getIndex(list, _start);
-        int end = getIndex(list, _end);
+        int start = getIndex(list, startIndex);
+        int end = getIndex(list, endIndex);
         if (start > end || start >= list.size())
         {
             return LpcConstants.ARRAY.EMPTY;
@@ -67,7 +71,7 @@ public class SubArray implements LpcReference
         return new ArrayValue(value.getActualType(), list.subList(start, end));
     }
 
-    private int getIndex(List< ? extends LpcValue> list, Index idx)
+    private static int getIndex(List< ? extends LpcValue> list, Index idx)
     {
         if (idx.index == -1)
         {

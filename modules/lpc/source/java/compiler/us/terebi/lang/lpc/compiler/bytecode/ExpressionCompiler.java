@@ -77,7 +77,6 @@ import us.terebi.lang.lpc.parser.ast.ASTLogicalAndExpression;
 import us.terebi.lang.lpc.parser.ast.ASTLogicalOrExpression;
 import us.terebi.lang.lpc.parser.ast.ASTMappingElement;
 import us.terebi.lang.lpc.parser.ast.ASTMappingLiteral;
-import us.terebi.lang.lpc.parser.ast.ASTMethod;
 import us.terebi.lang.lpc.parser.ast.ASTOptExpression;
 import us.terebi.lang.lpc.parser.ast.ASTPostfixExpression;
 import us.terebi.lang.lpc.parser.ast.ASTPostfixIncrementOperator;
@@ -495,16 +494,26 @@ public class ExpressionCompiler extends BaseASTVisitor
 
     private LpcExpression binaryExpression(SimpleNode node, String binaryFunction, boolean passMath)
     {
-        Expression[] operands = new Expression[node.jjtGetNumChildren()];
-
-        boolean integer = false;
-        boolean array = false;
-        LpcType[] types = new LpcType[operands.length];
+        LpcExpression[] operands = new LpcExpression[node.jjtGetNumChildren()];
         for (int i = 0; i < operands.length; i++)
         {
             Node child = node.jjtGetChild(i);
             LpcExpression expr = compile(child);
-            checkType(child, expr, Types.INT, Types.MIXED_ARRAY);
+            operands[i] = expr;
+        }
+        return binaryExpression(node, binaryFunction, passMath, operands);
+    }
+
+    private LpcExpression binaryExpression(SimpleNode node, String binaryFunction, boolean passMath, LpcExpression... operands)
+    {
+        boolean integer = false;
+        boolean array = false;
+        LpcType[] types = new LpcType[operands.length];
+        Expression[] expressions = new Expression[operands.length];
+        for (int i = 0; i < operands.length; i++)
+        {
+            LpcExpression expr = operands[i];
+            checkType(node, expr, Types.INT, Types.MIXED_ARRAY);
             types[i] = expr.type;
             if (Types.INT.equals(expr.type))
             {
@@ -514,7 +523,7 @@ public class ExpressionCompiler extends BaseASTVisitor
             {
                 array = true;
             }
-            operands[i] = getValue(expr);
+            expressions[i] = getValue(expr);
         }
 
         if (array && integer)
@@ -528,7 +537,7 @@ public class ExpressionCompiler extends BaseASTVisitor
             result = VM.Expression.callStatic( //
                     BinarySupport.class, //
                     VM.Method.find(BinarySupport.class, binaryFunction, MathLength.class, LpcValue[].class), //
-                    VM.Expression.getEnum(_context.options().getMath()), VM.Expression.array(LpcValue.class, operands));
+                    VM.Expression.getEnum(_context.options().getMath()), VM.Expression.array(LpcValue.class, expressions));
 
         }
         else
@@ -536,7 +545,7 @@ public class ExpressionCompiler extends BaseASTVisitor
             result = VM.Expression.callStatic( //
                     BinarySupport.class, //
                     VM.Method.find(BinarySupport.class, binaryFunction, LpcValue[].class), //
-                    VM.Expression.array(LpcValue.class, operands));
+                    VM.Expression.array(LpcValue.class, expressions));
         }
 
         return expression(result, commonType(types));
@@ -698,26 +707,25 @@ public class ExpressionCompiler extends BaseASTVisitor
     public Object visit(ASTAssignmentExpression node, Object data)
     {
         TokenNode leftNode = node.getLeftNode();
-        TokenNode opNode = node.getOperatorNode();
+        OperatorNode opNode = node.getOperatorNode();
         TokenNode rightNode = node.getRightNode();
 
         LpcExpression leftVar = compile(leftNode);
         if (!leftVar.reference)
         {
-            ASTUtil.findAncestor(ASTMethod.class, node).dump("@ ");
-            node.dump("* ");
             throw new CompileException(node, "Cannot assign to value \"" + ASTUtil.getCompleteImage(leftNode) + "\"");
         }
 
         LpcExpression rightVar = compile(rightNode);
         checkType(node, rightVar, leftVar.type);
 
-        LpcExpression operation = evaluateOperation(leftVar, opNode.jjtGetFirstToken(), rightVar);
+        LpcExpression operation = evaluateOperation(leftVar, opNode, rightVar);
         return expression(setReference(leftVar, getValue(operation)), leftVar.type);
     }
 
-    private LpcExpression evaluateOperation(LpcExpression leftVar, Token token, LpcExpression rightVar)
+    private LpcExpression evaluateOperation(LpcExpression leftVar, OperatorNode node, LpcExpression rightVar)
     {
+        Token token = node.getOperator();
         switch (token.kind)
         {
             case ParserConstants.ASSIGN:
@@ -733,11 +741,11 @@ public class ExpressionCompiler extends BaseASTVisitor
             case ParserConstants.MODULUS_ASSIGN:
                 return mathFunction("modulus", leftVar, rightVar);
             case ParserConstants.XOR_ASSIGN:
-                return binaryFunction("xor", leftVar, rightVar);
+                return binaryExpression(node, "xor", true, leftVar, rightVar);
             case ParserConstants.AND_ASSIGN:
-                return binaryFunction("and", leftVar, rightVar);
+                return binaryExpression(node, "binaryAnd", false, leftVar, rightVar);
             case ParserConstants.OR_ASSIGN:
-                return binaryFunction("or", leftVar, rightVar);
+                return binaryExpression(node, "binaryOr", false, leftVar, rightVar);
             case ParserConstants.LEFT_SHIFT_ASSIGN:
                 return binaryFunction("leftShift", leftVar, rightVar);
             case ParserConstants.RIGHT_SHIFT_ASSIGN:
@@ -1075,5 +1083,10 @@ public class ExpressionCompiler extends BaseASTVisitor
             var = compile(child);
         }
         return var;
+    }
+
+    public CompileContext getContext()
+    {
+        return _context;
     }
 }

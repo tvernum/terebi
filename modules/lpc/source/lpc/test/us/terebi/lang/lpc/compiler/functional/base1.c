@@ -23,3 +23,6 @@ private int private_int_var;
 void set_int(int i) { private_int_var = i ; }
 int get_int() { return private_int_var; }
 
+protected /* pure_virtual */ string callback();
+
+public string call_callback() { return callback() ; }

@@ -18,6 +18,8 @@
 
 package us.terebi.lang.lpc.compiler.java.context;
 
+import java.util.Collection;
+
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 
@@ -35,5 +37,7 @@ public interface ScopeLookup
     public ClassLookup classes();
 
     public void addInherit(String name, ObjectDefinition parent);
+    public Collection<String> getInheritNames();
+    public ObjectDefinition getInherit(String name);
 
 }

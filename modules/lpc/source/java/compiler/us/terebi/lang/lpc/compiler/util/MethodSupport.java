@@ -120,7 +120,7 @@ public class MethodSupport
     public void defineLocalMethod()
     {
         FunctionSignature signature = new Signature(hasModifier(Modifier.VARARGS), _returnType, _argumentDefinitions);
-        _scope.functions().defineLocalMethod(this.getMethodName(), this.getInternalName(), signature);
+        _scope.functions().defineLocalMethod(this.getMethodName(), this.getInternalName(), signature, _modifiers);
     }
 
     public VariableResolution[] declareParameters()

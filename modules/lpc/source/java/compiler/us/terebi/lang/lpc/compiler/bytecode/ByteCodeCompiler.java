@@ -19,6 +19,8 @@ package us.terebi.lang.lpc.compiler.bytecode;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.List;
+import java.util.regex.Pattern;
 
 import org.adjective.stout.builder.ClassSpec;
 import org.adjective.stout.core.ClassDescriptor;
@@ -45,19 +47,23 @@ public class ByteCodeCompiler implements Compiler
 {
     private final CompilerObjectManager _objectManager;
     private final Efuns _efuns;
+    private final List<Pattern> _debugPatterns;
+    private final boolean _insertTimeCheck;
 
-    public ByteCodeCompiler(CompilerObjectManager objectManager, Efuns efuns)
+    public ByteCodeCompiler(CompilerObjectManager objectManager, Efuns efuns, List<Pattern> debugPatterns, boolean insertTimeCheck)
     {
         _objectManager = objectManager;
         _efuns = efuns;
+        _debugPatterns = debugPatterns;
+        _insertTimeCheck = insertTimeCheck;
     }
 
     public void compile(ObjectSource source, ClassName name, ClassStore store, LineMapping lineMapping) throws IOException
     {
-        ClassSpec spec = new ClassSpec(name.packageName, name.className).withSuperClass(LpcObject.class).withModifiers(ElementModifier.PUBLIC);
+        ClassSpec spec = ClassSpec.newClass(name.packageName, name.className).withSuperClass(LpcObject.class).withModifiers(ElementModifier.PUBLIC);
         spec.withSourceCode(source.getFilename());
         ASTObjectDefinition ast = source.getSyntaxTree();
-        CompileContext context = new CompileContext(store, new CompileOptions(), ast, spec, lineMapping);
+        CompileContext context = new CompileContext(store, new CompileOptions(), ast, spec, lineMapping, _debugPatterns, _insertTimeCheck);
 
         compile(context, spec);
         store(spec, context);
@@ -77,13 +83,13 @@ public class ByteCodeCompiler implements Compiler
 
     public static ClassDescriptor store(ClassSpec spec, CompileContext context) throws IOException
     {
-        return store(spec, context.store());
+        return store(spec, context.store(), context.getDebugPatterns(), context.isTimeCheckEnabled());
     }
 
-    public static ClassDescriptor store(ClassSpec spec, ClassStore store) throws IOException
+    public static ClassDescriptor store(ClassSpec spec, ClassStore store, List<Pattern> debugPatterns, boolean execTimeCheck) throws IOException
     {
         ClassDescriptor cls = spec.create();
-        ByteCodeWriter writer = new LpcByteCodeWriter();
+        ByteCodeWriter writer = new LpcByteCodeWriter(debugPatterns, execTimeCheck);
         byte[] bytes = writer.write(cls);
         OutputStream stream = store.open(cls.getPackage(), cls.getName());
         stream.write(bytes);

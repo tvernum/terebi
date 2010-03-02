@@ -24,6 +24,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -193,6 +194,12 @@ public class ObjectSerializer
         }
     }
 
+    public static LpcValue restore(ObjectInstance object, String value)
+    {
+        LiteralParser parser = new LiteralParser(object);
+        return restore(value, parser);
+    }
+
     private void restore(ObjectInstance object, BufferedReader reader, boolean zeroNoSave) throws IOException
     {
         if (zeroNoSave)
@@ -208,7 +215,11 @@ public class ObjectSerializer
             {
                 break;
             }
-            int eq = line.indexOf('=');
+            int eq = line.indexOf(' ');
+            if (eq == -1)
+            {
+                eq = line.indexOf('=');
+            }
             if (eq == -1)
             {
                 LOG.warn("Invalid line (" + line + ") in save file " + _file);
@@ -224,7 +235,7 @@ public class ObjectSerializer
         }
     }
 
-    private LpcValue restore(String text, LiteralParser parser)
+    private static LpcValue restore(String text, LiteralParser parser)
     {
         try
         {
@@ -256,12 +267,27 @@ public class ObjectSerializer
     {
         writer.write(prefix);
         writer.write(field.getName());
-        writer.write('=');
+        writer.write(' ');
         writeValue(writer, value);
         writer.write('\n');
     }
 
-    private void writeValue(Writer writer, LpcValue value) throws IOException
+    public static String save(LpcValue value)
+    {
+        StringWriter writer = new StringWriter();
+        try
+        {
+            writeValue(writer, value);
+        }
+        catch (IOException e)
+        {
+            LOG.info("Cannot write variable: " + value, e);
+            return null;
+        }
+        return writer.toString();
+    }
+
+    private static void writeValue(Writer writer, LpcValue value) throws IOException
     {
         if (isInt(value))
         {

@@ -93,7 +93,7 @@ public abstract class AbstractType implements LpcType
             case EXTENSION:
                 return "extension " + getExtensionType().getName() + StringUtil.repeat("*", getArrayDepth());
             default:
-                return getKind().toString() + StringUtil.repeat("*", getArrayDepth());
+                return getKind().toString().toLowerCase() + StringUtil.repeat("*", getArrayDepth());
         }
     }
 

@@ -20,11 +20,14 @@ package us.terebi.lang.lpc.compiler.bytecode;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
+import org.adjective.stout.builder.ClassSpec;
 import org.adjective.stout.core.ConstructorSignature;
 import org.adjective.stout.core.ElementModifier;
 import org.adjective.stout.core.ExtendedType;
 import org.adjective.stout.core.MethodSignature;
+import org.adjective.stout.core.SimpleType;
 import org.adjective.stout.core.UnresolvedType;
 import org.adjective.stout.impl.MethodSignatureImpl;
 import org.adjective.stout.operation.Expression;
@@ -49,6 +52,7 @@ import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
@@ -158,11 +162,27 @@ public class FunctionCallCompiler extends BaseASTVisitor
             }
         }
 
+        return callFunction(function, arguments, _expressionCompiler.getContext());
+    }
+
+    public static Expression callFunction(FunctionReference function, Expression[] arguments, CompileContext context)
+    {
         MethodSignature signature = getSignature(function);
         if (function.isLocalMethod())
         {
-            Expression call = VM.Expression.callInherited(signature, arguments);
-            return call;
+            if (requiresDispatch(function.modifiers))
+            {
+                ClassSpec spec = context.currentClass();
+                SimpleType ifc = ClassBuilder.getInterfaceType(spec);
+                String self = ClassBuilder.getThisFieldName(spec);
+                Expression call = VM.Expression.callMethod(VM.Expression.getField(self, ifc), ifc, signature, arguments);
+                return call;
+            }
+            else
+            {
+                Expression call = VM.Expression.callInherited(signature, arguments);
+                return call;
+            }
         }
 
         Pair<Expression, UnresolvedType> target = findTarget(function);
@@ -170,20 +190,29 @@ public class FunctionCallCompiler extends BaseASTVisitor
         return call;
     }
 
-    private Pair<Expression, UnresolvedType> findTarget(FunctionReference function)
+    public static boolean requiresDispatch(Set< ? extends Modifier> modifiers)
+    {
+        if (modifiers.contains(Modifier.PRIVATE) || modifiers.contains(Modifier.NOMASK))
+        {
+            return false;
+        }
+        return true;
+    }
+
+    private static Pair<Expression, UnresolvedType> findTarget(FunctionReference function)
     {
         return ObjectPath.findTarget(function.objectPath);
     }
 
-    private MethodSignature getSignature(FunctionReference function)
+    private static MethodSignature getSignature(FunctionReference function)
     {
         ExtendedType[] parameterTypes = new ExtendedType[function.signature.getArguments().size()];
         for (int i = 0; i < parameterTypes.length; i++)
         {
             parameterTypes[i] = ByteCodeConstants.LPC_VALUE;
         }
-        return new MethodSignatureImpl(Collections.singleton(ElementModifier.PUBLIC), ByteCodeConstants.LPC_VALUE, function.internalName,
-                parameterTypes);
+        Set<ElementModifier> modifiers = Collections.singleton(ElementModifier.PUBLIC);
+        return new MethodSignatureImpl(modifiers, ByteCodeConstants.LPC_VALUE, function.internalName, parameterTypes);
     }
 
     private Expression compileIndirectMethodCall(FunctionReference function, FunctionArgument[] argVars, boolean expand)

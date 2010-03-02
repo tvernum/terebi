@@ -17,6 +17,8 @@
 
 package us.terebi.lang.lpc.compiler.util;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.parser.ast.ASTStatementBlock;
@@ -31,6 +33,8 @@ import us.terebi.lang.lpc.parser.util.ASTUtil;
  */
 public class StatementSupport
 {
+    private final Logger LOG = Logger.getLogger(StatementSupport.class);
+    
     private final ScopeLookup _scope;
     private final ParserVisitor _visitor;
 
@@ -48,7 +52,7 @@ public class StatementSupport
         {
             if (last.isTerminated())
             {
-                throw new CompileException(child, "Unreachable statement");
+                LOG.info("At " + child + " : Unreachable statement");
             }
             last = processStatement(child);
             if (last == null)

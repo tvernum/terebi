@@ -118,3 +118,17 @@ public int a14()
     return (*f)();
 }
 
+public int a15()
+{
+    function f = (: field = 15 :) ;
+    (*f)();
+    return field;
+}
+
+public int a16()
+{
+    mixed f = function() { field = 16 ; };
+    evaluate(f);
+    return field;
+}
+

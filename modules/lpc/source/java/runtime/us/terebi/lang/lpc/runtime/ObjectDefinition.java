@@ -31,5 +31,5 @@ public interface ObjectDefinition extends UserTypeDefinition
     
     public ObjectInstance getMasterInstance();
     public ObjectInstance newInstance(List<? extends LpcValue> arguments);
-    public ObjectInstance getInheritableInstance();
+    public ObjectInstance getInheritableInstance(ObjectInstance forInstance);
 }

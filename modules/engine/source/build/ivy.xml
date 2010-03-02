@@ -1,5 +1,5 @@
 <ivy-module version="2.0">
-    <info organisation="terebi" module="net"/>
+    <info organisation="terebi" module="engine"/>
     <configurations>
         <conf name="server" />
         <conf name="test" extends="server" visibility="private" />

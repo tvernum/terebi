@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.runtime.jvm.object;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
@@ -42,6 +43,7 @@ import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
 import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.lang.lpc.runtime.util.BoundMethod;
 import us.terebi.lang.lpc.runtime.util.Signature;
@@ -146,15 +148,27 @@ public class CompiledMethod implements CompiledMethodDefinition
     private LpcValue executeMethod(CompiledObjectInstance instance, List< ? extends LpcValue> arguments)
     {
         Object object = instance.getImplementingObject();
-        if (arguments.size() != _method.getParameterTypes().length)
+        if (arguments.size() < _method.getParameterTypes().length)
         {
-            throw new IllegalArgumentException("Wrong argument count to "
-                    + this
-                    + " (expected "
-                    + _method.getParameterTypes().length
-                    + ", got "
-                    + arguments.size()
-                    + ") - [varargs not implemented yet]");
+            if (this._signature.acceptsLessArguments())
+            {
+                List<LpcValue> args = new ArrayList<LpcValue>(arguments);
+                for (int i = arguments.size(); i < _method.getParameterTypes().length; i++)
+                {
+                    args.add(NilValue.INSTANCE);
+                }
+                arguments = args;
+            }
+            else
+            {
+                throw new IllegalArgumentException("Wrong argument count to "
+                        + this
+                        + " (expected "
+                        + _method.getParameterTypes().length
+                        + ", got "
+                        + arguments.size()
+                        + ")");
+            }
         }
         try
         {
@@ -181,7 +195,9 @@ public class CompiledMethod implements CompiledMethodDefinition
             if (causeMessage == null)
             {
                 causeMessage = causeName;
-            } else {
+            }
+            else
+            {
                 causeMessage = causeName + ":" + causeMessage;
             }
             throw new LpcRuntimeException("During method " + _method + " - " + causeMessage, cause);

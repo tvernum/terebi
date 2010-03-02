@@ -31,11 +31,11 @@ public class InheritedObject<T>
     private final CompiledObjectInstance _objectInstance;
     private final T _instance;
 
-    public InheritedObject(String name, Class< ? extends T> type, CompiledObjectDefinition definition)
+    public InheritedObject(String name, Class< ? extends T> type, CompiledObjectDefinition definition, CompiledObjectInstance instance)
     {
         _name = name;
         _definition = definition;
-        _objectInstance = _definition.getInheritableInstance();
+        _objectInstance = _definition.getInheritableInstance(instance);
         _instance = type.cast(_objectInstance.getImplementingObject());
     }
 

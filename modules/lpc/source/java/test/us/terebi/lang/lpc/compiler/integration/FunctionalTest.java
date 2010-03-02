@@ -55,6 +55,7 @@ public class FunctionalTest
         list.addAll(getTests("loop.c", builder));
         list.addAll(getTests("switch.c", builder));
         list.addAll(getTests("string.c", builder));
+        list.addAll(getTests("method.c", builder));
         list.addAll(getTests("function.c", builder));
         list.addAll(getTests("varargs.c", builder));
         list.addAll(getTests("mapping.c", builder));
@@ -125,6 +126,7 @@ public class FunctionalTest
     private static ObjectBuilder createBuilder(File directory) throws IOException
     {
         ObjectBuilderFactory factory = new ObjectBuilderFactory(StandardEfuns.getImplementation());
+        factory.setInsertTimeCheck(false);
         ObjectBuilder builder = factory.createBuilder(directory);
         builder.setPrintStats(System.out);
         return builder;

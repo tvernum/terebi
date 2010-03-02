@@ -38,9 +38,9 @@ public class ASTAssignmentExpression extends ExpressionNode
         return (TokenNode) this.jjtGetChild(0);
     }
 
-    public TokenNode getOperatorNode()
+    public OperatorNode getOperatorNode()
     {
-        return (TokenNode) this.jjtGetChild(1);
+        return (OperatorNode) this.jjtGetChild(1);
     }
 
     public TokenNode getRightNode()

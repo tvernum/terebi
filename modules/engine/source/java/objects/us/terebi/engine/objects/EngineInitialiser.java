@@ -23,8 +23,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map.Entry;
 
-import org.apache.log4j.Logger;
-
 import us.terebi.engine.config.Config;
 import us.terebi.engine.config.ConfigNames;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
@@ -33,7 +31,6 @@ import us.terebi.lang.lpc.compiler.ObjectBuilderFactory;
 import us.terebi.lang.lpc.io.FileFinder;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LpcParser;
-import us.terebi.lang.lpc.preprocessor.LexerException;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.ObjectMap;
@@ -46,8 +43,6 @@ import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
  */
 public class EngineInitialiser
 {
-    private final Logger LOG = Logger.getLogger(EngineInitialiser.class);
-
     private final Config _config;
     private final MudlibSetup _mudlib;
     private final BehaviourOptions _behaviour;
@@ -80,14 +75,7 @@ public class EngineInitialiser
         }
         for (Entry<String, String> entry : _compileOptions.getPreprocessorDefinitions().entrySet())
         {
-            try
-            {
-                parser.addDefine(entry.getKey(), entry.getValue());
-            }
-            catch (LexerException e)
-            {
-                LOG.error("Invalid preprocessor definition " + entry, e);
-            }
+            parser.addDefine(entry.getKey(), entry.getValue());
         }
 
         Efuns efuns = _context.efuns();
@@ -95,6 +83,7 @@ public class EngineInitialiser
         ObjectBuilderFactory factory = new ObjectBuilderFactory(efuns);
         factory.setWorkingDir(_compileOptions.compilerOutputDirectory());
         factory.setParser(parser);
+        factory.setDebugPatterns(_compileOptions.getDebugPatterns());
         ObjectBuilder builder = factory.createBuilder(fileFinder);
 
         CompilerObjectManager objectManager = builder.getObjectManager();

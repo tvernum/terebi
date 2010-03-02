@@ -18,6 +18,8 @@
 
 package us.terebi.lang.lpc.compiler.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.compiler.CompileException;
@@ -30,9 +32,9 @@ import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.parser.util.BaseASTVisitor;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
+import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
 import us.terebi.util.Range;
-import us.terebi.util.ToString;
 
 /**
  * 
@@ -73,21 +75,47 @@ public class FunctionCallSupport extends BaseASTVisitor implements ParserVisitor
     public FunctionReference findFunction(TokenNode node, String scope, String name)
     {
         List<FunctionReference> functions = _scope.functions().findFunctions(scope, name, !_scope.isSecureObject());
+        functions = filterVirtualFunctions(functions);
         if (functions == null || functions.isEmpty())
         {
             throw new CompileException(node, "No such function " + ((scope != null) ? scope + "::" : "") + name);
         }
         if (functions.size() > 1)
         {
-            throw new CompileException(node, "Multiple functions "
-                    + ((scope != null) ? scope + "::" : "")
-                    + name
-                    + " - "
-                    + ToString.toString(functions));
+            StringBuilder msg = new StringBuilder();
+            msg.append("Multiple functions ").append((scope != null) ? scope + "::" : "").append(name).append(" - ");
+            for (FunctionReference functionReference : functions)
+            {
+                msg.append(functionReference.describe()).append(" , ");
+            }
+            throw new CompileException(node, msg.toString());
         }
 
         FunctionReference function = functions.get(0);
         return function;
+    }
+
+    private List<FunctionReference> filterVirtualFunctions(List<FunctionReference> functions)
+    {
+        if (functions.isEmpty() || functions.size() == 1)
+        {
+            return functions;
+        }
+
+        List<FunctionReference> nonVirtual = new ArrayList<FunctionReference>(functions.size());
+        for (FunctionReference ref : functions)
+        {
+            if (!ref.modifiers.contains(Modifier.PURE_VIRTUAL))
+            {
+                nonVirtual.add(ref);
+            }
+        }
+        if (nonVirtual.isEmpty())
+        {
+            // They're all pure-virtual, so it doesn't matter which one we return
+            return Collections.singletonList(functions.get(0));
+        }
+        return nonVirtual;
     }
 
     public int getVarArgsIndex(FunctionSignature signature, int providedArgumentCount)
@@ -113,7 +141,7 @@ public class FunctionCallSupport extends BaseASTVisitor implements ParserVisitor
         {
             throw new CompileException(args, function.getTypeName()
                     + " "
-                    + function.toString()
+                    + function.describe()
                     + " requires "
                     + allowedArgCount
                     + " argument(s) but "

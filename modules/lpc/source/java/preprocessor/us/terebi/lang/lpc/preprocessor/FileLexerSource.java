@@ -31,8 +31,7 @@ import java.io.IOException;
  */
 public class FileLexerSource extends LexerSource
 {
-    // private File	file;
-    private String path;
+    private String _path;
 
     /**
      * Creates a new Source for lexing the given File.
@@ -42,9 +41,7 @@ public class FileLexerSource extends LexerSource
     public FileLexerSource(File file, String path) throws IOException
     {
         super(new BufferedReader(new FileReader(file)), true);
-
-        // this.file = file;
-        this.path = path;
+        this._path = path;
     }
 
     public FileLexerSource(File file) throws IOException
@@ -60,7 +57,7 @@ public class FileLexerSource extends LexerSource
     @Override
     protected String getPath()
     {
-        return path;
+        return _path;
     }
 
     @Override
@@ -71,6 +68,6 @@ public class FileLexerSource extends LexerSource
 
     public String toString()
     {
-        return "file " + path;
+        return "file " + _path;
     }
 }

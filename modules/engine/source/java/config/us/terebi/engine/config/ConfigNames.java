@@ -31,6 +31,7 @@ public class ConfigNames
     public static final String COMPILE_OUTPUT = "compile.output";
     public static final String COMPILE_INCLUDE_DIRECTORIES = "compile.include.directories";
     public static final String COMPILE_AUTO_INCLUDE = "compile.include.auto";
+    public static final String COMPILE_DEBUG = "compile.debug";
 
     public static final String TELNET_PORT = "telnet.ports";
 

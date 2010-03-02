@@ -28,8 +28,13 @@ import org.apache.log4j.Logger;
 import us.terebi.lang.lpc.compiler.CompilerAware;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectCompiler;
+import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.object.VirtualObjectDefinition;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.lang.lpc.runtime.util.Apply;
 import us.terebi.util.Predicate;
 import us.terebi.util.collection.PredicateIterator;
 
@@ -39,6 +44,8 @@ import us.terebi.util.collection.PredicateIterator;
 public class LpcCompilerObjectManager implements CompilerObjectManager, CompilerAware
 {
     private final Logger LOG = Logger.getLogger(LpcCompilerObjectManager.class);
+
+    private static final Apply VIRTUAL_COMPILE = new Apply("compile_object");
 
     private final Map<String, CompiledObjectDefinition> _definitions;
     private final Map<ObjectId, CompiledObjectInstance> _objects;
@@ -68,10 +75,27 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         CompiledObjectDefinition definition = _definitions.get(ObjectId.normalise(name));
         if (definition == null && _compiler != null)
         {
-            definition = _compiler.compile(filename(name));
+            definition = compile(name);
             registerObject(definition);
         }
         return definition;
+    }
+
+    private CompiledObjectDefinition compile(String name)
+    {
+        CompiledObjectDefinition definition = _compiler.compile(filename(name));
+        if (definition != null)
+        {
+            return definition;
+        }
+        LpcValue virtual = VIRTUAL_COMPILE.invoke(getMasterObject(), new StringValue(name));
+        if (!virtual.asBoolean())
+        {
+            throw new LpcRuntimeException("No such object " + name);
+        }
+        ObjectInstance object = virtual.asObject();
+        assert object instanceof CompiledObjectInstance;
+        return new VirtualObjectDefinition(this, name, (CompiledObjectInstance) object);
     }
 
     private String filename(String name)

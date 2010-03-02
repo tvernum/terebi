@@ -161,16 +161,24 @@ public class FunctionLiteralCompiler
 
     private LpcExpression checkOldStyleFunctionReference(ExpressionNode exprNode, List<ExpressionNode> arguments)
     {
-        if (exprNode instanceof ASTVariableReference)
+        if (!(exprNode instanceof ASTVariableReference))
         {
-            ASTVariableReference ref = (ASTVariableReference) exprNode;
-            VariableResolution var = _parentScope.variables().findVariable(ref.getVariableName());
-            if (var == null)
-            {
-                return getFunctionReference(ref, arguments);
-            }
+            return null;
         }
-        return null;
+
+        ASTVariableReference ref = (ASTVariableReference) exprNode;
+        if (ref.isPositionalVariable())
+        {
+            return null;
+        }
+
+        VariableResolution var = _parentScope.variables().findVariable(ref.getVariableName());
+        if (var != null)
+        {
+            return null;
+        }
+
+        return getFunctionReference(ref, arguments);
     }
 
     private LpcExpression getFunctionReference(ASTVariableReference ref, List<ExpressionNode> arguments)
@@ -259,7 +267,7 @@ public class FunctionLiteralCompiler
     {
         Token token = node.jjtGetFirstToken();
         String className = _context.publicClass().getName() + "$f" + pad(token.beginLine, 4) + "_" + pad(token.beginColumn, 3);
-        ClassSpec spec = new ClassSpec(_context.publicClass().getPackage(), className);
+        ClassSpec spec = ClassSpec.newClass(_context.publicClass().getPackage(), className);
         spec.withSuperClass(LpcFunction.class);
         spec.withModifiers(ElementModifier.PUBLIC, ElementModifier.FINAL);
         _context.pushClass(spec);
@@ -415,7 +423,7 @@ public class FunctionLiteralCompiler
         List<Parameter> parameters = new ArrayList<Parameter>();
 
         parameters.add(new ParameterSpec("s$owner").withType(LpcObject.class).create());
-        getReferencedVariables(vars, spec, parameters);
+        Map<String, VariableResolution> variables = getReferencedVariables(vars, spec, parameters);
 
         ExpressionCompiler compiler = new ExpressionCompiler(_scope, _context);
         LpcExpression[] immediates = getImmediateVariables(node, spec, compiler);
@@ -433,7 +441,7 @@ public class FunctionLiteralCompiler
         args[0] = VM.Expression.thisObject();
         for (int i = 1; i < args.length; i++)
         {
-            args[i] = VM.Expression.variable(parameters.get(i).getName());
+            args[i] = variables.get(parameters.get(i).getName()).access();
         }
 
         Expression function = VM.Expression.construct(spec, constructor, args);
@@ -460,6 +468,8 @@ public class FunctionLiteralCompiler
 
         statementCompiler.compileBlock(blockNode);
         _scope.variables().popScope();
+        
+        statements.add(VM.Statement.returnObject(ByteCodeConstants.VOID));
 
         return getExecute(statements);
     }

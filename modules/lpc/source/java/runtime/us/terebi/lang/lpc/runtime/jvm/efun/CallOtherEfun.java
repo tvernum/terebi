@@ -82,9 +82,13 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
             }
             target = objectDefinition.getMasterInstance();
         }
-        else
+        else if (MiscSupport.isObject(arg1))
         {
             target = arg1.asObject();
+        }
+        else
+        {
+            throw new LpcRuntimeException("Attempt to call function " + arg2 + " in non-object " + arg1);
         }
         String name = arg2.asString();
 

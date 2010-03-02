@@ -49,6 +49,11 @@ public class StringSubstring implements LpcReference
 
     public LpcValue get()
     {
+        return substring(_string.get(), _start, _end);
+    }
+
+    public static StringValue substring(LpcValue value, Index startIndex, Index endIndex)
+    {
         //      eval for ( int i=0; i<12; i++) { string s = "0123456789" ; write("[5.." + i + "] " + s[5..i]); }
         //        [5..0] 
         //        [5..1] 
@@ -88,10 +93,9 @@ public class StringSubstring implements LpcReference
         //        [9..9] 9
         //        [10..10] 
         //        [11..11] 
-
-        String str = _string.get().asString();
-        int start = getIndex(str, _start);
-        int end = getIndex(str, _end);
+        String str = value.asString();
+        int start = getIndex(str, startIndex);
+        int end = getIndex(str, endIndex);
         if (start > end || start >= str.length())
         {
             return LpcConstants.STRING.BLANK;
@@ -111,7 +115,7 @@ public class StringSubstring implements LpcReference
         return new StringValue(str.substring(start, end));
     }
 
-    private int getIndex(String str, Index idx)
+    private static int getIndex(String str, Index idx)
     {
         long index = idx.index;
         if (idx.reverse)

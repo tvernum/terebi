@@ -37,6 +37,7 @@ import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
@@ -277,5 +278,21 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
             return NilValue.INSTANCE;
         }
         return new ObjectValue(object.getMasterInstance());
+    }
+
+    protected Callable getFunctionReference(LpcValue func)
+    {
+        if (isFunction(func))
+        {
+            return func.asCallable();
+        }
+        else if (MiscSupport.isString(func))
+        {
+            return new BoundMethod(func.asString(), ThisObjectEfun.this_object());
+        }
+        else
+        {
+            throw new UnsupportedOperationException("Bad argument to " + getName() + " - " + func + " must be a string or a function");
+        }
     }
 }

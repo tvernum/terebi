@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 
 import org.adjective.stout.core.UnresolvedType;
 
+import us.terebi.lang.lpc.compiler.java.context.VariableLookup.ObjectPath;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.InternalName;
@@ -43,9 +44,9 @@ import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 public class FunctionLookup
 {
     private final Logger LOG = Logger.getLogger(FunctionLookup.class);
-    private final FunctionMap _efuns;
-    private final FunctionMap _simul;
-    private final FunctionMap _localMethods;
+    private final FunctionMap<Object> _efuns;
+    private final FunctionMap<Object> _simul;
+    private final FunctionMap<Set< ? extends Modifier>> _localMethods;
     private final Map<String, ObjectDefinition> _inherited;
     private final FunctionLookup _enclosing;
     private final String _enclosingPath;
@@ -55,14 +56,16 @@ public class FunctionLookup
     public static class FunctionReference
     {
         public final Callable.Kind kind;
+        public final Set<? extends Modifier> modifiers;
         public final String name;
         public final String internalName;
         public final FunctionSignature signature;
         public final VariableLookup.ObjectPath[] objectPath;
 
-        private FunctionReference(Kind k, String n, String internal, FunctionSignature s, VariableLookup.ObjectPath[] path)
+        private FunctionReference(Kind k, Set<? extends Modifier> mod, String n, String internal, FunctionSignature s, VariableLookup.ObjectPath[] path)
         {
             kind = k;
+            modifiers = mod;
             name = n;
             internalName = internal;
             signature = s;
@@ -71,26 +74,26 @@ public class FunctionLookup
 
         public static FunctionReference efun(String name, FunctionSignature signature)
         {
-            return reference(Callable.Kind.EFUN, name, name, signature);
+            return reference(Callable.Kind.EFUN, Collections.<Modifier>emptySet(), name, name, signature);
         }
 
-        private static FunctionReference reference(Kind kind, String name, String internalName, FunctionSignature signature)
+        private static FunctionReference reference(Kind kind, Set<? extends Modifier> modifiers, String name, String internalName, FunctionSignature signature)
         {
             if (signature == null)
             {
                 return null;
             }
-            return new FunctionReference(kind, name, internalName, signature, null);
+            return new FunctionReference(kind, modifiers, name, internalName, signature, null);
         }
 
         public static FunctionReference simul(String name, FunctionSignature signature)
         {
-            return reference(Callable.Kind.SIMUL_EFUN, name, name, signature);
+            return reference(Callable.Kind.SIMUL_EFUN, Collections.<Modifier>emptySet(), name, name, signature);
         }
 
-        public static FunctionReference local(String name, String internalName, FunctionSignature signature)
+        public static FunctionReference local(Set<? extends Modifier> modifiers, String name, String internalName, FunctionSignature signature)
         {
-            return reference(Callable.Kind.METHOD, name, internalName, signature);
+            return reference(Callable.Kind.METHOD, modifiers, name, internalName, signature);
         }
 
         public static FunctionReference inherited(MethodDefinition method, List<VariableLookup.ObjectPath> objectPath)
@@ -101,12 +104,12 @@ public class FunctionLookup
                 internalName = ((InternalName) method).getInternalName();
             }
             VariableLookup.ObjectPath[] pathArray = objectPath.toArray(new VariableLookup.ObjectPath[objectPath.size()]);
-            return new FunctionReference(Callable.Kind.METHOD, method.getName(), internalName, method.getSignature(), pathArray);
+            return new FunctionReference(Callable.Kind.METHOD, method.getModifiers(), method.getName(), internalName, method.getSignature(), pathArray);
         }
 
         public static FunctionReference function(String expr)
         {
-            return new FunctionReference(Callable.Kind.FUNCTION, expr, expr, GenericSignature.INSTANCE, null);
+            return new FunctionReference(Callable.Kind.FUNCTION,Collections.<Modifier>emptySet(), expr, expr, GenericSignature.INSTANCE, null);
         }
 
         public static FunctionReference enclose(FunctionReference ref, UnresolvedType enclosingType, String enclosingPath)
@@ -118,7 +121,7 @@ public class FunctionLookup
                 System.arraycopy(ref.objectPath, 0, path, 1, ref.objectPath.length);
             }
 
-            return new FunctionReference(ref.kind, ref.name, ref.internalName, ref.signature, path);
+            return new FunctionReference(ref.kind, ref.modifiers, ref.name, ref.internalName, ref.signature, path);
         }
 
         public String toString()
@@ -142,13 +145,33 @@ public class FunctionLookup
         {
             return (objectPath == null || objectPath.length == 0) && kind == Kind.METHOD;
         }
+
+        public CharSequence getPathString()
+        {
+            if (objectPath == null || objectPath.length == 0)
+            {
+                return "";
+            }
+            StringBuilder builder = new StringBuilder();
+            for (ObjectPath path : objectPath)
+            {
+                builder.append(path.lpcName);
+                builder.append("::");
+            }
+            return builder;
+        }
+
+        public String describe()
+        {
+            return getPathString() + name;
+        }
     }
 
     public FunctionLookup()
     {
-        _efuns = new FunctionMap();
-        _simul = new FunctionMap();
-        _localMethods = new FunctionMap();
+        _efuns = new FunctionMap<Object>();
+        _simul = new FunctionMap<Object>();
+        _localMethods = new FunctionMap<Set< ? extends Modifier>>();
         _enclosing = null;
         _enclosingPath = null;
         _enclosingType = null;
@@ -160,7 +183,7 @@ public class FunctionLookup
     {
         _efuns = parent._efuns;
         _simul = parent._simul;
-        _localMethods = new FunctionMap();
+        _localMethods = new FunctionMap<Set< ? extends Modifier>>();
         _enclosing = parent;
         _enclosingPath = path;
         _enclosingType = parentType;
@@ -213,7 +236,8 @@ public class FunctionLookup
         {
             FunctionSignature sig = _localMethods.get(name);
             String internalName = _internalNames.get(sig);
-            return Collections.singletonList(FunctionReference.local(name, internalName, sig));
+            Set< ? extends Modifier> modifiers = _localMethods.getSecondary(name);
+            return Collections.singletonList(FunctionReference.local(modifiers, name, internalName, sig));
         }
 
         List<FunctionReference> references = new ArrayList<FunctionReference>();
@@ -230,10 +254,11 @@ public class FunctionLookup
             List<VariableLookup.ObjectPath> path = getInheritedObject(_inherited, scope);
             if (!path.isEmpty())
             {
-                FunctionReference ref = findFunctionReference(name, path.get(path.size() - 1).getDefinition(), path);
-                if (ref != null)
+                ObjectDefinition definition = path.get(path.size() - 1).getDefinition();
+                findFunctions(name, Collections.singletonMap(scope, definition), references, new ArrayList<ObjectPath>());
+                if (!references.isEmpty())
                 {
-                    return Collections.singletonList(ref);
+                    return references;
                 }
             }
             return null;
@@ -306,7 +331,10 @@ public class FunctionLookup
             {
                 matches.add(func);
             }
-            findFunctions(functionName, parent.getInheritedObjects(), matches, path);
+            else
+            {
+                findFunctions(functionName, parent.getInheritedObjects(), matches, path);
+            }
             path.remove(path.size() - 1);
         }
     }
@@ -339,7 +367,7 @@ public class FunctionLookup
         return true;
     }
 
-    public void addEfuns(FunctionMap efuns)
+    public void addEfuns(FunctionMap<Object> efuns)
     {
         _efuns.putAll(efuns);
     }
@@ -362,9 +390,9 @@ public class FunctionLookup
         _inherited.put(name, parent);
     }
 
-    public void defineLocalMethod(String publicName, String internalName, FunctionSignature signature)
+    public void defineLocalMethod(String publicName, String internalName, FunctionSignature signature, Set< ? extends Modifier> modifiers)
     {
-        _localMethods.put(publicName, signature);
+        _localMethods.put(publicName, signature, modifiers);
         _internalNames.put(signature, internalName);
     }
 
@@ -372,6 +400,21 @@ public class FunctionLookup
     {
         FunctionLookup lookup = new FunctionLookup(parent, name, parentType);
         return lookup;
+    }
+
+    public Set<String> getLocalMethodNames()
+    {
+        return _localMethods.keySet();
+    }
+
+    public FunctionSignature getLocalMethodSignature(String name)
+    {
+        return _localMethods.get(name);
+    }
+
+    public Set< ? extends Modifier> getLocalMethodModifiers(String name)
+    {
+        return _localMethods.getSecondary(name);
     }
 
 }

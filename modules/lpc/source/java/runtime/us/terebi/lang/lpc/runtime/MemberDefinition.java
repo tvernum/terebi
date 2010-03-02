@@ -27,7 +27,7 @@ public interface MemberDefinition
 {
     public enum Modifier
     {
-        PUBLIC, PROTECTED, PRIVATE, NOSAVE, NOMASK, VARARGS;
+        PUBLIC, PROTECTED, PRIVATE, NOSAVE, NOMASK, VARARGS, PURE_VIRTUAL;
         // STATIC is returned as PROTECTED or NOSAVE
     }
 
