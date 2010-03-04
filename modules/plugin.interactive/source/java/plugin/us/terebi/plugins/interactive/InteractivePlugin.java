@@ -19,6 +19,7 @@
 package us.terebi.plugins.interactive;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
@@ -32,13 +33,8 @@ import us.terebi.plugins.interactive.efun.WriteEfun;
 /**
  * @version $Revision$
  */
-public class InteractivePlugin implements Plugin
+public class InteractivePlugin extends AbstractPlugin implements Plugin
 {
-    public void init(SystemContext context)
-    {
-        // No-op
-    }
-
     public void load(Config config, SystemContext context)
     {
         Efuns efuns = context.efuns();
@@ -49,15 +45,4 @@ public class InteractivePlugin implements Plugin
         efuns.define("tell_object", new TellObjectEfun(config.getBoolean("plugin.interactive.catch_tell", false)));
         efuns.define("receive", new ReceiveEfun());
     }
-
-    public void run(SystemContext context)
-    {
-        // No-op
-    }
-
-    public void start(SystemContext context)
-    {
-        // No-op
-    }
-
 }

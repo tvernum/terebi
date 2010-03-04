@@ -71,13 +71,17 @@ public class Engine
 
         PluginController plugins = new PluginController(_config);
         EngineInitialiser init = new EngineInitialiser(_config, newContext());
-        plugins.load(init.getSystemContext());
-
-        CoreObjects coreObjects = init.getCoreObjects();
-        plugins.init(init.getSystemContext());
         
+        plugins.load(init.getSystemContext());
+        init.load();
+
+        plugins.init(init.getSystemContext());
+        CoreObjects coreObjects = init.getCoreObjects();
+
+        plugins.epilog(init.getSystemContext());
         ObjectInstance master = coreObjects.master();
         preload(master);
+        
         runServer(master, init.getSystemContext(), plugins);
     }
 

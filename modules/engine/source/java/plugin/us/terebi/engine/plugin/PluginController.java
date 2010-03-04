@@ -62,28 +62,6 @@ public class PluginController
         _classLoader = null;
     }
 
-    /**
-     * Called very early in the initialisation process, before the master object or simul-efun objects are loaded.
-     * The provided {@link SystemContext} will have efuns, and some attachments (such as {@link us.terebi.engine.objects.CompileOptions},
-     * but will not have an object manager or master/simul-efun objects.
-     * This is the appropriate place to configure new efuns (so they can be used in the master object) and new preprocessor directives
-     */
-    public void load(SystemContext context)
-    {
-        if (_pluginDirectory == null)
-        {
-            _plugins = Collections.emptyList();
-            return;
-        }
-
-        loadPlugins();
-        _classLoader = new URLClassLoader(getPluginUrls(), getClass().getClassLoader());
-        for (PluginResolver plugin : _plugins)
-        {
-            plugin.load(_classLoader, _config, context);
-        }
-    }
-
     private void loadPlugins()
     {
         List<String> pluginInclude = Arrays.asList(_config.getStrings("plugins.include"));
@@ -149,14 +127,48 @@ public class PluginController
         return pluginFiles;
     }
 
+
     /**
-     * Called during the initialisation process, after the master object and simul-efun objects are loaded.
+     * Called very early in the initialisation process, before the master object or simul-efun objects are loaded.
+     * The provided {@link SystemContext} will have efuns, and some attachments (such as {@link us.terebi.engine.objects.CompileOptions},
+     * but will not have an object manager or master/simul-efun objects.
+     * This is the appropriate place to configure new efuns (so they can be used in the master object) and new preprocessor directives
+     */
+    public void load(SystemContext context)
+    {
+        if (_pluginDirectory == null)
+        {
+            _plugins = Collections.emptyList();
+            return;
+        }
+
+        loadPlugins();
+        _classLoader = new URLClassLoader(getPluginUrls(), getClass().getClassLoader());
+        for (PluginResolver plugin : _plugins)
+        {
+            plugin.load(_classLoader, _config, context);
+        }
+    }
+
+    /**
+     * Called during the initialisation process, after the object manager is loaded, but before the master object and simul-efun objects are loaded
      */
     public void init(SystemContext context)
     {
         for (PluginResolver plugin : _plugins)
         {
             plugin.init(context);
+        }
+    }
+
+    /**
+     * Called during the initialisation process, after the master object and simul-efun objects are loaded, but before epilog is called in the  master object
+     */
+    public void epilog(SystemContext context)
+    {
+        for (PluginResolver plugin : _plugins)
+        {
+            plugin.epilog(context);
         }
     }
 
@@ -183,5 +195,6 @@ public class PluginController
             plugin.run(context);
         }
     }
+
 
 }

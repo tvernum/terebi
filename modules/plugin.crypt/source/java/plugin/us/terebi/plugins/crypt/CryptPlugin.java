@@ -19,6 +19,7 @@
 package us.terebi.plugins.crypt;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
@@ -28,27 +29,11 @@ import us.terebi.plugins.crypt.efun.CryptEfun;
 /**
  * @version $Revision$
  */
-public class CryptPlugin implements Plugin
+public class CryptPlugin extends AbstractPlugin implements Plugin
 {
-    public void init(SystemContext context)
-    {
-        // No-op
-    }
-
     public void load(Config config, SystemContext context)
     {
         Efuns efuns = context.efuns();
         efuns.define("crypt", new CryptEfun(new UnixCrypt()));
     }
-
-    public void run(SystemContext context)
-    {
-        // No-op
-    }
-
-    public void start(SystemContext context)
-    {
-        // No-op
-    }
-
 }

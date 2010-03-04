@@ -18,23 +18,31 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.log4j.Logger;
+
+import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class WriteFileEfun extends AbstractEfun implements FunctionSignature, Callable
+public class WriteFileEfun extends FileEfun implements FunctionSignature, Callable
 {
+    private final Logger LOG = Logger.getLogger(WriteFileEfun.class);
+    
     // int write_file( string file, string str, int flag );
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
@@ -49,7 +57,7 @@ public class WriteFileEfun extends AbstractEfun implements FunctionSignature, Ca
     {
         return true;
     }
-    
+
     public LpcType getReturnType()
     {
         return Types.INT;
@@ -57,8 +65,39 @@ public class WriteFileEfun extends AbstractEfun implements FunctionSignature, Ca
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments, 2);
+        String file = arguments.get(0).asString();
+        String content = arguments.get(1).asString();
+        boolean overwrite = (arguments.size() > 2 ? arguments.get(2).asBoolean() : false);
+        OutputStream stream = null;
+        try
+        {
+            Resource resource = getResource(file);
+            if (overwrite)
+            {
+                stream = resource.write();
+            }
+            else
+            {
+                stream = resource.append();
+            }
+            write(stream, content);
+            return LpcConstants.INT.TRUE;
+        }
+        catch (IOException e)
+        {
+            LOG.info("Cannot write to file " + file, e);
+            return LpcConstants.INT.FALSE;
+        }
+        finally
+        {
+            IOUtils.closeQuietly(stream);
+        }
+    }
+
+    private void write(OutputStream stream, String content) throws IOException
+    {
+        IOUtils.write(content, stream);
     }
 
 }

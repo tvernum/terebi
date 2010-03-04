@@ -30,8 +30,8 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
-import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
@@ -156,8 +156,8 @@ public class MethodTestCase implements Callable<Object>
                 result = method.execute(instance, arguments);
 
                 MajorFrame frame = stack.peekFrame(0);
-                assertEquals(instance, frame.instance);
-                assertEquals(Origin.APPLY, frame.origin);
+                assertEquals(instance, frame.instance());
+                assertEquals(Origin.APPLY, frame.origin());
             }
             finally
             {

@@ -19,6 +19,7 @@
 package us.terebi.plugins.persist;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
@@ -30,30 +31,14 @@ import us.terebi.plugins.persist.efun.SaveVariableEfun;
 /**
  * @version $Revision$
  */
-public class PersistPlugin implements Plugin
+public class PersistPlugin extends AbstractPlugin implements Plugin
 {
-    public void init(SystemContext context)
+    public void load(Config config, SystemContext context)
     {
         Efuns efuns = context.efuns();
         efuns.define("save_object", new SaveObjectEfun());
-        efuns.define("restore_object", new RestoreObjectEfun()); 
+        efuns.define("restore_object", new RestoreObjectEfun());
         efuns.define("save_variable", new SaveVariableEfun());
-        efuns.define("restore_variable", new RestoreVariableEfun()); 
+        efuns.define("restore_variable", new RestoreVariableEfun());
     }
-
-    public void load(Config config, SystemContext context)
-    {
-        // No-op
-    }
-
-    public void run(SystemContext context)
-    {
-        // No-op
-    }
-
-    public void start(SystemContext context)
-    {
-        // No-op
-    }
-
 }

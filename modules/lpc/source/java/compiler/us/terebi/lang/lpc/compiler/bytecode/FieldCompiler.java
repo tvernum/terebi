@@ -109,8 +109,10 @@ public class FieldCompiler extends MemberVisitor implements ParserVisitor
     static void addField(ClassSpec spec, FieldDescriptor field)
     {
         FieldSpec fieldSpec = new FieldSpec(field.name).withType(LpcField.class).withModifiers(ElementModifier.PUBLIC);
-        fieldSpec.withAnnotation(new AnnotationSpec(LpcMember.class). //
-        withAttribute("name", field.name).withAttribute("modifiers", new ElementModifier[0]));
+        fieldSpec.withAnnotation(new AnnotationSpec(LpcMember.class) //
+        .withAttribute("name", field.name) //
+        .withAttribute("modifiers", field.modifiers.toArray(new Modifier[0])) // 
+        );
         fieldSpec.withAnnotation(MethodCompiler.getMemberTypeAnnotation(field.type));
 
         spec.withField(fieldSpec);
@@ -153,7 +155,6 @@ public class FieldCompiler extends MemberVisitor implements ParserVisitor
 
         return field;
     }
-
 
     public static Expression typeExpression(LpcType type, EnclosingType enclosingType)
     {

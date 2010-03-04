@@ -38,5 +38,7 @@ public interface ObjectManager
     
     public Iterable< ? extends ObjectInstance> objects();
     public Iterable<? extends ObjectInstance> objects(String name);
-
+    
+    public void addListener(ObjectLifecycleListener listener);
+    public void removeListener(ObjectLifecycleListener listener);
 }

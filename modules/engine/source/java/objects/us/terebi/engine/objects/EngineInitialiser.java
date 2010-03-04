@@ -49,6 +49,7 @@ public class EngineInitialiser
     private final CompileOptions _compileOptions;
     private CoreObjects _coreObjects;
     private SystemContext _context;
+    private CompilerObjectManager _objectManager;
 
     public EngineInitialiser(Config config, SystemContext context)
     {
@@ -61,6 +62,30 @@ public class EngineInitialiser
     }
 
     private CoreObjects loadCoreObjects() throws IOException
+    {
+        if (_objectManager == null)
+        {
+            loadObjectManager();
+        }
+
+        ExecutionTimeCheck check = new ExecutionTimeCheck(_config.getLong(ConfigNames.MAX_EVAL_TIME_INIT, 30000));
+        try
+        {
+            synchronized (_context.lock())
+            {
+                check.begin();
+                ObjectDefinition sefunDefinition = _objectManager.defineSimulatedEfunObject(getLocalPath(_mudlib.sefun()));
+                ObjectDefinition masterDefinition = _objectManager.defineMasterObject(getLocalPath(_mudlib.master()));
+                return new CoreObjects(_objectManager, masterDefinition.getMasterInstance(), sefunDefinition.getMasterInstance());
+            }
+        }
+        finally
+        {
+            check.end();
+        }
+    }
+
+    public void loadObjectManager() throws IOException
     {
         LpcParser parser = new LpcParser();
         FileFinder fileFinder = new FileFinder(_mudlib.root());
@@ -88,19 +113,7 @@ public class EngineInitialiser
 
         CompilerObjectManager objectManager = builder.getObjectManager();
         configureSystemContext(objectManager, fileFinder);
-
-        ExecutionTimeCheck check = new ExecutionTimeCheck(_config.getLong(ConfigNames.MAX_EVAL_TIME_INIT, 30000));
-        try
-        {
-            check.begin();
-            ObjectDefinition sefunDefinition = objectManager.defineSimulatedEfunObject(getLocalPath(_mudlib.sefun()));
-            ObjectDefinition masterDefinition = objectManager.defineMasterObject(getLocalPath(_mudlib.master()));
-            return new CoreObjects(objectManager, masterDefinition.getMasterInstance(), sefunDefinition.getMasterInstance());
-        }
-        finally
-        {
-            check.end();
-        }
+        _objectManager = objectManager;
     }
 
     private void configureSystemContext(CompilerObjectManager objectManager, ResourceFinder resourceFinder)
@@ -202,5 +215,13 @@ public class EngineInitialiser
     public SystemContext getSystemContext()
     {
         return _context;
+    }
+
+    public void load() throws IOException
+    {
+        if (_objectManager == null)
+        {
+            loadObjectManager();
+        }
     }
 }

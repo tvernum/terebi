@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime.jvm.context;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ObjectInstance;
@@ -31,37 +32,87 @@ public class CallStack
 {
     public enum Origin
     {
-        APPLY, HEART_BEAT, CALL_OUT, CALL_OTHER, EFUN, POINTER,
+        APPLY, HEART_BEAT, CALL_OUT, CALL_OTHER, EFUN, POINTER;
+
+        public String lpcName()
+        {
+            return name().toLowerCase();
+        }
     }
 
-    public static class MajorFrame
+    public interface Frame
     {
-        public final Origin origin;
-        public final ObjectInstance instance;
-        public final int javaStackSize;
+        public Origin origin();
 
-        public MajorFrame(Origin orgn, ObjectInstance inst, int javaStackSz)
+        public ObjectInstance instance();
+    }
+
+    public static class MajorFrame implements Frame
+    {
+        private final Origin _origin;
+        private final ObjectInstance _instance;
+        private final int _javaStackSize;
+
+        public MajorFrame(Origin origin, ObjectInstance instance, int javaStackSize)
         {
-            this.origin = orgn;
-            this.instance = inst;
-            this.javaStackSize = javaStackSz;
+            this._origin = origin;
+            this._instance = instance;
+            this._javaStackSize = javaStackSize;
         }
 
         public String toString()
         {
-            return "<" + origin + ":" + instance + ">";
+            return "<" + _origin + ":" + _instance + ">";
+        }
+
+        public ObjectInstance instance()
+        {
+            return _instance;
+        }
+
+        public Origin origin()
+        {
+            return _origin;
+        }
+
+        public int stackIndex()
+        {
+            return _javaStackSize;
         }
     }
 
-    public static class DetailFrame extends MajorFrame
+    public static class DetailFrame implements Frame
     {
-        public DetailFrame(Origin orgn, ObjectInstance inst, int javaStackSz)
+        private final Origin _origin;
+        private final ObjectInstance _instance;
+        private final String _function;
+
+        public DetailFrame(Origin origin, ObjectInstance instance, String function)
         {
-            super(orgn, inst, javaStackSz);
-            //@TODO
+            _origin = origin;
+            _instance = instance;
+            _function = function;
         }
 
-//        public final String function;
+        public Origin origin()
+        {
+            return _origin;
+        }
+
+        public ObjectInstance instance()
+        {
+            return _instance;
+        }
+
+        public String function()
+        {
+            return _function;
+        }
+
+        public String toString()
+        {
+            return "<" + _origin + ":" + _instance + "->" + _function + ">";
+        }
     }
 
     private final Stack<MajorFrame> _frames;
@@ -71,7 +122,7 @@ public class CallStack
         _frames = new ArrayStack<MajorFrame>();
     }
 
-    public void pushFrame(MajorFrame frame)
+    private void pushFrame(MajorFrame frame)
     {
         _frames.push(frame);
     }
@@ -85,8 +136,8 @@ public class CallStack
     private int mostRecentUserFrameIndex()
     {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
-        int stackIndex = stackTrace.length - 2;
-        for (; stackIndex > 0; stackIndex--)
+        int stackIndex = 2;
+        for (; stackIndex < stackTrace.length; stackIndex++)
         {
             if (isUserCode(stackTrace[stackIndex]))
             {
@@ -123,18 +174,28 @@ public class CallStack
     public List<DetailFrame> detailFrames()
     {
         StackTraceElement[] stackTrace = Thread.currentThread().getStackTrace();
+        List<DetailFrame> frames = new ArrayList<DetailFrame>(stackTrace.length / 2);
 
-        int stackIndex = stackTrace.length - 2;
-        for (; stackIndex > 0; stackIndex--)
+        int frameIndex = 0;
+        for (int stackIndex = 2; stackIndex < stackTrace.length; stackIndex++)
         {
-            if (isUserCode(stackTrace[stackIndex]))
+            if (frameIndex >= _frames.size())
             {
                 break;
             }
+            MajorFrame major = _frames.peek(frameIndex);
+            if (isUserCode(stackTrace[stackIndex]))
+            {
+                DetailFrame frame = new DetailFrame(major.origin(), major.instance(), stackTrace[stackIndex].getMethodName());
+                frames.add(frame);
+            }
+            if (stackIndex == major.stackIndex())
+            {
+                frameIndex++;
+            }
         }
-//        return stackIndex;
-        // @TODO
-        return null;
+
+        return frames;
     }
 
     public int size()

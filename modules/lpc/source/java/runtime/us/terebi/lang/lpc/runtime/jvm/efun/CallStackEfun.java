@@ -30,7 +30,7 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.DetailFrame;
-import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
@@ -92,29 +92,35 @@ public class CallStackEfun extends AbstractEfun implements FunctionSignature, Ca
     Object: /secure/tmp/zod_CMD_EVAL_TMP_FILE at line 21
 
      */
-    private LpcValue execute(int arg)
+    private LpcValue execute(int flag)
     {
         List<LpcValue> result = new ArrayList<LpcValue>();
 
         ThreadContext context = RuntimeContext.obtain();
         List<DetailFrame> frames = context.callStack().detailFrames();
 
-        LpcType type = (arg == 1) ? Types.OBJECT_ARRAY : Types.STRING_ARRAY;
-        for (MajorFrame frame : frames)
+        LpcType type = (flag == 1) ? Types.OBJECT_ARRAY : Types.STRING_ARRAY;
+        for (DetailFrame frame : frames)
         {
-            if (arg == 1)
+            if (flag == 1)
             {
-                result.add(new ObjectValue(frame.instance));
+                result.add(new ObjectValue(frame.instance()));
                 continue;
             }
             String str;
-            switch (arg)
+            switch (flag)
             {
                 case 0:
-                    str = frame.instance.getDefinition().getName();
+                    str = frame.instance().getDefinition().getName();
+                    break;
+                case 2:
+                    str = frame.function();
+                    break;
+                case 3:
+                    str = frame.origin().lpcName();
+                    break;
                 default:
-                    // @TODO
-                    str = "?";
+                    throw new LpcRuntimeException("Bad flag (" + flag + ") to " + getName());
             }
             result.add(new StringValue(str));
         }

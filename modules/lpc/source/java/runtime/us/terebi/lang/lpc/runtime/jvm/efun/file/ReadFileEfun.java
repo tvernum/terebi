@@ -74,12 +74,12 @@ public class ReadFileEfun extends FileEfun implements FunctionSignature, Callabl
         {
             Resource resource = getResource(file);
             stream = resource.read();
-            if (arguments.size() == 1)
+            if (!hasArgument(arguments, 1))
             {
                 return readFile(stream);
             }
             long start = arguments.get(1).asLong();
-            long end = (arguments.size() < 3) ? Long.MAX_VALUE : start + arguments.get(2).asLong();
+            long end = hasArgument(arguments, 2) ? start + arguments.get(2).asLong() : Long.MAX_VALUE;
             return readLines(stream, start, end);
         }
         catch (IOException e)

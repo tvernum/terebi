@@ -84,10 +84,10 @@ public class ThisPlayerEfun extends AbstractEfun
         }
         CallStack stack = context.callStack();
         MajorFrame frame = stack.topFrame();
-        if (isUser(frame.instance))
+        if (isUser(frame.instance()))
         {
-            attributes.set(CONTEXT_ATTRIBUTE, frame.instance);
-            return frame.instance;
+            attributes.set(CONTEXT_ATTRIBUTE, frame.instance());
+            return frame.instance();
         }
         return null;
     }

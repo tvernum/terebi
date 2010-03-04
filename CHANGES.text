@@ -1,3 +1,87 @@
+2010-03-04
+    Finish off call stack support
+
+2010-03-03
+    Allow '0' as any argument in an efun
+    Normalise ObjectId filename when initialised with 2 arg constructor
+
+2010-03-01
+    Support for virtual function calls
+
+2010-02-28
+    Add efuns
+    Support field references in block style function literals
+    Fix bytecode for |= &= etc
+    Support pure virtual functions
+
+2010-02-26
+    Add virtual objects
+    Add dummy efuns for parser and ed (in plugins)
+    Addded support for "%*s" in sscanf
+    Fixed preprocessor - it was not being reset between uses
+
+2010-02-22
+    Add debug capabilities to generated code
+    Implement environment efuns
+
+2010-02-21
+    Pass flag to epilog efun (compat with MudOS)
+    Allow call-out on string (master instance of file)
+    Fix FunctionValue to correctly act as a callable
+    Don't recompile if class file is up-to-date
+
+2010-02-20
+    Include debug info (file name/line number)
+    Include security checks in file efuns
+    Track if loading master object so we don't end up in infinite loop of self referential objects.
+    Don't do security checks while loading master object
+    Support old-style (: function, arg1, arg2, ... :) function pointers
+    Add reclaim_objects efun (as no-op)
+
+2010-02-19
+    Add additional plugins to root build
+    Add eval cost (exec time) checks
+
+2010-01-29
+    Config for Dead Souls (DS IIr8)
+    Plugin to provide compatability with MudOS/FluffOS for defines/efuns that are not essential
+
+2010-01-27
+    Add flag to this_player efun
+    virtualp() efun
+    Correctly set varargs flag on method parameters
+    match_path efun
+    {array} | {array} (union)
+    {array} & {array} (intersection)
+    Support function literals of the form (: some_method :)
+    Make function literals correctly reference fields
+    Handled catch through synthetic methods
+
+2010-01-25
+    Make constant '0' a mixed value, so it can be assigned to a string or object var
+
+2010-01-24
+    Use proper path in #line markers
+    Compound Expressions
+    Cast Expression
+    Handle switch statements 
+    Access to enclosing methods in function literal
+
+2009-12-24
+    Crypt passwords in vision mudlib
+    Create crypt efun in separate plugin
+    Replace ObjectReference with ObjectId
+    Failed build if unit test fails
+
+2009-12-10
+    Misc improvements to mudlib
+    Provide debug info in plugin builds
+    Provide appropriate messages from catch() expression
+    Support string + object
+    Ability to find object if (and only if) loaded
+    Add __DATE__ and __TIME__ macros to preprocessor
+    Add trim(str) efun
+
 2009-12-08
     Fixes to build process
     Prompt after saving new user

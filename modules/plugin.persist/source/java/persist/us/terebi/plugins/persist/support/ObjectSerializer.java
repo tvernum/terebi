@@ -26,6 +26,8 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -40,6 +42,7 @@ import us.terebi.lang.lpc.parser.jj.ParseException;
 import us.terebi.lang.lpc.runtime.ClassInstance;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
@@ -100,6 +103,7 @@ public class ObjectSerializer
         try
         {
             Writer writer = new OutputStreamWriter(output);
+            writerHeader(object, writer);
             persist(object, writer, saveZero);
         }
         finally
@@ -107,6 +111,15 @@ public class ObjectSerializer
             IOUtil.close(output);
         }
         return false;
+    }
+
+    private void writerHeader(ObjectInstance object, Writer writer) throws IOException
+    {
+        writer.write("# ");
+        writer.write(object.getCanonicalName());
+        writer.write(" ");
+        writer.write(DateFormat.getDateTimeInstance().format(new Date()));
+        writer.write("\n");
     }
 
     public boolean restore(ObjectInstance object, boolean zeroNoSave) throws IOException
@@ -175,7 +188,7 @@ public class ObjectSerializer
         Map<String, ? extends ObjectInstance> inherited = object.getInheritedObjects();
         for (String inherit : inherited.keySet())
         {
-            persist(inherit + "::", inherited.get(inherit), writer, saveZero);
+            persist(prefix + inherit + "::", inherited.get(inherit), writer, saveZero);
         }
 
         Map<FieldDefinition, LpcValue> fields = object.getFieldValues();
@@ -202,6 +215,11 @@ public class ObjectSerializer
 
     private void restore(ObjectInstance object, BufferedReader reader, boolean zeroNoSave) throws IOException
     {
+        if (object == null)
+        {
+            throw new IllegalArgumentException("Cannot restore null object");
+        }
+        
         if (zeroNoSave)
         {
             zeroNoSave(object);
@@ -351,11 +369,13 @@ public class ObjectSerializer
         int sep = name.indexOf("::");
         if (sep == -1)
         {
-            FieldDefinition field = object.getDefinition().getFields().get(name);
+            ObjectDefinition definition = object.getDefinition();
+            Map<String, ? extends FieldDefinition> fields = definition.getFields();
+            FieldDefinition field = fields.get(name);
             if (field == null)
             {
                 LOG.info("Object " + object + " does not have a field " + name);
-                LOG.info("Object " + object + " has " + object.getDefinition().getFields());
+                LOG.info("Object " + object + " has " + fields);
             }
             else
             {

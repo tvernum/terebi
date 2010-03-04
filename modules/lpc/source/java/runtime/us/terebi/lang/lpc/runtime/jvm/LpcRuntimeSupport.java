@@ -38,6 +38,7 @@ import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
@@ -101,7 +102,12 @@ public class LpcRuntimeSupport
     {
         SystemContext context = RuntimeContext.obtain().system();
         Efuns functions = context.efuns();
-        return functions.getImplementation(name);
+        Callable efun = functions.getImplementation(name);
+        if (efun == null)
+        {
+            throw new InternalError("Cannot access efun " + name);
+        }
+        return efun;
     }
 
     public Callable simul_efun(String name)

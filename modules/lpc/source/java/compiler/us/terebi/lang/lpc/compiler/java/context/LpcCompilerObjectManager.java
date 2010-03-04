@@ -20,8 +20,10 @@ package us.terebi.lang.lpc.compiler.java.context;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.log4j.Logger;
 
@@ -31,12 +33,17 @@ import us.terebi.lang.lpc.compiler.ObjectCompiler;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.ObjectLifecycleListener;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.object.VirtualObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.Apply;
 import us.terebi.util.Predicate;
 import us.terebi.util.collection.PredicateIterator;
+import us.terebi.util.listener.ListenerManager;
 
 /**
  * 
@@ -49,6 +56,9 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
 
     private final Map<String, CompiledObjectDefinition> _definitions;
     private final Map<ObjectId, CompiledObjectInstance> _objects;
+    private final ListenerManager<ObjectLifecycleListener> _listeners;
+    private final Set<String> _compiling;
+
     private ObjectCompiler _compiler;
     private long _id;
     private String _master;
@@ -58,9 +68,10 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
     {
         _definitions = new HashMap<String, CompiledObjectDefinition>();
         _objects = new HashMap<ObjectId, CompiledObjectInstance>();
+        _listeners = new ListenerManager<ObjectLifecycleListener>(ObjectLifecycleListener.class);
+        _compiling = new HashSet<String>();
         _compiler = null;
         _id = 0;
-
         _master = null;
         _sefun = null;
     }
@@ -76,26 +87,54 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         if (definition == null && _compiler != null)
         {
             definition = compile(name);
-            registerObject(definition);
         }
         return definition;
     }
 
     private CompiledObjectDefinition compile(String name)
     {
-        CompiledObjectDefinition definition = _compiler.compile(filename(name));
-        if (definition != null)
+        if (_compiling.contains(name))
         {
-            return definition;
+            throw new InternalError("Compile cycle detected");
         }
-        LpcValue virtual = VIRTUAL_COMPILE.invoke(getMasterObject(), new StringValue(name));
-        if (!virtual.asBoolean())
+
+        _compiling.add(name);
+        try
         {
-            throw new LpcRuntimeException("No such object " + name);
+            CompiledObjectDefinition definition = _compiler.compile(filename(name));
+            if (definition != null)
+            {
+                return register(definition, null);
+            }
+            LpcValue virtual = VIRTUAL_COMPILE.invoke(getMasterObject(), new StringValue(name));
+            if (!virtual.asBoolean())
+            {
+                throw new LpcRuntimeException("No such object " + name);
+            }
+            ObjectInstance object = virtual.asObject();
+            assert object instanceof CompiledObjectInstance;
+            definition = new VirtualObjectDefinition(this, name, (CompiledObjectInstance) object);
+            return register(definition, object);
         }
-        ObjectInstance object = virtual.asObject();
-        assert object instanceof CompiledObjectInstance;
-        return new VirtualObjectDefinition(this, name, (CompiledObjectInstance) object);
+        finally
+        {
+            _compiling.remove(name);
+        }
+    }
+
+    private CompiledObjectDefinition register(CompiledObjectDefinition definition, ObjectInstance prototype)
+    {
+        registerObject(definition);
+        if (prototype != null)
+        {
+            _listeners.dispatch().vitualObjectCompiled(getContext(), this, definition, prototype);
+        }
+        else
+        {
+            _listeners.dispatch().objectCompiled(getContext(), this, definition);
+        }
+        forceLoad(definition);
+        return definition;
     }
 
     private String filename(String name)
@@ -105,10 +144,13 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
 
     public void registerObject(CompiledObjectDefinition object)
     {
+        if (object == null)
+        {
+            return;
+        }
         LOG.info("Loaded " + object);
         String name = ObjectId.normalise(object.getName());
         _definitions.put(name, object);
-        forceLoad(object);
     }
 
     private CompiledObjectInstance forceLoad(CompiledObjectDefinition object)
@@ -120,6 +162,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
     public void registerObject(CompiledObjectInstance object)
     {
         _objects.put(new ObjectId(object), object);
+        _listeners.dispatch().objectCreated(getContext(), this, object);
     }
 
     public long allocateObjectIdentifier()
@@ -216,6 +259,22 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
     public void instanceDestructed(ObjectInstance instance)
     {
         _objects.values().remove(instance);
+        _listeners.dispatch().objectDestructed(getContext(), this, instance);
+    }
+
+    private SystemContext getContext()
+    {
+        return RuntimeContext.obtain().system();
+    }
+
+    public void addListener(ObjectLifecycleListener listener)
+    {
+        _listeners.addListener(listener);
+    }
+
+    public void removeListener(ObjectLifecycleListener listener)
+    {
+        _listeners.removeListener(listener);
     }
 
 }

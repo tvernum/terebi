@@ -19,6 +19,7 @@
 package us.terebi.plugins.ed;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
@@ -31,13 +32,8 @@ import us.terebi.plugins.ed.efun.InEditEfun;
 /**
  * @version $Revision$
  */
-public class EdPlugin implements Plugin
+public class EdPlugin extends AbstractPlugin  implements Plugin
 {
-    public void init(SystemContext context)
-    {
-        // No-op
-    }
-
     public void load(Config config, SystemContext context)
     {
         Efuns efuns = context.efuns();
@@ -46,15 +42,4 @@ public class EdPlugin implements Plugin
         efuns.define("query_ed_mode", new NoOpEfun(LpcConstants.INT.MINUS_ONE));
         efuns.define("in_edit", new InEditEfun());
     }
-
-    public void run(SystemContext context)
-    {
-        // No-op
-    }
-
-    public void start(SystemContext context)
-    {
-        // No-op
-    }
-
 }

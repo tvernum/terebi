@@ -64,7 +64,7 @@ public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, C
     public static ObjectInstance this_object(ThreadContext context)
     {
         CallStack stack = context.callStack();
-        ObjectInstance instance = stack.peekFrame(0).instance;
+        ObjectInstance instance = stack.peekFrame(0).instance();
         return instance;
     }
 }

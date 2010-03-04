@@ -21,6 +21,7 @@ import us.terebi.engine.config.Config;
 import us.terebi.engine.config.ConfigException;
 import us.terebi.engine.config.ConfigNames;
 import us.terebi.engine.objects.CompileOptions;
+import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
@@ -31,13 +32,8 @@ import us.terebi.plugins.compat.efun.SetEvalLimitEfun;
 /**
  * @version $Revision$
  */
-public class CompatPlugin implements Plugin
+public class CompatPlugin extends AbstractPlugin implements Plugin
 {
-    public void init(SystemContext context)
-    {
-        // No-op
-    }
-
     public void load(Config config, SystemContext context)
     {
         CompileOptions compileOptions = context.attachments().get(CompileOptions.class);
@@ -62,15 +58,4 @@ public class CompatPlugin implements Plugin
         efuns.define("reset_eval_cost", new ResetEvalCostEfun());
         efuns.define("set_eval_limit", new SetEvalLimitEfun());
     }
-
-    public void run(SystemContext context)
-    {
-        // No-op
-    }
-
-    public void start(SystemContext context)
-    {
-        // No-op
-    }
-
 }

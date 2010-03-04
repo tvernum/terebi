@@ -84,7 +84,6 @@ import us.terebi.lang.lpc.runtime.jvm.efun.PreviousObjectEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.QueryIdleEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.QueryIpNameEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.QueryIpNumberEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.QueryPrivsEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.QuerySnoopEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.QuerySnoopingEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.RandomEfun;
@@ -311,7 +310,6 @@ public class StandardEfuns
         public static final Efun time = new TimeEfun();
         public static final Efun ctime = new CtimeEfun();
         public static final Efun localtime = new LocaltimeEfun();
-        public static final Efun query_privs = new QueryPrivsEfun();
         public static final Efun dump_file_descriptors = new NoOpEfun(LpcConstants.STRING.BLANK);
         public static final Efun reclaim_objects = new NoOpEfun(LpcConstants.INT.ZERO);
 

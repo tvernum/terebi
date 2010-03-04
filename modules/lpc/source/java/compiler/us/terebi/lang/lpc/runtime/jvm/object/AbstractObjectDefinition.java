@@ -25,9 +25,11 @@ import org.apache.commons.io.FilenameUtils;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.runtime.AttributeMap;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.util.Apply;
+import us.terebi.lang.lpc.runtime.util.Attributes;
 
 /**
  * 
@@ -38,6 +40,7 @@ public abstract class AbstractObjectDefinition implements CompiledObjectDefiniti
 
     private final CompilerObjectManager _manager;
     private final String _name;
+    private final AttributeMap _attributes;
 
     private CompiledObjectInstance _master;
     private boolean _loadingMaster;
@@ -46,6 +49,7 @@ public abstract class AbstractObjectDefinition implements CompiledObjectDefiniti
     {
         _manager = manager;
         _name = name;
+        _attributes = new Attributes();
         _master = null;
         _loadingMaster = false;
     }
@@ -135,4 +139,8 @@ public abstract class AbstractObjectDefinition implements CompiledObjectDefiniti
         objectManager().registerObject(instance);
     }
 
+    public AttributeMap getAttributes()
+    {
+        return _attributes;
+    }
 }

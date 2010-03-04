@@ -233,7 +233,7 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
         }
         catch (Throwable e)
         {
-            throw new LpcRuntimeException("Internal Error - " + e.getMessage(), e);
+            throw new LpcRuntimeException("Internal Error - " + e.toString(), e);
         }
     }
 

@@ -36,12 +36,12 @@ public class ObjectId
         int hash = name.indexOf('#');
         if (hash == -1)
         {
-            _file = name;
+            _file = normalise(name);
             _id = 0;
         }
         else
         {
-            _file = name.substring(0, hash);
+            _file = normalise(name.substring(0, hash));
             _id = Long.parseLong(name.substring(hash + 1));
         }
     }
@@ -78,4 +78,41 @@ public class ObjectId
     {
         return _id;
     }
+
+    public int hashCode()
+    {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((_file == null) ? 0 : _file.hashCode());
+        result = prime * result + (int) (_id ^ (_id >>> 32));
+        return result;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+        if (obj == null)
+        {
+            return false;
+        }
+        if (getClass() != obj.getClass())
+        {
+            return false;
+        }
+        ObjectId other = (ObjectId) obj;
+        return equals(other);
+    }
+
+    public boolean equals(ObjectId other)
+    {
+        if (_file.equals(other._file) && _id == other._id)
+        {
+            return true;
+        }
+        return false;
+    }
+
 }

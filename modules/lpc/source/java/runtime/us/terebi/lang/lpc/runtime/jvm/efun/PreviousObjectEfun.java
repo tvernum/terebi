@@ -71,14 +71,14 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
             for (int i = 1; i < callStack.size(); i++)
             {
                 MajorFrame frame = callStack.peekFrame(i);
-                array.add(frame.instance);
+                array.add(frame.instance());
             }
             return array.toArray();
         }
 
         int offset = (int) (index + 1);
         MajorFrame frame = callStack.peekFrame(offset);
-        return new ObjectValue(frame.instance);
+        return new ObjectValue(frame.instance());
     }
 
 }

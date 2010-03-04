@@ -116,6 +116,10 @@ public class MathSupport
         {
             return new StringValue(left.asString() + right.asString());
         }
+        if (isNil(left) && isNumber(right))
+        {
+            return right;
+        }
         throw new UnsupportedOperationException("add - Not implemented for "
                 + left.getActualType()
                 + " + "

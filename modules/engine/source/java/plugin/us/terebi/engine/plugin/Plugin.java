@@ -27,8 +27,35 @@ import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
  */
 public interface Plugin
 {
+    /**
+     * Called very early in the initialisation process, before the master object or simul-efun objects are loaded.
+     * The provided {@link SystemContext} will have efuns, and some attachments (such as {@link us.terebi.engine.objects.CompileOptions},
+     * but will not have an object manager or master/simul-efun objects.
+     * This is the appropriate place to configure new efuns (so they can be used in the master object) and new preprocessor directives
+     */
     public void load(Config config, SystemContext context);
+
+    /**
+     * Called during the initialisation process, after the object manager is loaded, but before the master object and simul-efun objects are loaded
+     * This is the appropriate place to register listeners with the object manager
+     */
     public void init(SystemContext context);
+
+    /**
+     * Called during the initialisation process, after the master object and simul-efun objects are loaded, but before epilog is called in the master object
+     * This is the appropriate place to load any objects, or to verify that the correct applies have been defined in the master object
+     */
+    public void epilog(SystemContext context);
+
+    /**
+     * Called after the initialisation process, before external connections are opened.
+     * This is the last chance to do anything before connections are opened
+     */
     public void start(SystemContext context);
+
+    /**
+     * Called at the end of the start-up process, after external connections are opened.
+     * The driver is now running and listening, it's really too late to do anything useful
+     */
     public void run(SystemContext context);
 }

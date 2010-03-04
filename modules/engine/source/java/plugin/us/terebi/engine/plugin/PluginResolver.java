@@ -107,11 +107,7 @@ class PluginResolver
         ZipEntry entry = jar.getEntry(PROPERTIES_LOCATION);
         if (entry == null)
         {
-            LOG.error("Plugin "
-                    + IOUtil.canonicalPath(file)
-                    + " does not contain "
-                    + PROPERTIES_LOCATION
-                    + ". Plugin will not be loaded");
+            LOG.error("Plugin " + IOUtil.canonicalPath(file) + " does not contain " + PROPERTIES_LOCATION + ". Plugin will not be loaded");
             return null;
         }
         return jar.getInputStream(entry);
@@ -153,12 +149,7 @@ class PluginResolver
             Class< ? > cls = classLoader.loadClass(_config.getPluginManager());
             if (!Plugin.class.isAssignableFrom(cls))
             {
-                LOG.error("Specified plugin manager '"
-                        + _config.getPluginManager()
-                        + "' for "
-                        + _config
-                        + " does not implement "
-                        + Plugin.class);
+                LOG.error("Specified plugin manager '" + _config.getPluginManager() + "' for " + _config + " does not implement " + Plugin.class);
                 _failed = true;
                 return;
             }
@@ -202,5 +193,14 @@ class PluginResolver
             return;
         }
         _plugin.run(context);
+    }
+
+    public void epilog(SystemContext context)
+    {
+        if (_failed)
+        {
+            return;
+        }
+        _plugin.epilog(context);
     }
 }

@@ -59,12 +59,14 @@ public class BoundMethod implements Callable
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        return _method.execute(_instance, arguments);
+        LpcValue result = _method.execute(_instance, arguments);
+        return result;
     }
 
     public LpcValue execute(LpcValue... arguments)
     {
-        return _method.execute(_instance, Arrays.asList(arguments));
+        LpcValue result = _method.execute(_instance, Arrays.asList(arguments));
+        return result;
     }
 
     public Kind getKind()

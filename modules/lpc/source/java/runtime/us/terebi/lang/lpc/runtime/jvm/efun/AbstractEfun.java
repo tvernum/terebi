@@ -118,7 +118,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
             LpcValue val = argumentValues.get(i);
             if (def.isVarArgs())
             {
-                checkType(i + 1, Types.MIXED_ARRAY, val.getActualType());
+                checkType(i + 1, Types.MIXED_ARRAY, val.getActualType(), val);
                 for (LpcValue element : val.asList())
                 {
                     checkArgument(def, element, i + 1);
@@ -134,7 +134,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
     private void checkArgument(ArgumentDefinition def, LpcValue val, int index)
     {
         LpcType valType = (val instanceof LpcReference) ? ((LpcReference) val).getType() : val.getActualType();
-        checkType(index, def.getType(), valType);
+        checkType(index, def.getType(), valType, val);
         checkSemantics(index, def.getSemantics(), val);
     }
 
@@ -149,7 +149,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         }
     }
 
-    private void checkType(int index, LpcType expectedType, LpcType actualType)
+    private void checkType(int index, LpcType expectedType, LpcType actualType, LpcValue value)
     {
         if (expectedType.equals(actualType))
         {
@@ -160,6 +160,10 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
             return;
         }
         if (acceptsLessArguments() && actualType.getKind() == LpcType.Kind.NIL)
+        {
+            return;
+        }
+        if (Types.INT.equals(actualType) && value.asLong() == 0)
         {
             return;
         }
@@ -242,7 +246,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         }
         if (isString(value))
         {
-            ObjectInstance thisObject = RuntimeContext.obtain().callStack().peekFrame(0).instance;
+            ObjectInstance thisObject = RuntimeContext.obtain().callStack().peekFrame(0).instance();
             MethodDefinition method = thisObject.getDefinition().getMethods().get(value.asString());
             if (method == null)
             {
@@ -294,5 +298,10 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         {
             throw new UnsupportedOperationException("Bad argument to " + getName() + " - " + func + " must be a string or a function");
         }
+    }
+
+    protected boolean hasArgument(List<? extends LpcValue> arguments, int index)
+    {
+        return index < arguments.size() && index >= 0 && !MiscSupport.isNil(arguments.get(index));
     }
 }

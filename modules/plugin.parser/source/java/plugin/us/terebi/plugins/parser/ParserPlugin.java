@@ -19,6 +19,7 @@
 package us.terebi.plugins.parser;
 
 import us.terebi.engine.config.Config;
+import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
@@ -34,13 +35,8 @@ import us.terebi.plugins.parser.efun.VoidEfun;
 /**
  * @version $Revision$
  */
-public class ParserPlugin implements Plugin
+public class ParserPlugin extends AbstractPlugin implements Plugin
 {
-    public void init(SystemContext context)
-    {
-        // No-op
-    }
-
     public void load(Config config, SystemContext context)
     {
         Efuns efuns = context.efuns();
@@ -53,15 +49,4 @@ public class ParserPlugin implements Plugin
         efuns.define("parse_dump", new NoOpEfun(LpcConstants.STRING.BLANK));
         efuns.define("parse_my_rules", new ParseMyRulesEfun());
     }
-
-    public void run(SystemContext context)
-    {
-        // No-op
-    }
-
-    public void start(SystemContext context)
-    {
-        // No-op
-    }
-
 }

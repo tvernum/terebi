@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.plugins.privs.efun;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,9 +26,14 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.plugins.privs.Privs;
 
 /**
  * 
@@ -48,8 +53,17 @@ public class QueryPrivsEfun extends AbstractEfun implements FunctionSignature, C
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
-        return new StringValue("");
+        ObjectInstance obj = arguments.get(0).asObject();
+        String privs = Privs.get(obj);
+        if (privs == null)
+        {
+            return NilValue.INSTANCE;
+        }
+        if (privs.length() == 0)
+        {
+            return LpcConstants.STRING.BLANK;
+        }
+        return new StringValue(privs);
     }
 
 }

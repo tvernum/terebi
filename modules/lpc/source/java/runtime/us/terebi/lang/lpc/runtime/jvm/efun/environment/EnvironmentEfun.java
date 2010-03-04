@@ -34,6 +34,8 @@ import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNil;
+
 /**
  * 
  */
@@ -59,7 +61,7 @@ public class EnvironmentEfun extends AbstractEfun implements FunctionSignature, 
         checkArguments(arguments);
 
         ObjectInstance obj;
-        if (arguments.isEmpty())
+        if (arguments.isEmpty() || isNil(arguments.get(0)))
         {
             obj = ThisObjectEfun.this_object();
         }
