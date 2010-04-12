@@ -71,7 +71,7 @@ public class BindEfun extends AbstractEfun implements FunctionSignature, Callabl
         checkArguments(arguments);
         Callable func = arguments.get(0).asCallable();
         ObjectInstance owner = arguments.get(1).asObject();
-        // @TODO security check in master object
+        /* @TODO : EFUN - security check in master object */
         return new FunctionValue(new BoundFunction(func, owner));
     }
 

@@ -81,6 +81,9 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         _compiler = compiler;
     }
 
+    /**
+     * @throws LpcRuntimeException If object cannot be found
+     */
     public CompiledObjectDefinition findObject(String name)
     {
         CompiledObjectDefinition definition = _definitions.get(ObjectId.normalise(name));
@@ -109,7 +112,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
             LpcValue virtual = VIRTUAL_COMPILE.invoke(getMasterObject(), new StringValue(name));
             if (!virtual.asBoolean())
             {
-                throw new LpcRuntimeException("No such object " + name);
+                throw new ObjectNotFoundException(name);
             }
             ObjectInstance object = virtual.asObject();
             assert object instanceof CompiledObjectInstance;

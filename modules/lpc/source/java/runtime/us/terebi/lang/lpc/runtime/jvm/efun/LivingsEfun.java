@@ -46,7 +46,7 @@ public class LivingsEfun extends AbstractEfun implements FunctionSignature, Call
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO */
+        /* @TODO : EFUN */
         return VoidValue.INSTANCE;
     }
 

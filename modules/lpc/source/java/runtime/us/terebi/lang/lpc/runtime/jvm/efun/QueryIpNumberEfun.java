@@ -48,7 +48,7 @@ public class QueryIpNumberEfun extends AbstractEfun implements FunctionSignature
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
+        /* @TODO : EFUN */
         return new StringValue("0.0.0.0");
     }
 

@@ -49,6 +49,7 @@ import org.adjective.stout.operation.VM;
 
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
+import us.terebi.lang.lpc.compiler.java.context.FunctionLookup;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
 import us.terebi.lang.lpc.compiler.util.DelegatingDeclarationVisitor;
@@ -66,6 +67,7 @@ import us.terebi.lang.lpc.runtime.jvm.Dispatch;
 import us.terebi.lang.lpc.runtime.jvm.InheritedObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 
 /**
  * 
@@ -187,28 +189,84 @@ public class ClassBuilder extends BaseASTVisitor
         }
     }
 
+    private class MethodKey
+    {
+        public final String name;
+        public final int argumentCount;
+
+        public MethodKey(String n, int count)
+        {
+            this.name = n;
+            this.argumentCount = count;
+        }
+
+        public MethodKey(MethodDescriptor methodDescriptor)
+        {
+            this(methodDescriptor.getName(), methodDescriptor.getParameters().length);
+        }
+
+        public int hashCode()
+        {
+            return name.hashCode() ^ argumentCount;
+        }
+
+        public boolean equals(Object obj)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            if (obj == this)
+            {
+                return true;
+            }
+            if (obj instanceof ClassBuilder.MethodKey)
+            {
+                ClassBuilder.MethodKey other = (ClassBuilder.MethodKey) obj;
+                return this.name.equals(other.name) && this.argumentCount == other.argumentCount;
+            }
+            return false;
+        }
+
+        public String toString()
+        {
+            return getClass().getSimpleName() + ':' + name + '(' + argumentCount + ')';
+        }
+    }
+
     private void createDispatchMethodStubs()
     {
-        Set<String> required = new HashSet<String>();
+        Set<MethodKey> required = new HashSet<MethodKey>();
         for (String inherit : _scope.getInheritNames())
         {
             ObjectDefinition parent = _scope.getInherit(inherit);
             getAllMethodNames(required, parent);
         }
 
-        required.removeAll(getImplementedMethods(_spec));
+        Set<MethodKey> implemented = getImplementedMethods(_spec);
+        required.removeAll(implemented);
 
         FunctionCallSupport support = new FunctionCallSupport(_scope);
-        for (String methodName : required)
+        for (MethodKey key : required)
         {
-            FunctionReference reference = support.findFunction(null, null, methodName);
-            MethodSpec method = new MethodSpec(methodName);
+            FunctionReference reference = support.findInheritedFunction(key.name, key.argumentCount);
 
+            List< ? extends ArgumentDefinition> arguments = reference.signature.getArguments();
+            if (arguments.size() != key.argumentCount)
+            {
+                throw new InternalError("Method reference "
+                        + reference
+                        + " has "
+                        + arguments.size()
+                        + " arguments, but dispatch is expecting "
+                        + key.argumentCount);
+            }
+            MethodSpec method = new MethodSpec(key.name);
+            
             method.withModifiers(ElementModifier.PUBLIC, ElementModifier.FINAL, ElementModifier.SYNTHETIC);
             method.withAnnotation(new AnnotationSpec(Dispatch.class));
             method.withReturnType(ByteCodeConstants.LPC_VALUE);
 
-            List< ? extends ArgumentDefinition> arguments = reference.signature.getArguments();
             Parameter[] parameters = new Parameter[arguments.size()];
             for (int i = 0; i < parameters.length; i++)
             {
@@ -229,18 +287,19 @@ public class ClassBuilder extends BaseASTVisitor
         }
     }
 
-    private void getAllMethodNames(Set<String> names, ObjectDefinition obj)
+    private void getAllMethodNames(Set<MethodKey> names, ObjectDefinition obj)
     {
         for (String name : obj.getMethods().keySet())
         {
-            if (names.contains(name))
+            MethodDefinition definition = obj.getMethods().get(name);
+            MethodKey key = new MethodKey(name, definition.getSignature().getArguments().size());
+            if (names.contains(key))
             {
                 continue;
             }
-            MethodDefinition definition = obj.getMethods().get(name);
             if (FunctionCallCompiler.requiresDispatch(definition.getModifiers()))
             {
-                names.add(name);
+                names.add(key);
             }
         }
         for (ObjectDefinition inherit : (Collection< ? extends ObjectDefinition>) obj.getInheritedObjects().values())
@@ -251,32 +310,40 @@ public class ClassBuilder extends BaseASTVisitor
 
     private void createPureVirtualMethodStubs()
     {
-        Set<String> declared = _scope.functions().getLocalMethodNames();
+        final FunctionLookup functions = _scope.functions();
 
-        Set<String> implemented = getImplementedMethods(_spec);
+        Set<MethodKey> implemented = getImplementedMethods(_spec);
+        Set<MethodKey> unimplemented = new HashSet<MethodKey>();
 
-        Set<String> unimplemented = new HashSet<String>(declared);
-        unimplemented.removeAll(implemented);
-
-        for (String name : unimplemented)
+        Set<String> declared = functions.getLocalMethodNames();
+        for (String dec : declared)
         {
-            List<FunctionReference> inherited = _scope.functions().findFunctions("", name, false);
+            MethodKey key = new MethodKey(dec, functions.getLocalMethodSignature(dec).getArguments().size());
+            if (!implemented.contains(key))
+            {
+                unimplemented.add(key);
+            }
+        }
+
+        for (MethodKey key : unimplemented)
+        {
+            List<FunctionReference> inherited = functions.findFunctions("", key.name, false);
             if (!inherited.isEmpty())
             {
                 continue;
             }
-            FunctionSignature signature = _scope.functions().getLocalMethodSignature(name);
-            Set< ? extends Modifier> modifiers = _scope.functions().getLocalMethodModifiers(name);
-            addEmptyMethod(name, signature, modifiers);
+            FunctionSignature signature = functions.getLocalMethodSignature(key.name);
+            Set< ? extends Modifier> modifiers = functions.getLocalMethodModifiers(key.name);
+            addEmptyMethod(key.name, signature, modifiers);
         }
     }
 
-    private Set<String> getImplementedMethods(ClassSpec spec)
+    private Set<MethodKey> getImplementedMethods(ClassSpec spec)
     {
-        Set<String> implemented = new HashSet<String>();
+        Set<MethodKey> implemented = new HashSet<MethodKey>();
         for (MethodDescriptor methodDescriptor : spec.getMethods())
         {
-            implemented.add(methodDescriptor.getName());
+            implemented.add(new MethodKey(methodDescriptor));
         }
         return implemented;
     }

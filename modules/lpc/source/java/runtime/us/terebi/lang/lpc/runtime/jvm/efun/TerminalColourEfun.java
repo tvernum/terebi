@@ -59,7 +59,7 @@ public class TerminalColourEfun extends AbstractEfun implements FunctionSignatur
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        /* @TODO */
+        /* @TODO : EFUN */
         return arguments.get(0);
     }
 

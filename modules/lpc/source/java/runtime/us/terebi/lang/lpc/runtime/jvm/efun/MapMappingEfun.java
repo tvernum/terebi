@@ -30,6 +30,8 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -66,20 +68,36 @@ public class MapMappingEfun extends AbstractEfun implements FunctionSignature, C
         Map<LpcValue, LpcValue> map = mapping.asMap();
 
         LpcValue func = arguments.get(1);
+        List< ? extends LpcValue> args = arguments.get(2).asList();
 
+        Callable callable;
         if (isFunction(func))
         {
-            Callable callable = func.asCallable();
-            List< ? extends LpcValue> args = arguments.get(2).asList();
-            Map<LpcValue, LpcValue> result = map_function(map, callable, args);
-            return new MappingValue(result);
+            callable = func.asCallable();
         }
-        // @TODO
-        throw new UnsupportedOperationException(getName() + "(mapping," + func.getActualType() + ", ..) - Not implemented");
+        else if (MiscSupport.isString(func))
+        {
+            ObjectInstance object;
+            if (args.isEmpty())
+            {
+                object = ThisObjectEfun.this_object();
+            }
+            else
+            {
+                object = args.get(0).asObject();
+            }
+            callable = super.getFunctionReference(func.asString(), object);
+            args = args.subList(1, args.size());
+        }
+        else
+        {
+            throw new UnsupportedOperationException(getName() + "(mapping," + func.getActualType() + ", ..) - Not implemented");
+        }
+        Map<LpcValue, LpcValue> result = map_function(map, callable, args);
+        return new MappingValue(result);
     }
 
-    private Map<LpcValue, LpcValue> map_function(Map<LpcValue, LpcValue> map, Callable function,
-            List< ? extends LpcValue> additionalArguments)
+    private Map<LpcValue, LpcValue> map_function(Map<LpcValue, LpcValue> map, Callable function, List< ? extends LpcValue> additionalArguments)
     {
         HashMap<LpcValue, LpcValue> result = new HashMap<LpcValue, LpcValue>(map.size());
 

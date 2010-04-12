@@ -44,11 +44,6 @@ public class MatchPathEfun extends AbstractEfun implements FunctionSignature, Ca
         return list;
     }
 
-    public boolean acceptsLessArguments()
-    {
-        return false;
-    }
-
     public LpcType getReturnType()
     {
         return Types.MIXED;
@@ -56,7 +51,7 @@ public class MatchPathEfun extends AbstractEfun implements FunctionSignature, Ca
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        checkArguments(arguments, 2);
+        checkArguments(arguments);
         Map<LpcValue, LpcValue> map = arguments.get(0).asMap();
         String target = arguments.get(1).asString();
 

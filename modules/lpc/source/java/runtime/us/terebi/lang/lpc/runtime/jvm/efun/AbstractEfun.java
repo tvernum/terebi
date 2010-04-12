@@ -238,6 +238,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         return builder.toString();
     }
 
+    @Deprecated
     protected Callable getFunction(LpcValue value, int index)
     {
         if (isFunction(value))
@@ -247,6 +248,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         if (isString(value))
         {
             ObjectInstance thisObject = RuntimeContext.obtain().callStack().peekFrame(0).instance();
+            // @TODO - Should this handled inherited methods?
             MethodDefinition method = thisObject.getDefinition().getMethods().get(value.asString());
             if (method == null)
             {
@@ -286,13 +288,19 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
 
     protected Callable getFunctionReference(LpcValue func)
     {
-        if (isFunction(func))
+        return getFunctionReference(func, null);
+    }
+
+    protected Callable getFunctionReference(LpcValue func, LpcValue object)
+    {
+        if (MiscSupport.isFunction(func))
         {
             return func.asCallable();
         }
         else if (MiscSupport.isString(func))
         {
-            return new BoundMethod(func.asString(), ThisObjectEfun.this_object());
+            ObjectInstance instance = (object == null ? ThisObjectEfun.this_object() : object.asObject());
+            return new BoundMethod(func.asString(), instance);
         }
         else
         {
@@ -300,7 +308,12 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         }
     }
 
-    protected boolean hasArgument(List<? extends LpcValue> arguments, int index)
+    protected Callable getFunctionReference(String funcName, ObjectInstance object)
+    {
+        return new BoundMethod(funcName, object);
+    }
+
+    protected boolean hasArgument(List< ? extends LpcValue> arguments, int index)
     {
         return index < arguments.size() && index >= 0 && !MiscSupport.isNil(arguments.get(index));
     }

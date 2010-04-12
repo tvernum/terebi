@@ -18,8 +18,18 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 
@@ -50,5 +60,33 @@ public class ValueSupport
     public static LpcValue floatValue(double value)
     {
         return new FloatValue(value);
+    }
+
+    public static ArrayValue arrayValue(LpcValue[] elements)
+    {
+        return arrayValue(Arrays.asList(elements));
+    }
+
+    public static ArrayValue arrayValue(Collection<LpcValue> elements)
+    {
+        if (elements.isEmpty())
+        {
+            return LpcConstants.ARRAY.EMPTY;
+        }
+
+        List<LpcValue> list = new ArrayList<LpcValue>(elements);
+        Set<LpcType> types = new HashSet<LpcType>();
+        for (LpcValue lpcValue : elements)
+        {
+            types.add(lpcValue.getActualType());
+        }
+
+        if (types.size() == 1)
+        {
+            return new ArrayValue(Types.arrayOf(types.iterator().next()), list);
+        }
+
+        LpcType[] typeArray = types.toArray(new LpcType[types.size()]);
+        return new ArrayValue(Types.arrayOf(MiscSupport.commonType(typeArray)), list);
     }
 }

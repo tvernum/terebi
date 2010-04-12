@@ -52,7 +52,7 @@ public class FlushMessagesEfun extends AbstractEfun implements FunctionSignature
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO */
+        /* @TODO : EFUN */
         return LpcConstants.INT.ZERO;
     }
 

@@ -30,7 +30,9 @@ import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager.ObjectNotFoundException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -44,7 +46,7 @@ public class LoadObjectEfun extends AbstractEfun implements FunctionSignature, C
         return Collections.singletonList(new ArgumentSpec("file", Types.STRING));
     }
 
-    public LpcType getReturnType()  
+    public LpcType getReturnType()
     {
         return Types.OBJECT;
     }
@@ -54,10 +56,16 @@ public class LoadObjectEfun extends AbstractEfun implements FunctionSignature, C
         checkArguments(arguments);
         String file = arguments.get(0).asString();
         ObjectManager manager = RuntimeContext.obtain().system().objectManager();
-        ObjectDefinition definition = manager.findObject(file);
-        // @TODO - Return nil is "file" does not exist
-        ObjectInstance instance = definition.getMasterInstance();
-        return new ObjectValue(instance);
+        try
+        {
+            ObjectDefinition definition = manager.findObject(file);
+            ObjectInstance instance = definition.getMasterInstance();
+            return new ObjectValue(instance);
+        }
+        catch (ObjectNotFoundException e)
+        {
+            return NilValue.INSTANCE;
+        }
     }
 
 }

@@ -41,7 +41,7 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
 {
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("arguments", Types.INT));
+        return Collections.singletonList(new ArgumentSpec("index", Types.INT));
     }
 
     public boolean acceptsLessArguments()
@@ -58,7 +58,7 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
     {
         checkArguments(arguments);
         long index = 0;
-        if (!arguments.isEmpty())
+        if (hasArgument(arguments, 0))
         {
             index = arguments.get(0).asLong();
         }

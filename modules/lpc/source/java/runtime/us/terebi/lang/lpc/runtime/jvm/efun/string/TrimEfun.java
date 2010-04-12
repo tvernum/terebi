@@ -16,47 +16,34 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.string;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
-import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractStringEfun;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
  * 
  */
-public class RenameEfun extends AbstractEfun implements FunctionSignature, Callable
+public class TrimEfun extends AbstractStringEfun implements FunctionSignature, Callable
 {
-    // int cp(string src, string dst);
-    protected List< ? extends ArgumentDefinition> defineArguments()
-    {
-        ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
-        list.add(new ArgumentSpec("src", Types.STRING));
-        list.add(new ArgumentSpec("dst", Types.STRING));
-        return list;
-    }
-
-    public boolean acceptsLessArguments()
-    {
-        return false;
-    }
-    
-    public LpcType getReturnType()
-    {
-        return Types.INT;
-    }
-
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return null;
+        checkArguments(arguments);
+        LpcValue arg = arguments.get(0);
+        String str = arg.asString();
+        String trim = str.trim();
+        if (str == trim)
+        {
+            return arg;
+        }
+        else
+        {
+            return new StringValue(trim);
+        }
     }
-
 }

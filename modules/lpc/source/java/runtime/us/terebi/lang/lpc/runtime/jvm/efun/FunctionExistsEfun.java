@@ -68,7 +68,7 @@ public class FunctionExistsEfun extends AbstractEfun implements FunctionSignatur
         ObjectInstance target = arg1.asObject();
         String name = arg2.asString();
 
-        // @TODO - check inherited methods
+        /* @TODO : EFUN - check inherited methods */
         Map<String, ? extends MethodDefinition> methods = target.getDefinition().getMethods();
         MethodDefinition method = methods.get(name);
         if (method == null)

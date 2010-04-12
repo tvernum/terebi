@@ -21,18 +21,30 @@ package us.terebi.lang.lpc.runtime.jvm.context;
 import us.terebi.lang.lpc.compiler.java.context.ObjectId;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 
 /**
  * 
  */
 public interface ObjectManager
 {
+    public static class ObjectNotFoundException extends LpcRuntimeException
+    {
+        public ObjectNotFoundException(String name)
+        {
+            super("Object " + name + " not found");
+        }
+    }
+    
     public ObjectDefinition defineMasterObject(String name);
     public ObjectInstance getMasterObject();
 
     public ObjectDefinition defineSimulatedEfunObject(String name);
     public ObjectInstance getSimulatedEfunObject();
-    
+
+    /**
+     * @throws ObjectNotFoundException If no object can be found for <code>name</code>.
+     */
     public ObjectDefinition findObject(String name);
     public ObjectInstance findObject(ObjectId id);
     

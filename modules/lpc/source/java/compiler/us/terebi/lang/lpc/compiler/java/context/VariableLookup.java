@@ -322,7 +322,7 @@ public class VariableLookup implements VariableResolver
                             where.append(var.objectPath[0].lpcName);
                             where.append(',');
                         }
-                        throw new LookupException("The inherited variable " + name + " exists in " + where);
+                        throw new LookupException("The inherited variable " + name + " exists in multiple places: " + where);
                     }
             }
         }

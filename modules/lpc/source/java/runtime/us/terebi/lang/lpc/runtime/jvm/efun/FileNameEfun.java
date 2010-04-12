@@ -54,7 +54,7 @@ public class FileNameEfun extends AbstractEfun implements FunctionSignature, Cal
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         ObjectInstance obj;
-        if (arguments.isEmpty())
+        if (!hasArgument(arguments, 0))
         {
             obj = ThisObjectEfun.this_object();
         }

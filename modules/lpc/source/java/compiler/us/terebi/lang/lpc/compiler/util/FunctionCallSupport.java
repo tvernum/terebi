@@ -72,18 +72,31 @@ public class FunctionCallSupport extends BaseASTVisitor implements ParserVisitor
         _scope = scope;
     }
 
+    public FunctionReference findInheritedFunction(String name, int argCount)
+    {
+        List<FunctionReference> functions = _scope.functions().getInheritedMethods(name, argCount);
+        functions = filterVirtualFunctions(functions);
+        return extractFunctionReferences(null, name, functions);
+    }
+
     public FunctionReference findFunction(TokenNode node, String scope, String name)
     {
         List<FunctionReference> functions = _scope.functions().findFunctions(scope, name, !_scope.isSecureObject());
         functions = filterVirtualFunctions(functions);
+        String scopedName = ((scope != null) ? scope + "::" : "") + name;
+        return extractFunctionReferences(node, scopedName, functions);
+    }
+
+    private FunctionReference extractFunctionReferences(TokenNode node, final String scopedName, List<FunctionReference> functions)
+    {
         if (functions == null || functions.isEmpty())
         {
-            throw new CompileException(node, "No such function " + ((scope != null) ? scope + "::" : "") + name);
+            throw new CompileException(node, "No such function " + scopedName);
         }
         if (functions.size() > 1)
         {
             StringBuilder msg = new StringBuilder();
-            msg.append("Multiple functions ").append((scope != null) ? scope + "::" : "").append(name).append(" - ");
+            msg.append("Multiple functions ").append(scopedName).append(" - ");
             for (FunctionReference functionReference : functions)
             {
                 msg.append(functionReference.describe()).append(" , ");
@@ -146,7 +159,9 @@ public class FunctionCallSupport extends BaseASTVisitor implements ParserVisitor
                     + allowedArgCount
                     + " argument(s) but "
                     + args.jjtGetNumChildren()
-                    + " were provided");
+                    + ' '
+                    + (args.jjtGetNumChildren() == 1 ? "was" : "were")
+                    + " provided");
         }
     }
 

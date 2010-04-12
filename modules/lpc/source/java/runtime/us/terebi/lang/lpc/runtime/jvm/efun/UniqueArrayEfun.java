@@ -72,7 +72,7 @@ public class UniqueArrayEfun extends AbstractEfun implements FunctionSignature, 
         LpcValue array = arguments.get(0);
         LpcValue func = arguments.get(1);
         LpcValue skip = VoidValue.INSTANCE;
-        if (arguments.size() > 2)
+        if (hasArgument(arguments, 2))
         {
             skip = arguments.get(2);
         }

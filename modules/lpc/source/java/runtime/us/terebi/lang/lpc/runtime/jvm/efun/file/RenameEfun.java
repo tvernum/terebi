@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,48 +26,32 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class GetDirectoryInfoEfun extends AbstractEfun implements FunctionSignature, Callable
+public class RenameEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    //    mixed array get_dir(string dir);
-    //
-    //    mixed array get_dir(string dir, int flag);
-    //
-    //    If `dir' is a filename ('*' and '?' wildcards are supported), an array of 
-    //    strings is returned containing all filenames that match the specification. 
-    //    If `dir' is a directory name (ending with a slash--ie: "/u/", "/adm/", etc),
-    //    all filenames in that directory are returned.  
-    //
-    //    If called with a second argument equal to -1, get_dir will return an array
-    //    of subarrays, where the format of each subarray is:
-    //
-    //      ({ filename, size_of_file, last_time_file_touched })
+    // int cp(string src, string dst);
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
-        list.add(new ArgumentSpec("dir", Types.STRING));
-        list.add(new ArgumentSpec("flag", Types.INT));
+        list.add(new ArgumentSpec("src", Types.STRING));
+        list.add(new ArgumentSpec("dst", Types.STRING));
         return list;
-    }
-
-    public boolean acceptsLessArguments()
-    {
-        return true;
     }
 
     public LpcType getReturnType()
     {
-        return Types.MIXED_ARRAY;
+        return Types.INT;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
+        /* @TODO : EFUN */
         return null;
     }
 

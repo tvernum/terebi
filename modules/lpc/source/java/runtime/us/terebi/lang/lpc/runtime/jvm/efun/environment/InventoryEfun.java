@@ -28,6 +28,7 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
@@ -65,7 +66,7 @@ public class InventoryEfun extends AbstractEfun
         checkArguments(arguments);
 
         ObjectInstance obj;
-        if (arguments.isEmpty())
+        if (arguments.isEmpty() || MiscSupport.isNil(arguments.get(0)))
         {
             obj = ThisObjectEfun.this_object();
         }
@@ -80,7 +81,6 @@ public class InventoryEfun extends AbstractEfun
         {
             array.add(new ObjectValue(object));
         }
-
         return new ArrayValue(Types.OBJECT_ARRAY, array);
     }
 

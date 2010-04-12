@@ -30,13 +30,13 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isFunction;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMapping;
 
 /**
@@ -83,12 +83,17 @@ public class FilterEfun extends AbstractEfun implements FunctionSignature, Calla
 
         LpcValue func = arguments.get(1);
 
-        Callable callable = getFunctionReference(func);
         List< ? extends LpcValue> args = arguments.get(2).asList();
+        LpcValue object = null;
+        if (MiscSupport.isString(func) && !args.isEmpty())
+        {
+            object = args.get(0);
+            args = args.subList(1, args.size());
+        }
+
+        Callable callable = getFunctionReference(func, object);
         List< ? extends LpcValue> result = filter(list, callable, args);
         return new ArrayValue(array.getActualType(), result);
-
-        // @TODO
     }
 
     private List< ? extends LpcValue> filter(List<LpcValue> list, Callable function, List< ? extends LpcValue> additionalArguments)
@@ -118,17 +123,18 @@ public class FilterEfun extends AbstractEfun implements FunctionSignature, Calla
         Map<LpcValue, LpcValue> map = mapping.asMap();
 
         LpcValue func = arguments.get(1);
+        List< ? extends LpcValue> args = arguments.get(2).asList();
 
-        if (isFunction(func))
+        LpcValue object = null;
+        if (MiscSupport.isString(func) && !args.isEmpty())
         {
-            Callable callable = func.asCallable();
-            List< ? extends LpcValue> args = arguments.get(2).asList();
-            Map<LpcValue, LpcValue> result = filter(map, callable, args);
-            return new MappingValue(result);
-
+            object = args.get(0);
+            args = args.subList(1, args.size());
         }
-        // @TODO
-        throw new UnsupportedOperationException(getName() + "(mapping," + func.getActualType() + ", ..) - Not implemented");
+
+        Callable callable = getFunctionReference(func, object);
+        Map<LpcValue, LpcValue> result = filter(map, callable, args);
+        return new MappingValue(result);
     }
 
     private Map<LpcValue, LpcValue> filter(Map<LpcValue, LpcValue> map, Callable function, List< ? extends LpcValue> additionalArguments)

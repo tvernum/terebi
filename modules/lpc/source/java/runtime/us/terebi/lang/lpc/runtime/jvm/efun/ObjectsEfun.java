@@ -58,7 +58,7 @@ public class ObjectsEfun extends AbstractEfun implements FunctionSignature, Call
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
+        /* @TODO : EFUN */
         return null;
     }
 

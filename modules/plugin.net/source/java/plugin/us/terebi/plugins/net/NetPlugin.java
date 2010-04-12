@@ -1,6 +1,5 @@
 /* ------------------------------------------------------------------------
- * $Id$
- * Copyright 2009 Tim Vernum
+ * Copyright 2010 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,33 +15,22 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.plugins.net;
 
-import java.util.List;
-
-import us.terebi.lang.lpc.runtime.Callable;
-import us.terebi.lang.lpc.runtime.FunctionSignature;
-import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.engine.config.Config;
+import us.terebi.engine.plugin.AbstractPlugin;
+import us.terebi.engine.plugin.Plugin;
+import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
+import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.plugins.net.efun.ResolveEfun;
 
 /**
- * 
  */
-public class TrimEfun extends AbstractStringEfun implements FunctionSignature, Callable
+public class NetPlugin extends AbstractPlugin implements Plugin
 {
-    public LpcValue execute(List< ? extends LpcValue> arguments)
+    public void load(Config config, SystemContext context)
     {
-        checkArguments(arguments);
-        LpcValue arg = arguments.get(0);
-        String str = arg.asString();
-        String trim = str.trim();
-        if (str == trim)
-        {
-            return arg;
-        }
-        else
-        {
-            return new StringValue(trim);
-        }
+        Efuns efuns = context.efuns();
+        efuns.define("resolve", new ResolveEfun());
     }
 }

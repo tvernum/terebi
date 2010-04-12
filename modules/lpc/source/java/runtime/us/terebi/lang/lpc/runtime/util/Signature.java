@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime.util;
 
+import java.util.Iterator;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
@@ -54,10 +55,57 @@ public class Signature implements FunctionSignature
     {
         return _varargs;
     }
-    
+
     public boolean hasUnstructuredArguments()
     {
         return false;
+    }
+
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        if (obj == this)
+        {
+            return true;
+        }
+        if (obj instanceof Signature)
+        {
+            Signature other = (Signature) obj;
+            if (this._returnType.equals(other._returnType) && this._varargs == other._varargs && this._arguments.size() == other._arguments.size())
+            {
+                Iterator< ? extends ArgumentDefinition> thisArgs = this._arguments.iterator();
+                Iterator< ? extends ArgumentDefinition> otherArgs = other._arguments.iterator();
+                while (thisArgs.hasNext())
+                {
+                    ArgumentDefinition thisArg = thisArgs.next();
+                    ArgumentDefinition otherArg = otherArgs.next();
+
+                    if (thisArg.isVarArgs() != otherArg.isVarArgs())
+                    {
+                        return false;
+                    }
+                    if (thisArg.getSemantics() != otherArg.getSemantics())
+                    {
+                        return false;
+                    }
+                    if (!thisArg.getType().equals(otherArg.getType()))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        return false;
+    }
+
+    public int hashCode()
+    {
+        return _returnType.hashCode() ^ (_arguments.size() << (_varargs ? 2 : 4));
     }
 
     public String toString()
@@ -69,10 +117,17 @@ public class Signature implements FunctionSignature
         }
         builder.append(_returnType);
         builder.append(" ( ");
-        for (ArgumentDefinition arg : _arguments)
+        Iterator< ? extends ArgumentDefinition> iterator = _arguments.iterator();
+        while (iterator.hasNext())
         {
+            ArgumentDefinition arg = iterator.next();
             builder.append(arg);
-            builder.append(' ');
+            if (iterator.hasNext())
+            {
+                builder.append(" , ");
+            } else {
+                builder.append(' ');
+            }
         }
         builder.append(')');
         return builder.toString();

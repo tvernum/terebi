@@ -18,14 +18,19 @@
 
 package us.terebi.lang.lpc.runtime.jvm;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+
 import us.terebi.lang.lpc.compiler.java.context.ClassFinder;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
-import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.MethodDefinition;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.value.ClassReference;
 
@@ -111,15 +116,41 @@ public class LpcObject extends LpcRuntimeSupport
 
     public Callable method(String name)
     {
-        CompiledMethodDefinition method = getObjectDefinition().getMethods().get(name);
+        CompiledObjectDefinition object = getObjectDefinition();
+        Callable callable = findMethod(name, object);
+        if (callable != null)
+        {
+            return callable;
+        }
+        throw new InternalError("No such method " + name + " in " + object);
+    }
+
+    private Callable findMethod(String name, ObjectDefinition object)
+    {
+        MethodDefinition method = object.getMethods().get(name);
         if (method != null)
         {
             return method.getFunction(getObjectInstance());
         }
-        else
+        Set<Callable> match = new HashSet<Callable>();
+        Collection< ? extends ObjectDefinition> inherited = object.getInheritedObjects().values();
+        for (ObjectDefinition parent : inherited)
         {
-            throw new InternalError("Not such method " + name + " in " + getObjectDefinition());
+            Callable callable = findMethod(name, parent);
+            if (callable != null)
+            {
+                match.add(callable);
+            }
         }
+        if (match.isEmpty())
+        {
+            return null;
+        }
+        if (match.size() == 1)
+        {
+            return match.iterator().next();
+        }
+        throw new InternalError("Object " + object + " inherits " + match.size() + " methods named '" + name + "'");
     }
 
 }

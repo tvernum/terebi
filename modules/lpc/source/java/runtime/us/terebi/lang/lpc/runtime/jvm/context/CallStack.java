@@ -32,7 +32,7 @@ public class CallStack
 {
     public enum Origin
     {
-        APPLY, HEART_BEAT, CALL_OUT, CALL_OTHER, EFUN, POINTER;
+        APPLY, HEART_BEAT, CALL_OUT, CALL_OTHER, EFUN, POINTER, SIMUL;
 
         public String lpcName()
         {

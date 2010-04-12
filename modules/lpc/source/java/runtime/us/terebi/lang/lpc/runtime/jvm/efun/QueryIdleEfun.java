@@ -47,7 +47,7 @@ public class QueryIdleEfun extends AbstractEfun implements FunctionSignature, Ca
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
+        /* @TODO : EFUN */
         return LpcConstants.INT.ZERO;
     }
 

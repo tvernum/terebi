@@ -38,8 +38,8 @@ import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
-import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
@@ -49,6 +49,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.BoundMethod;
+import us.terebi.lang.lpc.runtime.util.StackCall;
 import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
 
 /**
@@ -114,7 +115,7 @@ public class LpcRuntimeSupport
     {
         SystemContext context = RuntimeContext.obtain().system();
         ObjectInstance sefun = context.objectManager().getSimulatedEfunObject();
-        return new BoundMethod(name, sefun);
+        return new StackCall(new BoundMethod(name, sefun), Origin.SIMUL);
     }
 
     public static LpcType withType(Kind kind, int depth)
@@ -163,25 +164,7 @@ public class LpcRuntimeSupport
 
     public ArrayValue makeArray(LpcValue... elements)
     {
-        if (elements.length == 0)
-        {
-            return new ArrayValue(Types.MIXED_ARRAY, new ArrayList<LpcValue>());
-        }
-
-        List<LpcValue> list = new ArrayList<LpcValue>(Arrays.asList(elements));
-        Set<LpcType> types = new HashSet<LpcType>();
-        for (LpcValue lpcValue : elements)
-        {
-            types.add(lpcValue.getActualType());
-        }
-
-        if (types.size() == 1)
-        {
-            return new ArrayValue(Types.arrayOf(types.iterator().next()), list);
-        }
-
-        LpcType[] typeArray = types.toArray(new LpcType[types.size()]);
-        return new ArrayValue(Types.arrayOf(MiscSupport.commonType(typeArray)), list);
+        return ValueSupport.arrayValue(elements);
     }
 
     public NilValue nil()

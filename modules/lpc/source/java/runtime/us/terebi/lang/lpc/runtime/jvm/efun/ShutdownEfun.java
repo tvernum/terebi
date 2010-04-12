@@ -48,7 +48,7 @@ public class ShutdownEfun extends AbstractEfun implements FunctionSignature, Cal
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        // @TODO
+        /* @TODO : EFUN */
         return VoidValue.INSTANCE;
     }
 }

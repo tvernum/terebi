@@ -51,7 +51,7 @@ public class LivingEfun extends AbstractEfun implements FunctionSignature, Calla
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
+        /* @TODO : EFUN */
         return getValue(false);
     }
 

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="source/java/net"/>
+	<classpathentry kind="src" path="source/java/plugin"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/terebi.engine"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/terebi.lpc"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/terebi.net"/>
+	<classpathentry kind="lib" path="/terebi.engine/lib/server/log4j-1.2.14.jar"/>
+	<classpathentry kind="output" path="output/eclipse"/>
+</classpath>

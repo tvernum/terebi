@@ -35,6 +35,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -70,8 +71,24 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
         LpcValue arg2 = arguments.get(1);
         List< ? extends LpcValue> args = arguments.get(2).asList();
 
+        return callOther(arg1, arg2, args);
+    }
+
+    private LpcValue callOther(LpcValue arg1, LpcValue arg2, List< ? extends LpcValue> args)
+    {
         ObjectInstance target;
-        if (MiscSupport.isString(arg1))
+
+        if (MiscSupport.isArray(arg1))
+        {
+            List<LpcValue> elements = arg1.asList();
+            List<LpcValue> result = new ArrayList<LpcValue>(elements.size());
+            for (LpcValue element : elements)
+            {
+                result.add(callOther(element, arg2, args));
+            }
+            return ValueSupport.arrayValue(result);
+        }
+        else if (MiscSupport.isString(arg1))
         {
             ObjectManager objectManager = RuntimeContext.obtain().system().objectManager();
             String objectName = arg1.asString();
@@ -90,8 +107,8 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
         {
             throw new LpcRuntimeException("Attempt to call function " + arg2 + " in non-object " + arg1);
         }
-        String name = arg2.asString();
 
+        String name = arg2.asString();
         return callOther(target, name, args);
     }
 
@@ -99,6 +116,7 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
     {
         Map<String, ? extends MethodDefinition> methods = target.getDefinition().getMethods();
         MethodDefinition method = methods.get(name);
+        // @TODO - This probably doesn't handle calls to inherited methods....
         if (method == null)
         {
             return NilValue.INSTANCE;

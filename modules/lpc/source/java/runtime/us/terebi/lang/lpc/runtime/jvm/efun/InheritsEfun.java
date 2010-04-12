@@ -50,7 +50,7 @@ public class InheritsEfun extends AbstractEfun implements FunctionSignature, Cal
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
+        /* @TODO : EFUN */
         return null;
     }
 

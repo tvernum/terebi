@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.java.context.LookupException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolution;
 import us.terebi.lang.lpc.parser.ast.ASTElementExpander;
@@ -119,8 +121,15 @@ public class MethodSupport
 
     public void defineLocalMethod()
     {
-        FunctionSignature signature = new Signature(hasModifier(Modifier.VARARGS), _returnType, _argumentDefinitions);
-        _scope.functions().defineLocalMethod(this.getMethodName(), this.getInternalName(), signature, _modifiers);
+        try
+        {
+            FunctionSignature signature = new Signature(hasModifier(Modifier.VARARGS), _returnType, _argumentDefinitions);
+            _scope.functions().defineLocalMethod(this.getMethodName(), this.getInternalName(), signature, _modifiers);
+        }
+        catch (LookupException e)
+        {
+            throw new CompileException(_node, e.getMessage());
+        }
     }
 
     public VariableResolution[] declareParameters()

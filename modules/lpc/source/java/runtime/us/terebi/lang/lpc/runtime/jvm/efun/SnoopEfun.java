@@ -54,7 +54,7 @@ public class SnoopEfun extends AbstractEfun implements FunctionSignature, Callab
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
+        /* @TODO : EFUN */
         return null;
     }
 

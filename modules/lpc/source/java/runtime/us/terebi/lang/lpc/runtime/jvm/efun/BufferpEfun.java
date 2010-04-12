@@ -32,5 +32,4 @@ public class BufferpEfun extends AbstractTypecheckEfun implements FunctionSignat
     {
         super(Types.BUFFER);
     }
-
 }

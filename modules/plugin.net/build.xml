@@ -1,0 +1,70 @@
+<project name="terebi.net"  default="all" basedir="." >
+
+  <property name="dir.source"                   location="source/"                       />
+  <property name="dir.source.java"              location="${dir.source}/java"            />
+  <property name="dir.source.resource"          location="${dir.source}/resource"        />
+  <property name="dir.source.resource.plugin"   location="${dir.source.resource}/plugin" />
+
+  <property name="dir.output"         location="output/ant"            />
+  <property name="dir.output.classes" location="${dir.output}/classes" />
+  <property name="dir.output.plugin" location="${dir.output}/plugin" />
+
+  <target name="all"   description="Builds Plugin + runs tests" depends="build" />
+  <target name="build" description="Builds Plugin"              depends="compile, jar " />
+
+  <target name="compile" depends="compile.net, compile.plugin" />
+
+  <macrodef name="compile_java">
+       <attribute name="dir" />
+       <attribute name="classpath" />
+       <sequential>
+            <mkdir dir="${dir.output.classes}" />
+            <javac srcdir="${dir.source.java}/@{dir}"
+                   destdir="${dir.output.classes}"
+                   classpathref="@{classpath}"
+                   debug="true"
+                   deprecation="true" 
+                   optimize="true"
+                   listfiles="false"
+                   source="1.5">
+            </javac>
+       </sequential>
+  </macrodef>
+
+  <path id="build.classpath">
+    <pathelement location="../lpc/output/ant/classes" />
+    <pathelement location="../net/output/ant/classes" />
+    <pathelement location="../engine/output/ant/classes" />
+    <fileset dir="../engine/lib/server" />
+  </path>
+
+  <target name="compile.net">
+    <compile_java dir="net" classpath="build.classpath" />
+  </target>
+     
+  <target name="compile.plugin">
+    <compile_java dir="plugin" classpath="build.classpath" />
+  </target>
+     
+  <target name="jar" depends="compile" >
+    <mkdir dir="${dir.output.plugin}" />
+    <jar destfile="${dir.output.plugin}/net.jar" 
+         basedir="${dir.output.classes}">
+        <metainf dir="${dir.source.resource.plugin}" includes="terebi.properties" />
+    </jar>
+  </target>
+
+  <target name="dist.source" >
+    <zip destfile="${dir.output.plugin}/${ant.project.name}-source.zip">
+      <fileset dir="." includes="source/java/**" />
+      <fileset dir="." includes="source/resource/plugin/*" />
+    </zip>
+  </target>
+
+  <target name="dist" depends="jar,dist.source" />
+
+  <target name="clean">
+    <delete dir="${dir.output}" />
+  </target>
+
+</project>

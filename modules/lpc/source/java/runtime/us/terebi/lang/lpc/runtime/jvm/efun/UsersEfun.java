@@ -46,7 +46,7 @@ public class UsersEfun extends AbstractEfun implements FunctionSignature, Callab
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO */
+        /* @TODO : EFUN */
         return VoidValue.INSTANCE;
     }
 
