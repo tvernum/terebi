@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.util.collection.ArrayStack;
 import us.terebi.util.collection.Stack;
 
@@ -55,6 +56,10 @@ public class CallStack
 
         public MajorFrame(Origin origin, ObjectInstance instance, int javaStackSize)
         {
+            if (instance == null)
+            {
+                throw new InternalError("Attempt to push frame (" + origin + ") with no object");
+            }
             this._origin = origin;
             this._instance = instance;
             this._javaStackSize = javaStackSize;

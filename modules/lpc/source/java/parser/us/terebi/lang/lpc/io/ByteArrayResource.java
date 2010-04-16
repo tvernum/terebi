@@ -30,6 +30,8 @@ import org.apache.commons.io.FilenameUtils;
  */
 public class ByteArrayResource implements Resource
 {
+    private static final Resource[] NO_CHILDREN = new Resource[0];
+    
     private final byte[] _bytes;
     private final String _name;
 
@@ -42,6 +44,11 @@ public class ByteArrayResource implements Resource
     public Resource getChild(String name)
     {
         return new NoSuchResource(this, name);
+    }
+    
+    public Resource[] getChildren()
+    {
+        return NO_CHILDREN;
     }
 
     public String getName()
@@ -117,5 +124,10 @@ public class ByteArrayResource implements Resource
     public boolean newerThan(long mod)
     {
         return true;
+    }
+    
+    public long lastModified()
+    {
+        return System.currentTimeMillis();
     }
 }

@@ -149,6 +149,10 @@ public class FunctionCallSupport extends BaseASTVisitor implements ParserVisitor
 
     public void checkArgumentCount(final int providedArguments, FunctionReference function, ASTFunctionArguments args)
     {
+        if (args.hasExpander())
+        {
+            return;
+        }
         Range<Integer> allowedArgCount = FunctionUtil.getAllowedNumberOfArgument(function.signature);
         if (!allowedArgCount.inRange(providedArguments))
         {

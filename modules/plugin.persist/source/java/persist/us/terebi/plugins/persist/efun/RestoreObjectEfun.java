@@ -66,11 +66,15 @@ public class RestoreObjectEfun extends AbstractEfun
     {
         checkArguments(arguments, 1);
         String file = arguments.get(0).asString();
-        long flag = arguments.get(1).asLong();
+        long flag = (arguments.size() >= 2 ? arguments.get(1).asLong() : 0);
         ThreadContext threadContext = RuntimeContext.obtain();
         ObjectInstance object = ThisObjectEfun.this_object(threadContext);
         try
         {
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("Restore " + object + " from " + file + " with flag " + flag);
+            }
             boolean restored = new ObjectSerializer(file).restore(object, flag == 1);
             return getValue(restored);
         }

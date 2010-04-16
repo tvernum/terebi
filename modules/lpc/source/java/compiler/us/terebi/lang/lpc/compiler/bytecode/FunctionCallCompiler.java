@@ -235,7 +235,7 @@ public class FunctionCallCompiler extends BaseASTVisitor
             Expression[] collections = new Expression[argVars.length];
             for (int i = 0; i < collections.length; i++)
             {
-                Expression expr = argVars[i].expression.expression;
+                Expression expr = ExpressionCompiler.getValue(argVars[i].expression);
                 if (argVars[i].expand)
                 {
                     collections[i] = VM.Expression.callMethod(expr, LpcValue.class, ByteCodeConstants.VALUE_AS_LIST);

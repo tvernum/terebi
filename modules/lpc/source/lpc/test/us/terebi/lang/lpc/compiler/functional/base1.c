@@ -26,3 +26,8 @@ int get_int() { return private_int_var; }
 protected /* pure_virtual */ string callback();
 
 public string call_callback() { return callback() ; }
+
+int multiple_arguments(int a, int b, int c)
+{
+    return a+b+c;
+}

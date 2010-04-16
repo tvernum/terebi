@@ -69,7 +69,7 @@ public class VirtualObjectDefinition extends AbstractObjectDefinition implements
         return _definition.getFields();
     }
 
-    protected CompiledObjectInstance newInstance(long id, InstanceType type, Object forThis, List< ? extends LpcValue> createArguments)
+    protected CompiledObjectInstance newInstance(long id, InstanceType type, CompiledObjectInstance forInstance, List< ? extends LpcValue> createArguments)
     {
         CompiledObjectInstance instance = _definition.getPrototypeInstance();
         for (FieldDefinition fieldDefinition : _definition.getFields().values())

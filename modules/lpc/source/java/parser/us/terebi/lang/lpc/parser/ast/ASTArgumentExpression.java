@@ -34,4 +34,9 @@ public class ASTArgumentExpression extends SimpleNode
         }
         return 0;
     }
+
+    public boolean hasExpander()
+    {
+        return getArgumentType() == ParserConstants.EXPANDO;
+    }
 }

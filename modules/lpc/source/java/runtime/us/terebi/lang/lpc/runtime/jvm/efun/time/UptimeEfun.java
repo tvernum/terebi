@@ -16,42 +16,46 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.time;
 
-import java.text.DateFormat;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
-import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.StartTime;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
-import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 
 /**
  * 
  */
-public class CtimeEfun extends AbstractEfun implements FunctionSignature, Callable
+public class UptimeEfun extends AbstractEfun implements FunctionSignature
 {
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("clock", Types.INT));
+        return Collections.emptyList();
     }
 
     public LpcType getReturnType()
     {
-        return Types.STRING;
+        return Types.INT;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        checkArguments(arguments);
-        LpcValue clock = arguments.get(0);
-        String ctime = DateFormat.getDateTimeInstance().format(new Date(clock.asLong() * 1000));
-        return new StringValue(ctime);
+        StartTime startTime = RuntimeContext.obtain().system().attachments().get(StartTime.class);
+        if (startTime == null)
+        {
+            throw new InternalError("Start time not configured");
+        }
+        long uptimeSeconds = (System.currentTimeMillis() - startTime.time) / 1000;
+        return new IntValue(uptimeSeconds);
     }
+
 }

@@ -19,4 +19,21 @@ public class ASTFunctionArguments extends SimpleNode
     {
         return visitor.visit(this, data);
     }
+
+    public boolean hasExpander()
+    {
+        for (int i = 0; i < this.jjtGetNumChildren(); i++)
+        {
+            Node node = this.jjtGetChild(i);
+            if (node instanceof ASTArgumentExpression)
+            {
+                final ASTArgumentExpression arg = (ASTArgumentExpression) node;
+                if (arg.hasExpander())
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

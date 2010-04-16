@@ -186,18 +186,24 @@ public class FunctionLiteralCompiler
         FunctionCallSupport fcs = new FunctionCallSupport(_scope);
         FunctionReference function = fcs.findFunction(ref, ref.getScope(), ref.getVariableName());
         Expression callable = FunctionCallCompiler.getCallable(function);
+        
+        MethodSignature pointer = VM.Method.find(CallableSupport.class, "pointer", Callable.class, ObjectInstance.class);
+        Expression owner = VM.Expression.callInherited(ByteCodeConstants.GET_OBJECT_INSTANCE, new Expression[0]); 
+        callable = VM.Expression.callStatic(CallableSupport.class, pointer, callable, owner);
+
         if (!arguments.isEmpty())
         {
             ExpressionCompiler compiler = new ExpressionCompiler(_parentScope, _context);
             Expression[] elements = new Expression[arguments.size()];
             for (int i = 0; i < elements.length; i++)
             {
-                elements[i] = compiler.compile(arguments.get(i)).expression;
+                elements[i] = ExpressionCompiler.getValue(compiler.compile(arguments.get(i)));
             }
             Expression array = VM.Expression.array(LpcValue.class, elements);
             MethodSignature bind = VM.Method.find(CallableSupport.class, "bindArguments", Callable.class, LpcValue[].class);
             callable = VM.Expression.callStatic(CallableSupport.class, bind, callable, array);
         }
+
 
         Expression value = VM.Expression.construct(VM.Method.constructor(FunctionValue.class, Callable.class), callable);
         return new LpcExpression(function.signature.getReturnType(), value);
@@ -358,13 +364,13 @@ public class FunctionLiteralCompiler
     private MethodSpec getExpressionExecute(LpcExpression expr)
     {
         List<ElementBuilder<Statement>> body = Collections.singletonList(VM.Statement.returnObject(ExpressionCompiler.getValue(expr)));
-        return getExecute(body);
+        return getInvoke(body);
     }
 
-    private MethodSpec getExecute(List< ? extends ElementBuilder< ? extends Statement>> statements)
+    private MethodSpec getInvoke(List< ? extends ElementBuilder< ? extends Statement>> statements)
     {
         Parameter parameter = new ParameterSpec(POSITIONAL_ARGUMENT_COLLECTION).withType(LpcValue[].class).create();
-        MethodSpec execute = new MethodSpec("execute").withModifiers(ElementModifier.PUBLIC).withParameters(parameter);
+        MethodSpec execute = new MethodSpec("invoke").withModifiers(ElementModifier.PROTECTED).withParameters(parameter);
         return execute.withReturnType(ByteCodeConstants.LPC_VALUE).withBody(statements);
     }
 
@@ -468,10 +474,10 @@ public class FunctionLiteralCompiler
 
         statementCompiler.compileBlock(blockNode);
         _scope.variables().popScope();
-        
+
         statements.add(VM.Statement.returnObject(ByteCodeConstants.VOID));
 
-        return getExecute(statements);
+        return getInvoke(statements);
     }
 
     private MethodSpec getBlockConstructor(List<Parameter> parameters, LpcExpression[] immediates,

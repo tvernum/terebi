@@ -66,7 +66,7 @@ public class SaveObjectEfun extends AbstractEfun
     {
         checkArguments(arguments, 1);
         String file = arguments.get(0).asString();
-        long flag = arguments.get(1).asLong();
+        long flag = arguments.size() < 2 ? 0 : arguments.get(1).asLong();
         ThreadContext threadContext = RuntimeContext.obtain();
         ObjectInstance object = ThisObjectEfun.this_object(threadContext);
         try

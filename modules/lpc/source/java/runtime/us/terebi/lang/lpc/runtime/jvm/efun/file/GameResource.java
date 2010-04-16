@@ -124,12 +124,28 @@ class GameResource implements Resource
 
     public Resource getChild(String name)
     {
-        return new GameResource(_resource.getChild(name), _object, _efun);
+        return makeResource(_resource.getChild(name));
+    }
+
+    private GameResource makeResource(final Resource delegate)
+    {
+        return new GameResource(delegate, _object, _efun);
+    }
+
+    public Resource[] getChildren()
+    {
+        Resource[] delegate = _resource.getChildren();
+        Resource[] wrapped = new Resource[delegate.length];
+        for (int i = 0; i < wrapped.length; i++)
+        {
+            wrapped[i] = makeResource(delegate[i]);
+        }
+        return wrapped;
     }
 
     public Resource getParent()
     {
-        return new GameResource(_resource.getParent(), _object, _efun);
+        return makeResource(_resource.getParent());
     }
 
     public InputStream read() throws IOException
@@ -168,5 +184,10 @@ class GameResource implements Resource
         return _resource.newerThan(mod);
     }
     
-    
+    public long lastModified()
+    {
+        checkReadAccess();
+        return _resource.lastModified();
+    }
+
 }

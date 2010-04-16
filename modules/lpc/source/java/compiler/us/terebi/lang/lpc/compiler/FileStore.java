@@ -22,16 +22,21 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
 
+import org.apache.log4j.Logger;
+
 /**
  * 
  */
 public class FileStore implements ClassStore
 {
+    private final Logger LOG = Logger.getLogger(FileStore.class);
+
     private final File _directory;
 
     public FileStore(File directory)
     {
         _directory = directory;
+        LOG.info("New " + getClass().getSimpleName() + " @" + directory);
     }
 
     public OutputStream open(String packageName, String className) throws FileNotFoundException

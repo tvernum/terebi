@@ -39,8 +39,9 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MemberDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
-import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
 import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
+import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
@@ -61,14 +62,33 @@ public class CompiledMethod implements CompiledMethodDefinition
     private final Set< ? extends Modifier> _modifiers;
     private final ScopeLookup _lookup;
 
+    @SuppressWarnings("unchecked")
     public CompiledMethod(CompiledObjectDefinition object, Method method, ScopeLookup lookup)
     {
         _objectDefinition = object;
-        _method = method;
         _name = resolveName(method);
         _signature = resolveSignature(method);
         _modifiers = resolveModifiers(method);
         _lookup = lookup;
+
+        Class[] interfaces = method.getDeclaringClass().getInterfaces();
+        assert interfaces.length == 1;
+        Class iface = interfaces[0];
+        
+      try
+      {
+          // Look for method on interface to support polymorphism
+          method = iface.getMethod(method.getName(), method.getParameterTypes());
+      }
+      catch (SecurityException e)
+      {
+          throw new InternalError(e);
+      }
+      catch (NoSuchMethodException e)
+      {
+          // Ignore
+      }
+      _method = method;
     }
 
     private FunctionSignature resolveSignature(Method method)
@@ -178,6 +198,10 @@ public class CompiledMethod implements CompiledMethodDefinition
                 return (LpcValue) result;
             }
             throw new IllegalStateException("Method " + _method + " did not return an LpcValue - returned " + result + " instead");
+        }
+        catch (IllegalArgumentException e)
+        {
+            throw new LpcRuntimeException("During method " + _method + " - " + e.getMessage(), e);
         }
         catch (IllegalAccessException e)
         {

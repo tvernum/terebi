@@ -2,14 +2,20 @@
 
 inherit "base1";
 
-int func2() 
+public int func2() 
 {
     return default1() + public1() ;
 }
 
-int var1()
+public int var1()
 {
     return strlen(public_var) > 0;
+}
+
+public int expand5()
+{
+    int array args = ({ 2, 4, -1 });
+    return multiple_arguments( args... );
 }
 
 public int state9()

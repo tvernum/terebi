@@ -128,7 +128,7 @@ public class MethodSupport
         }
         catch (LookupException e)
         {
-            throw new CompileException(_node, e.getMessage());
+            throw new CompileException(_node, e.getMessage(), e);
         }
     }
 

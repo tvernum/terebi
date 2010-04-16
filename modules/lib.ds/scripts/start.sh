@@ -21,14 +21,35 @@ echo "Main = ${MAIN}"
 echo "Classpath = ${CP}"
 echo "Config = ${CONFIG_FILE}"
 
-[ -d ${WORK_DIR} ] || mkdir ${WORK_DIR}
+DEBUG=0
+CLEAN=0
 
-if [ "$1" = "-d" ]
+while getopts "dc" option
+do
+    case $option in
+        d)
+            DEBUG=1
+            ;;
+        c)
+            CLEAN=1
+            ;;
+    esac
+done
+            
+[ -d ${WORK_DIR} ] || mkdir ${WORK_DIR}
+if [ $CLEAN -eq 1 ]
+then
+    rm -rf ${WORK_DIR}/*
+fi
+
+if [ $DEBUG -eq 1 ]
 then
     JAVA_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=9800,server=y,suspend=n"
 else
     JAVA_OPTS=""
 fi
 
+
 set -x
 java -cp ${CP} ${JAVA_OPTS} ${MAIN} ${CONFIG_FILE}
+

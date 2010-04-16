@@ -219,7 +219,7 @@ public class ObjectSerializer
         {
             throw new IllegalArgumentException("Cannot restore null object");
         }
-        
+
         if (zeroNoSave)
         {
             zeroNoSave(object);
@@ -233,6 +233,10 @@ public class ObjectSerializer
             {
                 break;
             }
+            if (line.startsWith("#"))
+            {
+                continue;
+            }
             int eq = line.indexOf(' ');
             if (eq == -1)
             {
@@ -240,7 +244,7 @@ public class ObjectSerializer
             }
             if (eq == -1)
             {
-                LOG.warn("Invalid line (" + line + ") in save file " + _file);
+                LOG.warn("Invalid line (" + summarise(line) + ") in save file " + _file);
                 continue;
             }
             LpcValue value = restore(line.substring(eq + 1), parser);
@@ -253,6 +257,18 @@ public class ObjectSerializer
         }
     }
 
+    private static String summarise(String str)
+    {
+        if (str.length() <= 100)
+        {
+            return str;
+        }
+        else
+        {
+            return str.substring(0, 85) + " ... " + str.substring(str.length() - 10);
+        }
+    }
+
     private static LpcValue restore(String text, LiteralParser parser)
     {
         try
@@ -261,7 +277,7 @@ public class ObjectSerializer
         }
         catch (ParseException e)
         {
-            LOG.info("Invalid literal '" + text + "'" + e.toString());
+            LOG.warn("Invalid literal '" + summarise(text) + "' - " + e.toString());
             return null;
         }
     }

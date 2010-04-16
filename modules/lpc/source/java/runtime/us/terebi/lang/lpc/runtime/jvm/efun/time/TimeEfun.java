@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.time;
 
 import java.util.Collections;
 import java.util.List;
@@ -25,6 +25,7 @@ import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 
@@ -45,8 +46,8 @@ public class TimeEfun extends AbstractEfun implements FunctionSignature
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        long currentTypeSeconds = System.currentTimeMillis() / 1000;
-        return new IntValue(currentTypeSeconds);
+        long currentTimeSeconds = System.currentTimeMillis() / 1000;
+        return new IntValue(currentTimeSeconds);
     }
 
 }

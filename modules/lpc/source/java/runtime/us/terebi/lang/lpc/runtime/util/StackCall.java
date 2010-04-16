@@ -21,7 +21,9 @@ import java.util.List;
 
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 
 public class StackCall extends CallableProxy implements Callable
 {
@@ -31,6 +33,16 @@ public class StackCall extends CallableProxy implements Callable
     {
         super(function);
         _origin = origin;
+    }
+
+    public ObjectInstance getOwner()
+    {
+        final ObjectInstance owner = super.getOwner();
+        if (owner == null)
+        {
+            throw new InternalError("Function " + super.getDelegate() + " has no owner");
+        }
+        return owner;
     }
 
     public LpcValue execute(final List< ? extends LpcValue> arguments)

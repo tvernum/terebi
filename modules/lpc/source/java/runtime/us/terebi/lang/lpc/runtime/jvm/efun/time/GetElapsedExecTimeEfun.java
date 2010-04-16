@@ -15,7 +15,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.time;
 
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +23,8 @@ import java.util.List;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
 import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
@@ -30,7 +32,7 @@ import us.terebi.lang.lpc.runtime.jvm.type.Types;
 /**
  * 
  */
-public class GetMaxExecTimeEfun extends AbstractEfun implements Efun
+public class GetElapsedExecTimeEfun extends AbstractEfun implements Efun
 {
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
@@ -44,8 +46,8 @@ public class GetMaxExecTimeEfun extends AbstractEfun implements Efun
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        long t = ExecutionTimeCheck.get().getMaximumTime();
+        long t = ExecutionTimeCheck.get().getElapsedTime();
         return ValueSupport.intValue(t);
-    }
+   }
 
 }

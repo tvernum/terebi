@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,7 @@ import org.apache.log4j.Logger;
 import org.adjective.stout.core.UnresolvedType;
 
 import us.terebi.lang.lpc.compiler.java.context.VariableLookup.ObjectPath;
+import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.InternalName;
@@ -420,7 +422,32 @@ public class FunctionLookup
         {
             return;
         }
-        throw new LookupException("Attempt to redefined signature for " + name + " from " + existing + " to " + replacement);
+        if (!existing.getReturnType().equals(replacement.getReturnType()))
+        {
+            throw new LookupException("Attempt to redefine return type for " + name + " from " + existing + " to " + replacement);
+        }
+        if (existing.getArguments().size() != replacement.getArguments().size())
+        {
+            throw new LookupException("Attempt to redefine argument count for " + name + " from " + existing + " to " + replacement);
+        }
+        Iterator< ? extends ArgumentDefinition> ie = existing.getArguments().iterator();
+        Iterator< ? extends ArgumentDefinition> ir = replacement.getArguments().iterator();
+        while (ie.hasNext())
+        {
+            ArgumentDefinition e = ie.next();
+            ArgumentDefinition r = ir.next();
+            if (!e.getType().equals(r.getType()))
+            {
+                throw new LookupException("Attempt to redefine argument type ("
+                        + e.getName()
+                        + ") for "
+                        + name
+                        + " from "
+                        + existing
+                        + " to "
+                        + replacement);
+            }
+        }
     }
 
     private void checkMatchingModifiers(String name, Set< ? extends Modifier> existing, Set< ? extends Modifier> replacement)
@@ -439,7 +466,7 @@ public class FunctionLookup
                 Modifier.PRIVATE));
         if (!accessModifiers.isEmpty())
         {
-            throw new LookupException("Attempt to redefined modifiers for " + name + " from " + existing + " to " + replacement);
+            throw new LookupException("Attempt to redefine modifiers for " + name + " from " + existing + " to " + replacement);
         }
 
         if (existing.contains(Modifier.VARARGS) && !replacement.contains(Modifier.VARARGS))

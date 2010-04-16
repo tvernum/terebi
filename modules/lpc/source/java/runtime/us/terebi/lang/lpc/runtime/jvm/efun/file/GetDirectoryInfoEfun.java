@@ -18,23 +18,35 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.log4j.Logger;
+
+import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
+import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class GetDirectoryInfoEfun extends AbstractEfun implements FunctionSignature, Callable
+public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature, Callable
 {
+    private final Logger LOG = Logger.getLogger(GetDirectoryInfoEfun.class);
+
     //    mixed array get_dir(string dir);
     //
     //    mixed array get_dir(string dir, int flag);
@@ -68,8 +80,87 @@ public class GetDirectoryInfoEfun extends AbstractEfun implements FunctionSignat
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO : EFUN */
-       return null;
+        checkArguments(arguments);
+        String path = arguments.get(0).asString();
+        long flag = arguments.get(1).asLong();
+
+        try
+        {
+            return ValueSupport.arrayValue(getDirectoryInfo(path, flag));
+        }
+        catch (IOException e)
+        {
+            LOG.warn(e);
+            return LpcConstants.ARRAY.EMPTY;
+        }
     }
 
+    private List<LpcValue> getDirectoryInfo(String path, long flag) throws IOException
+    {
+        boolean listDirectory = path.endsWith("/");
+        boolean longListing = (flag == -1);
+
+        Resource[] files = resolveWildCard(path);
+        List<LpcValue> array = new ArrayList<LpcValue>(files.length);
+
+        for (Resource resource : files)
+        {
+            if (listDirectory)
+            {
+                if (!resource.isDirectory())
+                {
+                    continue;
+                }
+                for (Resource child : resource.getChildren())
+                {
+                    array.add(getInfo(child, longListing));
+                }
+            }
+            else
+            {
+                array.add(getInfo(resource, longListing));
+            }
+        }
+        
+        return array;
+    }
+
+    private LpcValue getInfo(Resource resource, boolean longListing)
+    {
+        if (longListing)
+        {
+            return new ArrayValue(Types.MIXED_ARRAY, //
+                    new StringValue(resource.getPath()), new IntValue(resource.getSizeInBytes()), new IntValue(resource.lastModified()));
+        }
+        return null;
+    }
+
+    private Resource[] resolveWildCard(String path) throws IOException
+    {
+        if (path.indexOf('*') == -1 && path.indexOf('?') == -1)
+        {
+            return new Resource[] { getResource(path) };
+        }
+
+        List<Resource> match = new ArrayList<Resource>();
+
+        int slash = path.lastIndexOf('/', path.length() - 1);
+        String parentPath = path.substring(0, slash);
+        String childPath = path.substring(slash);
+
+        Resource[] parents = resolveWildCard(parentPath);
+        for (Resource parent : parents)
+        {
+            Resource[] children = parent.getChildren();
+            for (Resource child : children)
+            {
+                if (FilenameUtils.wildcardMatch(child.getName(), childPath, IOCase.INSENSITIVE))
+                {
+                    match.add(child);
+                }
+            }
+        }
+
+        return match.toArray(new Resource[match.size()]);
+    }
 }

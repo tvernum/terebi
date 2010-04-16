@@ -19,6 +19,7 @@
 package us.terebi.lang.lpc.runtime.jvm.value;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -55,6 +56,11 @@ public class ArrayValue extends AbstractValue implements LpcValue
         {
             _list.add(NilValue.INSTANCE);
         }
+    }
+
+    public ArrayValue(LpcType type, LpcValue... elements)
+    {
+        this(type, Arrays.asList(elements));
     }
 
     public List<LpcValue> asList()

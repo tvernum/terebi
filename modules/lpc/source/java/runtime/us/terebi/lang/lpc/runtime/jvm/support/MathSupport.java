@@ -96,7 +96,7 @@ public class MathSupport
         {
             return addArrays(left, right);
         }
-        if (isInt(left) && isInt(right))
+        if (isInteger(left) && isInteger(right))
         {
             return add(left.asLong(), right.asLong());
         }
@@ -120,10 +120,7 @@ public class MathSupport
         {
             return right;
         }
-        throw new UnsupportedOperationException("add - Not implemented for "
-                + left.getActualType()
-                + " + "
-                + right.getActualType());
+        throw new UnsupportedOperationException("add - Not implemented for " + left.getActualType() + " + " + right.getActualType());
     }
 
     private static LpcValue addMapping(Map<LpcValue, LpcValue> left, Map<LpcValue, LpcValue> right)
@@ -183,7 +180,7 @@ public class MathSupport
 
     public static LpcValue multiply(LpcValue left, LpcValue right)
     {
-        if (isInt(left) && isInt(right))
+        if (isInteger(left) && isInteger(right))
         {
             return intValue(left.asLong() * right.asLong());
         }
@@ -191,16 +188,12 @@ public class MathSupport
         {
             return new FloatValue(left.asDouble() * right.asDouble());
         }
-        throw new UnsupportedOperationException("multiply("
-                + left.getActualType()
-                + ","
-                + right.getActualType()
-                + ") - Not implemented");
+        throw new UnsupportedOperationException("multiply(" + left.getActualType() + "," + right.getActualType() + ") - Not implemented");
     }
 
     public static LpcValue divide(LpcValue left, LpcValue right)
     {
-        if (isInt(left) && isInt(right))
+        if (isInteger(left) && isInteger(right))
         {
             return intValue(left.asLong() / right.asLong());
         }
@@ -208,16 +201,12 @@ public class MathSupport
         {
             return new FloatValue(left.asDouble() / right.asDouble());
         }
-        throw new UnsupportedOperationException("divide("
-                + left.getActualType()
-                + ","
-                + right.getActualType()
-                + ") - Not implemented");
+        throw new UnsupportedOperationException("divide(" + left.getActualType() + "," + right.getActualType() + ") - Not implemented");
     }
 
     public static LpcValue subtract(LpcValue left, LpcValue right)
     {
-        if (isInt(left) && isInt(right))
+        if (isInteger(left) && isInteger(right))
         {
             return intValue(left.asLong() - right.asLong());
         }
@@ -225,16 +214,17 @@ public class MathSupport
         {
             return new FloatValue(left.asDouble() - right.asDouble());
         }
-        throw new UnsupportedOperationException("subtract("
-                + left.getActualType()
-                + ","
-                + right.getActualType()
-                + ") - Not implemented");
+        throw new UnsupportedOperationException("subtract(" + left.getActualType() + "," + right.getActualType() + ") - Not implemented");
+    }
+
+    private static boolean isInteger(LpcValue value)
+    {
+        return isInt(value) || isNil(value);
     }
 
     public static LpcValue modulus(LpcValue left, LpcValue right)
     {
-        if (isInt(left) && isInt(right))
+        if (isInteger(left) && isInteger(right))
         {
             return intValue(left.asLong() % right.asLong());
         }
@@ -242,10 +232,6 @@ public class MathSupport
         {
             return new FloatValue(left.asDouble() % right.asDouble());
         }
-        throw new UnsupportedOperationException("modulus("
-                + left.getActualType()
-                + ","
-                + right.getActualType()
-                + ") - Not implemented");
+        throw new UnsupportedOperationException("modulus(" + left.getActualType() + "," + right.getActualType() + ") - Not implemented");
     }
 }

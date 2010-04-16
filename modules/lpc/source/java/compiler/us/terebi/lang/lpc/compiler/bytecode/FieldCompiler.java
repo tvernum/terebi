@@ -33,7 +33,10 @@ import org.adjective.stout.operation.Expression;
 import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
 
+import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
+import us.terebi.lang.lpc.compiler.java.context.VariableResolver;
+import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolution;
 import us.terebi.lang.lpc.compiler.util.MemberVisitor;
 import us.terebi.lang.lpc.compiler.util.TypeSupport;
 import us.terebi.lang.lpc.parser.ast.ASTFields;
@@ -86,11 +89,17 @@ public class FieldCompiler extends MemberVisitor implements ParserVisitor
 
         List<Statement> statements = new ArrayList<Statement>();
 
+        final VariableResolver variables = getScope().variables();
         for (TokenNode child : ASTUtil.children(node))
         {
             assert child instanceof ASTVariable : "Child node is " + child.getClass() + " (but should be " + ASTVariable.class.getSimpleName() + ")";
             FieldDescriptor field = this.visit((ASTVariable) child, null);
-            getScope().variables().declareField(field.name, field.type);
+            VariableResolution existingVar = variables.getVariableInFrame(field.name);
+            if (existingVar != null)
+            {
+                throw new CompileException(child, "The field " + field.name + " (" + existingVar + ") has already been declared");
+            }
+            variables.declareField(field.name, field.type);
 
             FieldCompiler.addField(classSpec, field);
 

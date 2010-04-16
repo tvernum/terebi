@@ -61,6 +61,17 @@ public class FileResource implements Resource
         return new FileResource(new File(_file, name));
     }
 
+    public Resource[] getChildren()
+    {
+        File[] files = _file.listFiles();
+        Resource[] resources = new Resource[files.length];
+        for (int i = 0; i < resources.length; i++)
+        {
+            resources[i] = new FileResource(files[i]);
+        }
+        return resources;
+    }
+
     public String getName()
     {
         return _file.getName();
@@ -175,5 +186,10 @@ public class FileResource implements Resource
             return true;
         }
         return _file.lastModified() >= mod;
+    }
+    
+    public long lastModified()
+    {
+        return _file.lastModified();
     }
 }

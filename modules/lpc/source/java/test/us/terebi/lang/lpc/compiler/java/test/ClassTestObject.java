@@ -78,7 +78,7 @@ public class ClassTestObject extends LpcObject
         final LpcReference _lpc_v9 = ClassSupport.getField(_l_huh.get(), "f");
         final LpcValue _lpc_v10 = new LpcFunction(getObjectInstance(), 0)
         {
-            public LpcValue execute(LpcValue... args)
+            public LpcValue invoke(LpcValue[] args)
             {
                 final LpcValue _lpc_v11 = makeValue(7);
                 return _lpc_v11;

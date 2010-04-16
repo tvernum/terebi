@@ -21,6 +21,8 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
@@ -38,6 +40,8 @@ import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
  */
 public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, Callable
 {
+    private final static Logger LOG = Logger.getLogger(ThisObjectEfun.class);
+
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.emptyList();
@@ -65,6 +69,10 @@ public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, C
     {
         CallStack stack = context.callStack();
         ObjectInstance instance = stack.peekFrame(0).instance();
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("this_object() : Stack = " + stack + " ; this_object = " + instance);
+        }
         return instance;
     }
 }

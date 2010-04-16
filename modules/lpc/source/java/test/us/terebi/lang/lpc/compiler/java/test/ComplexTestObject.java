@@ -62,7 +62,7 @@ public class ComplexTestObject extends LpcObject
         final LpcValue _lpc_v15 = this.inherit_sword.get().set_wc(_lpc_v14);
         final LpcValue _lpc_v16 = new LpcFunction(getObjectInstance(), 1)
         {
-            public LpcValue execute(LpcValue... args)
+            public LpcValue invoke(LpcValue[] args)
             {
                 final LpcValue _lpc_v17 = makeValue("get_race");
                 final LpcValue _lpc_v18 = efun("call_other").execute(getArg(args, 1), _lpc_v17);

@@ -27,8 +27,10 @@ import java.io.OutputStream;
  */
 public interface Resource
 {
-    public Resource getChild(String name);
     public Resource getParent();
+    public Resource getChild(String name);
+    public Resource[] getChildren();
+
     public String getName();
     public String getPath();
     public String getParentName();
@@ -43,4 +45,5 @@ public interface Resource
     public void delete() throws IOException;
     
     public boolean newerThan(long mod);
+    public long lastModified();
 }

@@ -39,6 +39,8 @@ public class SystemContext
         _resourceFinder = resourceFinder;
         _lock = new Object();
         _attachments = new ObjectMap();
+        _attachments
+        .put(StartTime.class, new StartTime());
     }
 
     public ObjectMap attachments()

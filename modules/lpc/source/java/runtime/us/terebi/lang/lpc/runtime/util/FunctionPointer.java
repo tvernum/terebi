@@ -1,5 +1,5 @@
 /* ------------------------------------------------------------------------
- * Copyright 2009 Tim Vernum
+ * Copyright 2010 Tim Vernum
  * ------------------------------------------------------------------------
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,57 +17,25 @@
 
 package us.terebi.lang.lpc.runtime.util;
 
-import java.util.List;
-
 import us.terebi.lang.lpc.runtime.Callable;
-import us.terebi.lang.lpc.runtime.FunctionSignature;
-import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 
 /**
  * 
  */
-public class CallableProxy implements Callable
+public class FunctionPointer extends StackCall
 {
-    private final Callable _delegate;
+    private final ObjectInstance _owner;
 
-    public CallableProxy(Callable delegate)
+    public FunctionPointer(Callable delegate, ObjectInstance owner)
     {
-        _delegate = delegate;
-    }
-
-    public LpcValue execute(List< ? extends LpcValue> arguments)
-    {
-        return _delegate.execute(arguments);
-    }
-
-    public LpcValue execute(LpcValue... arguments)
-    {
-        return _delegate.execute(arguments);
-    }
-
-    public Kind getKind()
-    {
-        return _delegate.getKind();
+        super(delegate, Origin.POINTER);
+        _owner = owner;
     }
 
     public ObjectInstance getOwner()
     {
-        return _delegate.getOwner();
-    }
-
-    public FunctionSignature getSignature()
-    {
-        return _delegate.getSignature();
-    }
-    
-    protected Callable getDelegate()
-    {
-        return _delegate;
-    }
-    
-    public String toString()
-    {
-        return getClass().getSimpleName() + ":" + _delegate;
+        return _owner;
     }
 }

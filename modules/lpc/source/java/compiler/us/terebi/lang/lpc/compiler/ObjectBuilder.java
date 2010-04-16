@@ -40,6 +40,8 @@ import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.lang.lpc.parser.ast.SimpleNode;
 import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.object.CompiledDefinition;
 import us.terebi.util.log.LogContext;
 
@@ -170,6 +172,10 @@ public class ObjectBuilder implements ObjectCompiler
             String file = lineMapping.getFile(rawLine);
             int mappedLine = lineMapping.getLine(rawLine);
             throw new CompileException(file, mappedLine, e);
+        }
+        catch (LpcRuntimeException e)
+        {
+            throw new InternalError("While compiling " + resource, e);
         }
         return ast;
     }

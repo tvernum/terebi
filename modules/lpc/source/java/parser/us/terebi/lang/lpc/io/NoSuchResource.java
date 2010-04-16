@@ -28,6 +28,8 @@ import java.io.OutputStream;
  */
 public class NoSuchResource implements Resource
 {
+    private static final Resource[] NO_CHILDREN = new Resource[0];
+
     private final Resource _parent;
     private final String _name;
 
@@ -51,6 +53,11 @@ public class NoSuchResource implements Resource
     public Resource getChild(String name)
     {
         return new NoSuchResource(this, name);
+    }
+
+    public Resource[] getChildren()
+    {
+        return NO_CHILDREN;
     }
 
     public String getName()
@@ -121,6 +128,11 @@ public class NoSuchResource implements Resource
     public boolean newerThan(long mod)
     {
         return false;
+    }
+
+    public long lastModified()
+    {
+        return -1;
     }
 
 }

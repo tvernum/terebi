@@ -38,6 +38,7 @@ public class Types
 
     public static final LpcType STRING = new SimpleType(Kind.STRING);
     public static final LpcType STRING_ARRAY = new SimpleType(Kind.STRING, 1);
+    public static final LpcType STRING_ARRAY_ARRAY = new SimpleType(Kind.STRING, 2);
 
     public static final LpcType OBJECT = new SimpleType(Kind.OBJECT);
     public static final LpcType OBJECT_ARRAY = new SimpleType(Kind.OBJECT, 1);

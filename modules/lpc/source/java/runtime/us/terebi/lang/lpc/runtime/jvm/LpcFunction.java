@@ -30,6 +30,7 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
@@ -38,7 +39,9 @@ import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.lang.lpc.runtime.util.InContext;
 import us.terebi.lang.lpc.runtime.util.Signature;
+import us.terebi.lang.lpc.runtime.util.InContext.Exec;
 
 /**
  * 
@@ -100,6 +103,19 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
     {
         return execute(toArray(arguments));
     }
+
+    public LpcValue execute(final LpcValue... arguments)
+    {
+        return InContext.execute(Origin.POINTER, _owner, new Exec<LpcValue>()
+        {
+            public LpcValue execute()
+            {
+                return invoke(arguments);
+            }
+        });
+    }
+
+    protected abstract LpcValue invoke(LpcValue[] arguments);
 
     private LpcValue[] toArray(List< ? extends LpcValue> arguments)
     {

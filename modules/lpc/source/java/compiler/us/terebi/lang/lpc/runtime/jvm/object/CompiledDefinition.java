@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
@@ -84,7 +85,19 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
             LpcMember annotation = method.getAnnotation(LpcMember.class);
             if (annotation != null)
             {
-                _methods.put(annotation.name(), new CompiledMethod(this, method, _lookup));
+//                try
+//                {
+//                    method = iface.getMethod(method.getName(), method.getParameterTypes());
+                    _methods.put(annotation.name(), new CompiledMethod(this, method, _lookup));
+//                }
+//                catch (SecurityException e)
+//                {
+//                    throw new InternalError(e);
+//                }
+//                catch (NoSuchMethodException e)
+//                {
+//                    throw new InternalError(e);
+//                }
             }
         }
 
@@ -161,14 +174,14 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
         return Collections.unmodifiableMap(_inherited);
     }
 
-    protected CompiledObject<T> newInstance(long id, InstanceType type, Object forThis, List< ? extends LpcValue> createArguments)
+    protected CompiledObject<T> newInstance(long id, InstanceType type, CompiledObjectInstance forInstance, List< ? extends LpcValue> createArguments)
     {
         if (id != 0)
         {
             getMasterInstance();
         }
 
-        T object = createObject(forThis);
+        T object = createObject(forInstance == null ? null : forInstance.getImplementingObject());
 
         Map<String, ObjectInstance> parents = new HashMap<String, ObjectInstance>();
 
@@ -185,7 +198,7 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
         }
 
         object.setDefinition(this);
-        object.setInstance(instance);
+        object.setInstance(forInstance == null ? instance : forInstance);
         if (type == InstanceType.MASTER || type == InstanceType.INSTANCE)
         {
             register(instance);
