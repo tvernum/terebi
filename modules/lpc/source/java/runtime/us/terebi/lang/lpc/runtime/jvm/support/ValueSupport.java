@@ -78,6 +78,10 @@ public class ValueSupport
         Set<LpcType> types = new HashSet<LpcType>();
         for (LpcValue lpcValue : elements)
         {
+            if (lpcValue == null)
+            {
+                throw new IllegalArgumentException("Cannot put null values into an array (" + elements + ")");
+            }
             types.add(lpcValue.getActualType());
         }
 

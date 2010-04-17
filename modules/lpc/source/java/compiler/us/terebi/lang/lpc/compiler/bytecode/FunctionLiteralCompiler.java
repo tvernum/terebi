@@ -206,7 +206,7 @@ public class FunctionLiteralCompiler
 
 
         Expression value = VM.Expression.construct(VM.Method.constructor(FunctionValue.class, Callable.class), callable);
-        return new LpcExpression(function.signature.getReturnType(), value);
+        return new LpcExpression(Types.FUNCTION, value);
     }
 
     private LpcExpression compile(ExpressionNode exprNode, ExpressionCompiler compiler)

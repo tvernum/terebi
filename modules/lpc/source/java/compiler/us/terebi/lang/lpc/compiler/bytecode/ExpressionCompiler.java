@@ -1078,11 +1078,16 @@ public class ExpressionCompiler extends BaseASTVisitor
     public Object visit(ASTCompoundExpression node, Object data)
     {
         LpcExpression var = null;
+        List<ElementBuilder<? extends Statement>> statements = new ArrayList<ElementBuilder<? extends Statement>>();
         for (TokenNode child : ASTUtil.children(node))
         {
+            if(var != null) {
+                statements.add(VM.Statement.ignore(getValue(var)));
+            }
             var = compile(child);
         }
-        return var;
+        Expression expression = VM.Expression.chain(statements, getValue(var));
+        return expression(expression, var.type);
     }
 
     public CompileContext getContext()

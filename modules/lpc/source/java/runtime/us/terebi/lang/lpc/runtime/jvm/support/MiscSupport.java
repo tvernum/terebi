@@ -70,7 +70,7 @@ public class MiscSupport
 
     public static boolean isNumber(LpcType type)
     {
-        return Types.INT.equals(type) || Types.FLOAT.equals(type);
+        return Types.INT.equals(type) || Types.FLOAT.equals(type) || Types.NIL.equals(type);
     }
 
     public static boolean isFunction(LpcValue value)

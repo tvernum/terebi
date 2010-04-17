@@ -195,7 +195,12 @@ public class MathSupport
     {
         if (isInteger(left) && isInteger(right))
         {
-            return intValue(left.asLong() / right.asLong());
+            final long divisor = right.asLong();
+            if (divisor == 0)
+            {
+                throw new LpcRuntimeException("Division by zero");
+            }
+            return intValue(left.asLong() / divisor);
         }
         if (isNumber(left) && isNumber(right))
         {

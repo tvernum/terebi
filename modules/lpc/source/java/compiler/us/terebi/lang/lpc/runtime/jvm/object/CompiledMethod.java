@@ -38,6 +38,7 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MemberDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
 import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
@@ -74,21 +75,21 @@ public class CompiledMethod implements CompiledMethodDefinition
         Class[] interfaces = method.getDeclaringClass().getInterfaces();
         assert interfaces.length == 1;
         Class iface = interfaces[0];
-        
-      try
-      {
-          // Look for method on interface to support polymorphism
-          method = iface.getMethod(method.getName(), method.getParameterTypes());
-      }
-      catch (SecurityException e)
-      {
-          throw new InternalError(e);
-      }
-      catch (NoSuchMethodException e)
-      {
-          // Ignore
-      }
-      _method = method;
+
+        try
+        {
+            // Look for method on interface to support polymorphism
+            method = iface.getMethod(method.getName(), method.getParameterTypes());
+        }
+        catch (SecurityException e)
+        {
+            throw new InternalError(e);
+        }
+        catch (NoSuchMethodException e)
+        {
+            // Ignore
+        }
+        _method = method;
     }
 
     private FunctionSignature resolveSignature(Method method)
@@ -168,14 +169,22 @@ public class CompiledMethod implements CompiledMethodDefinition
     private LpcValue executeMethod(CompiledObjectInstance instance, List< ? extends LpcValue> arguments)
     {
         Object object = instance.getImplementingObject();
-        if (arguments.size() < _method.getParameterTypes().length)
+        final int requiredArgumentCount = _method.getParameterTypes().length;
+        if (arguments.size() < requiredArgumentCount)
         {
             if (this._signature.acceptsLessArguments())
             {
                 List<LpcValue> args = new ArrayList<LpcValue>(arguments);
-                for (int i = arguments.size(); i < _method.getParameterTypes().length; i++)
+                for (int i = arguments.size(); i < requiredArgumentCount; i++)
                 {
-                    args.add(NilValue.INSTANCE);
+                    if (this._signature.getArguments().get(i).isVarArgs())
+                    {
+                        args.add(LpcConstants.ARRAY.EMPTY);
+                    }
+                    else
+                    {
+                        args.add(NilValue.INSTANCE);
+                    }
                 }
                 arguments = args;
             }
@@ -184,11 +193,15 @@ public class CompiledMethod implements CompiledMethodDefinition
                 throw new IllegalArgumentException("Wrong argument count to "
                         + this
                         + " (expected "
-                        + _method.getParameterTypes().length
+                        + requiredArgumentCount
                         + ", got "
                         + arguments.size()
                         + ")");
             }
+        }
+        if (arguments.size() > requiredArgumentCount)
+        {
+            arguments = arguments.subList(0, requiredArgumentCount);
         }
         try
         {

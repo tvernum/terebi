@@ -85,19 +85,7 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
             LpcMember annotation = method.getAnnotation(LpcMember.class);
             if (annotation != null)
             {
-//                try
-//                {
-//                    method = iface.getMethod(method.getName(), method.getParameterTypes());
-                    _methods.put(annotation.name(), new CompiledMethod(this, method, _lookup));
-//                }
-//                catch (SecurityException e)
-//                {
-//                    throw new InternalError(e);
-//                }
-//                catch (NoSuchMethodException e)
-//                {
-//                    throw new InternalError(e);
-//                }
+                _methods.put(annotation.name(), new CompiledMethod(this, method, _lookup));
             }
         }
 

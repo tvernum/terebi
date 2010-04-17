@@ -49,6 +49,7 @@ public class FunctionalTest
         List<Callable<Object>> list = new ArrayList<Callable<Object>>();
         ObjectBuilder builder = createBuilder(new File("source/lpc/test/us/terebi/lang/lpc/compiler/functional/"));
 
+        list.addAll(getTests("expression.c", builder));
         list.addAll(getTests("binary.c", builder));
         list.addAll(getTests("math.c", builder));
         list.addAll(getTests("logic.c", builder));

@@ -80,7 +80,7 @@ public int a39()
 {
     int a = 0;
     int * arr = ({ 5, 7, 13, 1, 4, 9 });
-    // 5,12,25,26,30,39
+    // 5,12,25,26 1+2+3,30,39
     foreach ( int e in arr )
     {
         a += e;
@@ -177,3 +177,26 @@ public string str_abc()
     }
     return str;
 }
+
+public int a6()
+{
+    int sum, i, max;
+
+    for(sum=0, i=0, max = 3; i<max; i++)
+        sum += (i+1);
+    // 1+2+3
+
+    return sum;
+}
+
+public int b6()
+{
+    int sum, i, max;
+
+    for(max = 3; i<max; i++)
+        sum += (i+1);
+    // 1+2+3
+
+    return sum;
+}
+

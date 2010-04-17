@@ -121,7 +121,7 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
                 array.add(getInfo(resource, longListing));
             }
         }
-        
+
         return array;
     }
 
@@ -132,7 +132,10 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
             return new ArrayValue(Types.MIXED_ARRAY, //
                     new StringValue(resource.getPath()), new IntValue(resource.getSizeInBytes()), new IntValue(resource.lastModified()));
         }
-        return null;
+        else
+        {
+            return new StringValue(resource.getPath());
+        }
     }
 
     private Resource[] resolveWildCard(String path) throws IOException
