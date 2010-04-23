@@ -21,9 +21,6 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.Arrays;
 import java.util.List;
 
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isFunction;
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
-
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
@@ -41,12 +38,14 @@ import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.BoundMethod;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
-import us.terebi.lang.lpc.runtime.util.NilCallable;
+import us.terebi.lang.lpc.runtime.util.NilMethod;
 import us.terebi.util.Range;
 import us.terebi.util.StringUtil;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isFunction;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 
 /**
  * 
@@ -182,7 +181,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
                 + actualType);
     }
 
-    protected CharSequence getName()
+    public CharSequence getName()
     {
         StringBuilder builder = new StringBuilder();
         String name = getClass().getSimpleName();
@@ -252,7 +251,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
             MethodDefinition method = thisObject.getDefinition().getMethods().get(value.asString());
             if (method == null)
             {
-                return new NilCallable(thisObject, Callable.Kind.METHOD);
+                return new NilMethod(thisObject, value.asString());
             }
             else
             {
@@ -274,7 +273,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         {
             return NilValue.INSTANCE;
         }
-        return new ObjectValue(object);
+        return object.asValue();
     }
 
     protected LpcValue getValue(ObjectDefinition object)
@@ -283,7 +282,7 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         {
             return NilValue.INSTANCE;
         }
-        return new ObjectValue(object.getMasterInstance());
+        return object.getMasterInstance().asValue();
     }
 
     protected Callable getFunctionReference(LpcValue func)
@@ -316,5 +315,17 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
     protected boolean hasArgument(List< ? extends LpcValue> arguments, int index)
     {
         return index < arguments.size() && index >= 0 && !MiscSupport.isNil(arguments.get(index));
+    }
+
+    protected LpcValue getArgument(List< ? extends LpcValue> arguments, int index)
+    {
+        if (hasArgument(arguments, index))
+        {
+            return arguments.get(index);
+        }
+        else
+        {
+            return LpcConstants.NIL;
+        }
     }
 }

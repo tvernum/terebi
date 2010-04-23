@@ -39,6 +39,10 @@ public interface Callable
     
     public FunctionSignature getSignature();
     public ObjectInstance getOwner();
+    
+    /** @return The name of the callable, or null if it is unnamed (e.g. a function pointer) */
+    public CharSequence getName();
+    
 
     public LpcValue execute(List< ? extends LpcValue> arguments);
     public LpcValue execute(LpcValue... arguments);

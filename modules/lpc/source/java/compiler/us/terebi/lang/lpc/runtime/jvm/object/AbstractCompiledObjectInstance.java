@@ -17,20 +17,27 @@
 
 package us.terebi.lang.lpc.runtime.jvm.object;
 
+import java.lang.ref.WeakReference;
+
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
+import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 
 /**
  * 
  */
-public class AbstractCompiledObjectInstance
+public abstract class AbstractCompiledObjectInstance implements CompiledObjectInstance
 {
     private final CompiledObjectDefinition _definition;
-    private  final long _id;
+    private final long _id;
+    private WeakReference<ObjectValue> _value;
 
     public AbstractCompiledObjectInstance(CompiledObjectDefinition definition, long id)
     {
         _definition = definition;
         _id = id;
+        _value = new WeakReference<ObjectValue>(null);
     }
 
     public CompiledObjectDefinition getDefinition()
@@ -58,6 +65,17 @@ public class AbstractCompiledObjectInstance
     public String toString()
     {
         return getCanonicalName();
+    }
+
+    public LpcValue asValue()
+    {
+        ObjectValue value = _value.get();
+        if (value == null)
+        {
+            value = new ObjectValue(this);
+            _value = new WeakReference<ObjectValue>(value);
+        }
+        return value;
     }
 
 }

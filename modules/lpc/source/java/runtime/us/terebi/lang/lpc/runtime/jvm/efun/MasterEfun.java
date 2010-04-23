@@ -28,7 +28,6 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 
 /**
  * 
@@ -48,7 +47,7 @@ public class MasterEfun extends AbstractEfun implements FunctionSignature
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         SystemContext context = RuntimeContext.obtain().system();
-        return new ObjectValue(context.objectManager().getMasterObject());
+        return context.objectManager().getMasterObject().asValue();
     }
 
 }

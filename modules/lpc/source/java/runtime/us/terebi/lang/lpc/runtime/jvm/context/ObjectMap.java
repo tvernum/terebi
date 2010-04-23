@@ -52,4 +52,9 @@ public class ObjectMap
     {
         _map.putAll(map._map);
     }
+
+    public String toString()
+    {
+        return getClass().getSimpleName() + ":" + System.identityHashCode(this) + ":" + _map;
+    }
 }

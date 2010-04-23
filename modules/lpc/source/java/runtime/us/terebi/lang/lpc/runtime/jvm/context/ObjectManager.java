@@ -48,6 +48,7 @@ public interface ObjectManager
     public ObjectDefinition findObject(String name);
     public ObjectInstance findObject(ObjectId id);
     
+    public int objectCount();
     public Iterable< ? extends ObjectInstance> objects();
     public Iterable<? extends ObjectInstance> objects(String name);
     

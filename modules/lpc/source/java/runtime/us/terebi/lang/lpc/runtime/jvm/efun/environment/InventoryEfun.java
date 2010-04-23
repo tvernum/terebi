@@ -79,7 +79,7 @@ public class InventoryEfun extends AbstractEfun
         List<LpcValue> array = new ArrayList<LpcValue>();
         for (ObjectInstance object : inventory)
         {
-            array.add(new ObjectValue(object));
+            array.add(object.asValue());
         }
         return new ArrayValue(Types.OBJECT_ARRAY, array);
     }

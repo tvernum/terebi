@@ -78,7 +78,7 @@ public class PreviousObjectEfun extends AbstractEfun implements FunctionSignatur
 
         int offset = (int) (index + 1);
         MajorFrame frame = callStack.peekFrame(offset);
-        return new ObjectValue(frame.instance());
+        return frame.instance().asValue();
     }
 
 }

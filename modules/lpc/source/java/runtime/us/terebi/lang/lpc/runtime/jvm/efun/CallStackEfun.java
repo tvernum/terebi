@@ -104,7 +104,7 @@ public class CallStackEfun extends AbstractEfun implements FunctionSignature, Ca
         {
             if (flag == 1)
             {
-                result.add(new ObjectValue(frame.instance()));
+                result.add(frame.instance().asValue());
                 continue;
             }
             String str;

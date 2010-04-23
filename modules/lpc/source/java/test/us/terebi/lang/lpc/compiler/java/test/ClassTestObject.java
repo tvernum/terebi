@@ -83,6 +83,7 @@ public class ClassTestObject extends LpcObject
                 final LpcValue _lpc_v11 = makeValue(7);
                 return _lpc_v11;
             } /* _lpc_v10.execute() */
+
         }; /* _lpc_v10 */
         _lpc_v9.set(_lpc_v10);
         return _l_huh.get();

@@ -18,8 +18,10 @@
 package us.terebi.net.server;
 
 import java.net.InetSocketAddress;
+import java.util.Set;
 
 import us.terebi.net.core.Component;
+import us.terebi.net.core.Connection;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
@@ -28,4 +30,5 @@ public interface ConnectionListener extends Component
 {
     public void attachedToServer(Server server);
     public InetSocketAddress getAddress();
+    public Set<Connection> getConnections();
 }

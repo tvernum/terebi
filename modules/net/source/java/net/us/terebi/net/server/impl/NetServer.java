@@ -17,6 +17,8 @@
 
 package us.terebi.net.server.impl;
 
+import java.util.Set;
+
 import us.terebi.net.core.Component;
 import us.terebi.net.core.impl.AbstractComponent;
 import us.terebi.net.server.ConnectionListener;
@@ -30,6 +32,11 @@ public class NetServer extends AbstractComponent<ConnectionListener> implements 
     public void addListener(ConnectionListener listener)
     {
         super.addChild(listener);
+    }
+    
+    public Set<ConnectionListener> getListeners()
+    {
+        return super.getChildren();
     }
 
     public void attachedToParent(Component parent)

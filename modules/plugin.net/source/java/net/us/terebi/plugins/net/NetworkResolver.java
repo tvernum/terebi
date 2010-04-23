@@ -24,7 +24,7 @@ import java.util.concurrent.Executors;
 
 import org.apache.log4j.Logger;
 
-import us.terebi.engine.util.IdGenerator;
+import us.terebi.util.IdGenerator;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>

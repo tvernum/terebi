@@ -56,7 +56,7 @@ public class ThisObjectEfun extends AbstractEfun implements FunctionSignature, C
     {
         // @TODO - This can be optimised drastically, if we assume there is no sefun overriding this_object(), and make "this_object()" a local call in LpcObject
         ObjectInstance instance = this_object();
-        return new ObjectValue(instance);
+        return instance.asValue();
     }
 
     public static ObjectInstance this_object()

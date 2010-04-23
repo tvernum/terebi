@@ -27,7 +27,11 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.context.CallOutManager;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -54,8 +58,20 @@ public class CallOutEfun extends AbstractEfun implements FunctionSignature, Call
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        /* @TODO */
-        return new IntValue(-1);
-    }
+        long delay = arguments.get(1).asLong();
+        long time = System.currentTimeMillis() + (delay * 100);
 
+        LpcValue func = arguments.get(0);
+        Callable callable = getFunctionReference(func);
+
+        List<LpcValue> args = arguments.get(2).asList();
+        if (!args.isEmpty())
+        {
+            callable = CallableSupport.bindArguments(callable, args.toArray(new LpcValue[args.size()]));
+        }
+
+        CallOutManager callOutManager = RuntimeContext.obtain().system().callout();
+        int handle = callOutManager.add(time, callable, ThisObjectEfun.this_object());
+        return new IntValue(handle);
+    }
 }

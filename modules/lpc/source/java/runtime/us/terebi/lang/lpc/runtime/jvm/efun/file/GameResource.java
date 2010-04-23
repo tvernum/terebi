@@ -69,7 +69,7 @@ class GameResource implements Resource
             // Only possible while we're still loading the master object;
             return;
         }
-        LpcValue access = apply.invoke(master, new StringValue(_resource.getPath()), new ObjectValue(object), name);
+        LpcValue access = apply.invoke(master, new StringValue(_resource.getPath()), object.asValue(), name);
         if (access.asLong() == 0)
         {
             throw new LpcSecurityException("Efun "

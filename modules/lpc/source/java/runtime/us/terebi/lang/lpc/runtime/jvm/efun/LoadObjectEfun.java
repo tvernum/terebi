@@ -60,7 +60,7 @@ public class LoadObjectEfun extends AbstractEfun implements FunctionSignature, C
         {
             ObjectDefinition definition = manager.findObject(file);
             ObjectInstance instance = definition.getMasterInstance();
-            return new ObjectValue(instance);
+            return instance.asValue();
         }
         catch (ObjectNotFoundException e)
         {

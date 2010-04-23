@@ -1,3 +1,60 @@
+2010-04-23
+    Add 'find_call_out' efun
+    Implement 'objects' efun
+
+2010-04-22
+    Add support for call-outs
+
+2010-04-18
+    Implement 'users' efun
+    Expression type of (old style) function literals is 'function', not the type of the function evaluation
+
+2010-04-17
+    implement get_directory_info efun
+    Treat NIL as a number for comparisons (etc)
+    Fix compound expressions (a=1,b=2,c=3)
+    Fix compiled method handles to correctly handle dynamic 'this' via interface
+    Don't do check for argument count when using expand ('...')
+    Don't assume 2 args are provided to restore_object efun
+    Add option for starting driver with clean work dir
+
+2010-04-15
+    Support int - nil
+    'uptime' efun
+    Don't assume 2 args are provided to save_object efun
+    Add 'variables' efun
+    Don't allow two fields with the same name
+
+2010-04-14
+    Add origin/owner to stack when executing a function pointer
+    More accurate checking of function signature definition
+    Better logging on restore of object
+
+2010-04-13
+    Skip comments when restoring objects
+
+2010-04-12
+    Add 'simul' origin when calling a sefun
+    Add origin() efun
+    Fix plurality in compiler error message
+    Fix bugs when compiling delegate methods for overloaded method names
+    Lookup inherited methods in execution of function literals
+    Correctly handle missing/nil first argument to inventory
+    Support call_other on an array of objects/strings
+
+2010-04-08
+    Network module with 'resolve' efun
+    Don't allow mismatch between method prototype and definition
+
+2010-03-04
+    Set modifiers on bytecode on fields
+    Include header + fix field prefix in save_object efun
+    Support nil+number
+    Implement write_file efun
+    Add privs plugin
+    Add listener to object manager to allow plugins to add attributes on loaded objects
+    Add an "epilog" method to plugins, and redefine the init method to occur before the master object is loaded
+
 2010-03-04
     Finish off call stack support
 

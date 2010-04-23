@@ -204,7 +204,6 @@ public class FunctionLiteralCompiler
             callable = VM.Expression.callStatic(CallableSupport.class, bind, callable, array);
         }
 
-
         Expression value = VM.Expression.construct(VM.Method.constructor(FunctionValue.class, Callable.class), callable);
         return new LpcExpression(Types.FUNCTION, value);
     }

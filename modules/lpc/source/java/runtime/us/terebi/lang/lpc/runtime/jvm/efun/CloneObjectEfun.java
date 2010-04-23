@@ -98,7 +98,7 @@ public class CloneObjectEfun extends AbstractEfun implements FunctionSignature, 
             throw new LpcRuntimeException("Object not found - " + name);
         }
         ObjectInstance instance = definition.newInstance(arguments);
-        return new ObjectValue(instance);
+        return instance.asValue();
     }
 
 }

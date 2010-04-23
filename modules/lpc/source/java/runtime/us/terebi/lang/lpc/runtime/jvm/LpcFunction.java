@@ -241,4 +241,10 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
     {
         return _support.simul_efun(name);
     }
+    
+    public CharSequence getName()
+    {
+        return null;
+    }
+
 }

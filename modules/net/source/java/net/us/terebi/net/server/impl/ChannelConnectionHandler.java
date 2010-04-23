@@ -18,11 +18,14 @@
 package us.terebi.net.server.impl;
 
 import java.nio.channels.SocketChannel;
+import java.util.Set;
 
 import us.terebi.net.core.Component;
+import us.terebi.net.core.Connection;
 import us.terebi.net.core.NetException;
 
 public interface ChannelConnectionHandler extends Component
 {
     public void newConnection(SocketChannel socket, ChannelListener listener) throws NetException;
+    public Set<Connection> connections();
 }

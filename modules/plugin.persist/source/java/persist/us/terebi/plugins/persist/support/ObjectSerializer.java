@@ -49,7 +49,6 @@ import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.parser.LiteralParser;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.Apply;
 import us.terebi.util.io.IOUtil;
@@ -173,7 +172,7 @@ public class ObjectSerializer
         SystemContext system = RuntimeContext.obtain().system();
         ObjectInstance master = system.objectManager().getMasterObject();
 
-        LpcValue access = apply.invoke(master, new StringValue(_file), new ObjectValue(object), name);
+        LpcValue access = apply.invoke(master, new StringValue(_file), object.asValue(), name);
         return access.asLong() != 0;
     }
 

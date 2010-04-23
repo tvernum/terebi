@@ -70,4 +70,9 @@ public class CallableProxy implements Callable
     {
         return getClass().getSimpleName() + ":" + _delegate;
     }
+
+    public CharSequence getName()
+    {
+        return _delegate.getName();
+    }
 }

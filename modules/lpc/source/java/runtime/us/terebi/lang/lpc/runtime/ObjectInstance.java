@@ -37,4 +37,6 @@ public interface ObjectInstance extends UserTypeInstance
     public void destruct();
     public boolean isDestructed();
     public boolean isVirtual();
+    
+    public LpcValue asValue();
 }

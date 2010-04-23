@@ -107,7 +107,7 @@ public class ObjectShell implements Shell
         // no-op (for now)
     }
 
-    private ObjectInstance getConnectionObject(Connection connection)
+    public static ObjectInstance getConnectionObject(Connection connection)
     {
         return (ObjectInstance) connection.getAttributes().getAttribute(CONNECTION_OBJECT_ATTRIBUTE);
     }
@@ -199,5 +199,4 @@ public class ObjectShell implements Shell
     {
         return (InputHandler) user.getAttributes().get(OBJECT_INPUT_HANDLER_ATTRIBUTE);
     }
-
 }

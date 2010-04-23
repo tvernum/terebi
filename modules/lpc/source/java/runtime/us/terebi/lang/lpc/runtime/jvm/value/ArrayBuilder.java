@@ -24,6 +24,7 @@ import java.util.List;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 
 /**
  * 
@@ -51,7 +52,7 @@ public class ArrayBuilder
 
     public void add(long value)
     {
-        add(new IntValue(value));
+        add(ValueSupport.intValue(value));
     }
 
     public void add(String value)
@@ -66,7 +67,7 @@ public class ArrayBuilder
 
     public void add(ObjectInstance instance)
     {
-        add(new ObjectValue(instance));
+        add(instance.asValue());
     }
 
 }

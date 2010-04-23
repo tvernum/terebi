@@ -22,6 +22,8 @@ import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -30,6 +32,7 @@ import java.util.concurrent.ThreadFactory;
 
 import org.apache.log4j.Logger;
 
+import us.terebi.net.core.Connection;
 import us.terebi.net.core.NetException;
 import us.terebi.net.core.Shell;
 import us.terebi.net.core.impl.AbstractComponent;
@@ -52,6 +55,7 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
     private Executor _executor;
     private int _maxErrors;
     private Shell _shell;
+    private final Set<Connection> _connections;
 
     public TelnetChannelConnectionHandler() throws IOException
     {
@@ -59,6 +63,7 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         _threadFactory = null;
         _executor = null;
         _maxErrors = 0;
+        _connections = new HashSet<Connection>();
     }
 
     public void setThreadFactory(ThreadFactory threadFactory)
@@ -233,6 +238,9 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         {
             connection.bind(_shell);
         }
+        
+        _connections.add(connection);
+        
         LOG.info("New connection: " + connection);
         try
         {
@@ -257,4 +265,10 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
     {
         return getClass().getSimpleName() + "{" + _threadFactory + ";" + _shell + "}";
     }
+
+    public Set<Connection> connections()
+    {
+        return Collections.unmodifiableSet(_connections);
+    }
 }
+

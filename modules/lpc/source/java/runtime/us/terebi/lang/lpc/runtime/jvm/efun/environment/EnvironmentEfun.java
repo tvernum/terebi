@@ -75,7 +75,7 @@ public class EnvironmentEfun extends AbstractEfun implements FunctionSignature, 
         {
             return new NilValue(Types.OBJECT);
         }
-        return new ObjectValue(env);
+        return env.asValue();
     }
 
 }

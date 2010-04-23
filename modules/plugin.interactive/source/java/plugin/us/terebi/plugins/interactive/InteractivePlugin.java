@@ -28,6 +28,7 @@ import us.terebi.plugins.interactive.efun.InteractiveEfun;
 import us.terebi.plugins.interactive.efun.ReceiveEfun;
 import us.terebi.plugins.interactive.efun.TellObjectEfun;
 import us.terebi.plugins.interactive.efun.ThisPlayerEfun;
+import us.terebi.plugins.interactive.efun.UsersEfun;
 import us.terebi.plugins.interactive.efun.WriteEfun;
 
 /**
@@ -39,6 +40,7 @@ public class InteractivePlugin extends AbstractPlugin implements Plugin
     {
         Efuns efuns = context.efuns();
         efuns.define("interactive", new InteractiveEfun());
+        efuns.define("users", new UsersEfun());
         efuns.define("this_player", new ThisPlayerEfun());
         efuns.define("write", new WriteEfun());
         efuns.define("input_to", new InputToEfun());

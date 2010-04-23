@@ -27,7 +27,6 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -50,7 +49,7 @@ public class FunctionOwnerEfun extends AbstractEfun implements FunctionSignature
         checkArguments(arguments);
         LpcValue value = arguments.get(0);
         Callable function = value.asCallable();
-        return new ObjectValue(function.getOwner());
+        return function.getOwner().asValue();
     }
 
 }

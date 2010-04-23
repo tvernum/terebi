@@ -20,7 +20,6 @@ package us.terebi.lang.lpc.runtime.jvm.context;
 
 import us.terebi.lang.lpc.io.ResourceFinder;
 
-
 /**
  * 
  */
@@ -30,6 +29,7 @@ public class SystemContext
     private final ObjectManager _objectManager;
     private final ResourceFinder _resourceFinder;
     private final Object _lock;
+    private final CallOutManager _callout;
     private final ObjectMap _attachments;
 
     public SystemContext(Efuns efuns, ObjectManager objectManager, ResourceFinder resourceFinder)
@@ -38,9 +38,9 @@ public class SystemContext
         _objectManager = objectManager;
         _resourceFinder = resourceFinder;
         _lock = new Object();
+        _callout = new CallOutManager(this);
         _attachments = new ObjectMap();
-        _attachments
-        .put(StartTime.class, new StartTime());
+        _attachments.put(StartTime.class, new StartTime());
     }
 
     public ObjectMap attachments()
@@ -71,6 +71,11 @@ public class SystemContext
     public ResourceFinder resourceFinder()
     {
         return _resourceFinder;
+    }
+
+    public CallOutManager callout()
+    {
+        return _callout;
     }
 
 }

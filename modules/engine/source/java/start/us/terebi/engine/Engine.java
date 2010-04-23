@@ -137,6 +137,8 @@ public class Engine
         plugins.start(context);
         Apply connect = new Apply("connect");
         TerebiServer server = new TerebiServer(new ConnectionFactory(connect.bind(master)), _config, context);
+        LOG.info("Attaching " + server + " to " + context.attachments());
+        context.attachments().put(TerebiServer.class, server);
         server.start();
         plugins.run(context);
         try

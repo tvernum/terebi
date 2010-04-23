@@ -95,7 +95,6 @@ import us.terebi.lang.lpc.runtime.jvm.efun.ToIntEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.TypeofEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.UniqueArrayEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.UserpEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.UsersEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.ValuesEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.VariablesEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.VirtualpEfun;
@@ -108,6 +107,7 @@ import us.terebi.lang.lpc.runtime.jvm.efun.action.QueryVerbEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.action.SetLivingNameEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.callout.CallOutEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.callout.CallOutInfoEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.callout.FindCallOutEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.callout.RemoveCallOutEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.environment.EnvironmentEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.environment.InventoryEfun;
@@ -246,7 +246,6 @@ public class StandardEfuns
 
     public static class INTERACTIVE
     {
-        public static final Efun users = new UsersEfun();
         public static final Efun userp = new UserpEfun();
         public static final Efun exec = new ExecEfun();
         public static final Efun find_player = new FindPlayerEfun();
@@ -276,6 +275,7 @@ public class StandardEfuns
     {
         public static final Efun call_out = new CallOutEfun();
         public static final Efun call_out_info = new CallOutInfoEfun();
+        public static final Efun find_call_out = new FindCallOutEfun();
         public static final Efun remove_call_out = new RemoveCallOutEfun();
         public static final Efun call_other = new CallOtherEfun();
         public static final Efun functions = new FunctionsEfun();

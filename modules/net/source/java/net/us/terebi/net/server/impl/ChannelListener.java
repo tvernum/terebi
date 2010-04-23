@@ -22,11 +22,13 @@ import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.Set;
 import java.util.concurrent.ThreadFactory;
 
 import org.apache.log4j.Logger;
 
 import us.terebi.net.core.Component;
+import us.terebi.net.core.Connection;
 import us.terebi.net.core.NetException;
 import us.terebi.net.core.impl.AbstractComponent;
 import us.terebi.net.server.ConnectionListener;
@@ -108,6 +110,11 @@ public class ChannelListener extends AbstractComponent<ChannelConnectionHandler>
         removeChild(handler);
         _handler = handler;
         addChild(handler);
+    }
+    
+    public ChannelConnectionHandler getHandler()
+    {
+        return _handler;
     }
 
     public void setMaxErrors(int maxErrors)
@@ -208,6 +215,11 @@ public class ChannelListener extends AbstractComponent<ChannelConnectionHandler>
     public String toString()
     {
         return getClass().getSimpleName() + "[" + _address + "]";
+    }
+    
+    public Set<Connection> getConnections()
+    {
+        return _handler.connections();
     }
 
 }

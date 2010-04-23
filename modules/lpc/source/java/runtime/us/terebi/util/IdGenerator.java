@@ -17,7 +17,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.engine.util;
+package us.terebi.util;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
@@ -25,14 +25,28 @@ package us.terebi.engine.util;
 public class IdGenerator
 {
     private int _id;
+    private final int _first;
+    private final int _last;
 
     public IdGenerator()
     {
-        _id = 0;
+        this(1, Integer.MAX_VALUE);
+    }
+
+    public IdGenerator(int start, int max)
+    {
+        _id = start;
+        _first = start;
+        _last = max;
     }
 
     public synchronized int next()
     {
-        return ++_id;
+        if (_id == _last)
+        {
+            _id = _first;
+            return _last;
+        }
+        return _id++;
     }
 }

@@ -47,6 +47,7 @@ public class TerebiServer
     public TerebiServer(ConnectionObjectFactory factory, Config config, SystemContext context) throws IOException
     {
         _net = new NetServer();
+        ObjectShell shell = new ObjectShell(factory, context);
         long[] ports = config.getLongs(ConfigNames.TELNET_PORT);
         if (ports.length == 0)
         {
@@ -60,7 +61,7 @@ public class TerebiServer
             }
 
             TelnetChannelConnectionHandler handler = new TelnetChannelConnectionHandler();
-            handler.setShell(new ObjectShell(factory, context));
+            handler.setShell(shell);
 
             ChannelListener listener = new ChannelListener();
             listener.setAddress((short) port);
@@ -78,5 +79,10 @@ public class TerebiServer
     public void stop() throws NetException
     {
         _net.destroy();
+    }
+    
+    public NetServer getNetServer()
+    {
+        return _net;
     }
 }

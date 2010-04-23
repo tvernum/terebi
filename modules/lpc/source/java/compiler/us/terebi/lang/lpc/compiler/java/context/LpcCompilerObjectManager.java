@@ -187,6 +187,11 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         return _objects.get(id);
     }
 
+    public int objectCount()
+    {
+        return _objects.size();
+    }
+    
     public Iterable< ? extends ObjectInstance> objects()
     {
         return _objects.values();

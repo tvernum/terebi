@@ -68,7 +68,7 @@ public class Apply
         MethodDefinition method = getMethod(instance);
         if (method == null)
         {
-            return new NilMethod(instance);
+            return new NilMethod(instance, _name);
         }
         BoundMethod bind = new BoundMethod(method, instance);
         return new StackCall(bind, CallStack.Origin.APPLY);

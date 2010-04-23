@@ -34,10 +34,12 @@ import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 public class NilMethod implements Callable
 {
     private final ObjectInstance _object;
+    private final CharSequence _name;
 
-    public NilMethod(ObjectInstance object)
+    public NilMethod(ObjectInstance object, CharSequence name)
     {
         _object = object;
+        _name = name;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
@@ -64,6 +66,11 @@ public class NilMethod implements Callable
     {
         List<ArgumentDefinition> args = Collections.emptyList();
         return new Signature(false, Types.NIL, args);
+    }
+
+    public CharSequence getName()
+    {
+        return _name;
     }
 
 }

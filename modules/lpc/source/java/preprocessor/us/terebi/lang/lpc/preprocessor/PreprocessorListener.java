@@ -63,6 +63,7 @@ public class PreprocessorListener
      * implementation. It may simply record the error message, or
      * it may throw an exception.
      */
+    @SuppressWarnings("unused")
     public void handleWarning(Source source, int line, int column, String msg) throws LexerException
     {
         warnings++;
@@ -76,14 +77,17 @@ public class PreprocessorListener
      * implementation. It may simply record the error message, or
      * it may throw an exception.
      */
+    @SuppressWarnings("unused")
     public void handleError(Source source, int line, int column, String msg) throws LexerException
     {
         errors++;
         print(source.getName() + ":" + line + ":" + column + ": error: " + msg);
     }
 
+    @SuppressWarnings("unused")
     public void handleSourceChange(Source source, String event)
     {
+        // Ignore - override as required
     }
 
 }
