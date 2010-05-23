@@ -79,6 +79,30 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
     @SuppressWarnings("unchecked")
     private void introspect(CompilerObjectManager manager)
     {
+        Field[] fields = _implementation.getDeclaredFields();
+        for (Field field : fields)
+        {
+            if (field.getAnnotation(LpcInherited.class) != null)
+            {
+                LpcInherited inherited = field.getAnnotation(LpcInherited.class);
+                assert (inherited != null);
+                CompiledObjectDefinition parent = findInherited(manager, inherited);
+                _inherited.put(inherited.name(), parent);
+                _lookup.addInherit(inherited.name(), parent);
+            }
+        }
+        
+        Class[] classes = _implementation.getDeclaredClasses();
+        for (Class cls : classes)
+        {
+            if (LpcClass.class.isAssignableFrom(cls))
+            {
+                ClassDefinition classDefinition = LpcClass.getClassDefinition(cls);
+                _classes.put(classDefinition.getName(), classDefinition);
+                _lookup.classes().defineClass(classDefinition);
+            }
+        }
+
         Method[] methods = _implementation.getDeclaredMethods();
         for (Method method : methods)
         {
@@ -89,29 +113,12 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
             }
         }
 
-        Field[] fields = _implementation.getDeclaredFields();
         for (Field field : fields)
         {
             if (LpcField.class.isAssignableFrom(field.getType()))
             {
                 CompiledField cf = new CompiledField(this, field);
                 _fields.put(cf.getName(), cf);
-            }
-            else if (field.getAnnotation(LpcInherited.class) != null)
-            {
-                LpcInherited inherited = field.getAnnotation(LpcInherited.class);
-                assert (inherited != null);
-                _inherited.put(inherited.name(), findInherited(manager, inherited));
-            }
-        }
-
-        Class[] classes = _implementation.getDeclaredClasses();
-        for (Class cls : classes)
-        {
-            if (LpcClass.class.isAssignableFrom(cls))
-            {
-                ClassDefinition classDefinition = LpcClass.getClassDefinition(cls, this);
-                _classes.put(classDefinition.getName(), classDefinition);
             }
         }
     }

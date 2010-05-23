@@ -17,7 +17,6 @@
 
 package us.terebi.lang.lpc.runtime.jvm.parser;
 
-import java.util.Collections;
 import java.util.Map;
 
 import org.junit.Assert;
@@ -28,7 +27,6 @@ import us.terebi.lang.lpc.parser.jj.ParseException;
 import us.terebi.lang.lpc.runtime.ClassInstance;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
@@ -117,7 +115,7 @@ public class LiteralParserTest
     private ClassLookup getClassLookup()
     {
         ClassLookup lookup = new ClassLookup();
-        DynamicClassDefinition definition = new DynamicClassDefinition("Foo", Collections.<Modifier> emptySet());
+        DynamicClassDefinition definition = new DynamicClassDefinition("Foo");
         definition.addField(new DynamicField(definition, "bar", Types.INT));
         definition.addField(new DynamicField(definition, "baz", Types.STRING));
         definition.setFactory(new DynamicClassFactory(definition));

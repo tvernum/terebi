@@ -130,11 +130,11 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         if (longListing)
         {
             return new ArrayValue(Types.MIXED_ARRAY, //
-                    new StringValue(resource.getPath()), new IntValue(resource.getSizeInBytes()), new IntValue(resource.lastModified()));
+                    new StringValue(resource.getName()), new IntValue(resource.getSizeInBytes()), new IntValue(resource.lastModified()));
         }
         else
         {
-            return new StringValue(resource.getPath());
+            return new StringValue(resource.getName());
         }
     }
 

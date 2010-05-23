@@ -19,7 +19,6 @@ package us.terebi.lang.lpc.compiler.java.context;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -28,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.log4j.Logger;
 
 import org.adjective.stout.core.UnresolvedType;
@@ -456,19 +454,6 @@ public class FunctionLookup
         {
             return;
         }
-        final Collection< ? > disjunction = CollectionUtils.disjunction(existing, replacement);
-        if (disjunction.isEmpty())
-        {
-            return;
-        }
-
-        final Collection< ? > accessModifiers = CollectionUtils.intersection(disjunction, Arrays.asList(Modifier.PUBLIC, Modifier.PROTECTED,
-                Modifier.PRIVATE));
-        if (!accessModifiers.isEmpty())
-        {
-            throw new LookupException("Attempt to redefine modifiers for " + name + " from " + existing + " to " + replacement);
-        }
-
         if (existing.contains(Modifier.VARARGS) && !replacement.contains(Modifier.VARARGS))
         {
             throw new LookupException("Member " + name + " should be declared 'varargs' to match previous declaration");
@@ -495,5 +480,4 @@ public class FunctionLookup
     {
         return _localMethods.getSecondary(name);
     }
-
 }

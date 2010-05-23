@@ -92,17 +92,17 @@ public class NoSuchResource implements Resource
 
     public InputStream read() throws IOException
     {
-        throw new FileNotFoundException(getPath());
+        throw doesNotExist();
     }
 
     public OutputStream write() throws IOException
     {
-        throw new FileNotFoundException(getPath());
+        throw doesNotExist();
     }
 
     public OutputStream append() throws IOException
     {
-        throw new FileNotFoundException(getPath());
+        throw doesNotExist();
     }
 
     public String toString()
@@ -117,12 +117,17 @@ public class NoSuchResource implements Resource
 
     public void delete() throws IOException
     {
-        throw new FileNotFoundException(getPath());
+        throw doesNotExist();
     }
 
     public void mkdir() throws IOException
     {
-        throw new FileNotFoundException(getPath());
+        throw doesNotExist();
+    }
+
+    private FileNotFoundException doesNotExist()
+    {
+        return new FileNotFoundException(getPath());
     }
 
     public boolean newerThan(long mod)
@@ -133,6 +138,11 @@ public class NoSuchResource implements Resource
     public long lastModified()
     {
         return -1;
+    }
+
+    public void rename(Resource to) throws IOException
+    {
+        throw doesNotExist();
     }
 
 }

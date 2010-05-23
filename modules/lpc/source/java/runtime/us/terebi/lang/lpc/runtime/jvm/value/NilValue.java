@@ -18,6 +18,9 @@
 
 package us.terebi.lang.lpc.runtime.jvm.value;
 
+import java.util.Collections;
+import java.util.List;
+
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
@@ -50,17 +53,17 @@ public class NilValue extends AbstractValue implements LpcValue
     {
         return Types.NIL;
     }
-    
+
     public boolean asBoolean()
     {
         return false;
     }
-    
+
     public long asLong()
     {
         return 0;
     }
-    
+
     public double asDouble()
     {
         return 0;
@@ -70,7 +73,12 @@ public class NilValue extends AbstractValue implements LpcValue
     {
         return "";
     }
-    
+
+    public List<LpcValue> asList()
+    {
+        return Collections.emptyList();
+    }
+
     protected boolean valueEquals(LpcValue other)
     {
         return true;
@@ -80,7 +88,7 @@ public class NilValue extends AbstractValue implements LpcValue
     {
         return 0x79c;
     }
-    
+
     public CharSequence debugInfo()
     {
         return "0";

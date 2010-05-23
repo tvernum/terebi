@@ -1094,25 +1094,27 @@ public class Preprocessor
     /**
      * Includes a file from an include path, by name.
      */
-    private boolean include(Iterable<VirtualFile> path, String name) throws IOException
+    private VirtualFile include(Iterable<VirtualFile> path, String name) throws IOException
     {
         for (VirtualFile dir : path)
         {
             VirtualFile file = dir.getChildFile(name);
             if (include(file))
-                return true;
+            {
+                return file;
+            }
         }
-        return false;
+        return null;
     }
 
     /**
      * Handles an include directive.
      */
-    private void include(String parent, int line, String name, boolean quoted) throws IOException, LexerException
+    private VirtualFile include(String parent, int line, String name, boolean quoted) throws IOException, LexerException
     {
+        VirtualFile ifile;
         if (quoted)
         {
-            VirtualFile ifile;
             if (name.startsWith("/"))
             {
                 ifile = _filesystem.getFile(name);
@@ -1124,13 +1126,21 @@ public class Preprocessor
                 ifile = dir.getChildFile(name);
             }
             if (include(ifile))
-                return;
-            if (include(_quoteincludepath, name))
-                return;
+            {
+                return ifile;
+            }
+            ifile = include(_quoteincludepath, name);
+            if (ifile != null)
+            {
+                return ifile;
+            }
         }
 
-        if (include(_sysincludepath, name))
-            return;
+        ifile = include(_sysincludepath, name);
+        if (ifile != null)
+        {
+            return ifile;
+        }
 
         StringBuilder buf = new StringBuilder();
         if (quoted)
@@ -1140,8 +1150,11 @@ public class Preprocessor
                 buf.append(" ").append(dir);
         }
         for (VirtualFile dir : _sysincludepath)
+        {
             buf.append(" ").append(dir);
+        }
         error(line, 0, "File not found: " + name + " in" + buf);
+        return null;
     }
 
     private Token include() throws IOException, LexerException
@@ -1200,14 +1213,14 @@ public class Preprocessor
             }
 
             /* Do the inclusion. */
-            include(_source.getPath(), tok.getLine(), name, quoted);
+            VirtualFile include = include(_source.getPath(), tok.getLine(), name, quoted);
 
             /* 'tok' is the 'nl' after the include. We use it after the
              * #line directive. */
             if (_features.contains(Feature.LINEMARKERS))
             {
                 source_untoken(tok);
-                return line_token(1, name, "");
+                return line_token(1, include.getPath(), "");
             }
             return tok;
         }

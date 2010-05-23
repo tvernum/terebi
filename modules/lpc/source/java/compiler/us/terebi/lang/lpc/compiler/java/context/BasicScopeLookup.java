@@ -94,4 +94,8 @@ public class BasicScopeLookup implements ScopeLookup
         return _inherit.keySet();
     }
 
+    public String toString()
+    {
+        return getClass().getSimpleName();
+    }
 }

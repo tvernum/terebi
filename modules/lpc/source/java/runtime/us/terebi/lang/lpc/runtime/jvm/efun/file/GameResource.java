@@ -27,7 +27,6 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcSecurityException;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.Apply;
 
@@ -183,11 +182,28 @@ class GameResource implements Resource
         checkReadAccess();
         return _resource.newerThan(mod);
     }
-    
+
     public long lastModified()
     {
         checkReadAccess();
         return _resource.lastModified();
+    }
+
+    public void rename(Resource to) throws IOException
+    {
+        checkReadAccess();
+        GameResource destination = null;
+        if (to instanceof GameResource)
+        {
+            destination = (GameResource) to;
+            to = destination._resource;
+        }
+        else
+        {
+            destination = makeResource(to);
+        }
+        destination.checkWriteAccess();
+        _resource.rename(to);
     }
 
 }

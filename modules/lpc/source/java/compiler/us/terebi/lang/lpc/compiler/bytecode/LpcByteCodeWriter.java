@@ -17,10 +17,6 @@
 
 package us.terebi.lang.lpc.compiler.bytecode;
 
-import java.util.List;
-import java.util.regex.Pattern;
-
-import org.apache.log4j.Logger;
 import org.objectweb.asm.AnnotationVisitor;
 import org.objectweb.asm.Attribute;
 import org.objectweb.asm.ClassVisitor;
@@ -38,6 +34,7 @@ import org.adjective.stout.operation.ConstantIntegerExpression;
 import org.adjective.stout.operation.VM;
 import org.adjective.stout.writer.ByteCodeWriter;
 
+import us.terebi.lang.lpc.compiler.bytecode.context.DebugOptions;
 import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 
 /**
@@ -45,15 +42,13 @@ import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
  */
 public class LpcByteCodeWriter extends ByteCodeWriter
 {
-    private final Logger LOG = Logger.getLogger(LpcByteCodeWriter.class);
-
-    private final List<Pattern> _debugPatterns;
+    private final DebugOptions _debug;
     private final boolean _insertTimeChecks;
     private ClassDescriptor _class;
 
-    public LpcByteCodeWriter(List<Pattern> debugPatterns, boolean insertTimeChecks)
+    public LpcByteCodeWriter(DebugOptions debugOptions, boolean insertTimeChecks)
     {
-        _debugPatterns = debugPatterns;
+        _debug = (debugOptions == null ? new DebugOptions(null) : debugOptions);
         _insertTimeChecks = insertTimeChecks;
     }
 
@@ -243,22 +238,7 @@ public class LpcByteCodeWriter extends ByteCodeWriter
 
     private boolean isDebug(MethodDescriptor method)
     {
-        if (_debugPatterns == null)
-        {
-            return false;
-        }
-
-        // @TODO clean this up...
-        String spec = _class.getInternalName().substring(3) + ":" + method.getName();
-        for (Pattern pattern : _debugPatterns)
-        {
-            if (pattern.matcher(spec).matches())
-            {
-                LOG.info("Enabling debug for " + _class + " " + method + " [pattern:" + pattern + "]");
-                return true;
-            }
-        }
-        return false;
+        return _debug.isDebugEnabled(_class, method);
     }
 
     protected ClassWriter createClassWriter(int flags)

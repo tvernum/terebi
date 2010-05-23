@@ -20,6 +20,7 @@ package us.terebi.lang.lpc.runtime.jvm.value;
 
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 /**
@@ -48,12 +49,12 @@ public class IntValue extends AbstractValue
     {
         return _value;
     }
-    
+
     public double asDouble()
     {
         return _value;
     }
-    
+
     public boolean asBoolean()
     {
         return _value != 0;
@@ -63,7 +64,20 @@ public class IntValue extends AbstractValue
     {
         return String.valueOf(_value);
     }
-    
+
+    protected boolean equalsOther(LpcValue other)
+    {
+        if (super.equalsOther(other))
+        {
+            return true;
+        }
+        if (_value == 0 && MiscSupport.isNothing(other))
+        {
+            return true;
+        }
+        return false;
+    }
+
     protected boolean valueEquals(LpcValue other)
     {
         return this.asLong() == other.asLong();
@@ -71,7 +85,7 @@ public class IntValue extends AbstractValue
 
     protected int valueHashCode()
     {
-        return (int)(_value ^ (_value >>> 32));
+        return (int) (_value ^ (_value >>> 32));
     }
 
     public CharSequence debugInfo()

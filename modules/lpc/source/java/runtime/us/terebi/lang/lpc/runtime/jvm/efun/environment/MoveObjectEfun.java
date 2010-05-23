@@ -30,6 +30,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
@@ -67,8 +68,18 @@ public class MoveObjectEfun extends AbstractEfun
             destination = arguments.get(0).asObject();
         }
 
-        Environment.move(ThisObjectEfun.this_object(), destination);
-        
+        if (destination == null)
+        {
+            throw new LpcRuntimeException("No destination");
+        }
+
+        ObjectInstance object = ThisObjectEfun.this_object();
+        if (object == null)
+        {
+            throw new LpcRuntimeException("No current object");
+        }
+        Environment.move(object, destination);
+
         return VoidValue.INSTANCE;
     }
 

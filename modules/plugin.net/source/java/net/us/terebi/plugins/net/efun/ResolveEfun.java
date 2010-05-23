@@ -45,7 +45,7 @@ import us.terebi.plugins.net.NetworkResolver.Token;
  */
 public class ResolveEfun extends AbstractEfun implements Efun
 {
-    static final Logger LOG = Logger.getLogger(ResolveEfun.Handler.class);
+    static final Logger LOG = Logger.getLogger(ResolveEfun.class);
 
     public static class Handler implements NetworkResolver.Callback
     {

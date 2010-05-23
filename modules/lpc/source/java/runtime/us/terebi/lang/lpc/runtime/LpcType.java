@@ -25,7 +25,7 @@ public interface LpcType
 {
     public enum Kind
     {
-        INT, FLOAT, STRING, BUFFER, OBJECT, FUNCTION, MAPPING, MIXED, CLASS, VOID, NIL, EXTENSION;
+        INT, FLOAT, STRING, BUFFER, OBJECT, FUNCTION, MAPPING, MIXED, CLASS, VOID, NIL, ZERO, EXTENSION;
     }
 
     public Kind getKind();

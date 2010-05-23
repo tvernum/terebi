@@ -35,9 +35,9 @@ import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInteger;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMapping;
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNil;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNothing;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNumber;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
@@ -96,7 +96,7 @@ public class MathSupport
         {
             return addArrays(left, right);
         }
-        if (isInteger(left) && isInteger(right))
+        if (MiscSupport.isInteger(left) && MiscSupport.isInteger(right))
         {
             return add(left.asLong(), right.asLong());
         }
@@ -112,11 +112,11 @@ public class MathSupport
         {
             return new StringValue(left.asString() + right.asString());
         }
-        if (isNil(left) && isString(right))
+        if (isNothing(left) && isString(right))
         {
             return new StringValue(left.asString() + right.asString());
         }
-        if (isNil(left) && isNumber(right))
+        if (isNothing(left) && isNumber(right))
         {
             return right;
         }
@@ -180,7 +180,7 @@ public class MathSupport
 
     public static LpcValue multiply(LpcValue left, LpcValue right)
     {
-        if (isInteger(left) && isInteger(right))
+        if (MiscSupport.isInteger(left) && MiscSupport.isInteger(right))
         {
             return intValue(left.asLong() * right.asLong());
         }
@@ -193,7 +193,7 @@ public class MathSupport
 
     public static LpcValue divide(LpcValue left, LpcValue right)
     {
-        if (isInteger(left) && isInteger(right))
+        if (MiscSupport.isInteger(left) && MiscSupport.isInteger(right))
         {
             final long divisor = right.asLong();
             if (divisor == 0)
@@ -219,17 +219,18 @@ public class MathSupport
         {
             return new FloatValue(left.asDouble() - right.asDouble());
         }
+        if (isArray(left) && isArray(right))
+        {
+            List<LpcValue> result = new ArrayList<LpcValue>(left.asList());
+            result.removeAll(right.asList());
+            return new ArrayValue(left.getActualType(), result);
+        }
         throw new UnsupportedOperationException("subtract(" + left.getActualType() + "," + right.getActualType() + ") - Not implemented");
-    }
-
-    private static boolean isInteger(LpcValue value)
-    {
-        return isInt(value) || isNil(value);
     }
 
     public static LpcValue modulus(LpcValue left, LpcValue right)
     {
-        if (isInteger(left) && isInteger(right))
+        if (MiscSupport.isInteger(left) && MiscSupport.isInteger(right))
         {
             return intValue(left.asLong() % right.asLong());
         }

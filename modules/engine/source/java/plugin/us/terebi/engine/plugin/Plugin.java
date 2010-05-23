@@ -19,6 +19,8 @@
 
 package us.terebi.engine.plugin;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 
@@ -32,8 +34,9 @@ public interface Plugin
      * The provided {@link SystemContext} will have efuns, and some attachments (such as {@link us.terebi.engine.objects.CompileOptions},
      * but will not have an object manager or master/simul-efun objects.
      * This is the appropriate place to configure new efuns (so they can be used in the master object) and new preprocessor directives
+     * @param properties @TODO
      */
-    public void load(Config config, SystemContext context);
+    public void load(Config config, SystemContext context, Properties properties);
 
     /**
      * Called during the initialisation process, after the object manager is loaded, but before the master object and simul-efun objects are loaded

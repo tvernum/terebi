@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.Set;
 
 import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.bytecode.context.MethodInfo;
 import us.terebi.lang.lpc.compiler.java.context.LookupException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolution;
@@ -47,7 +48,7 @@ import us.terebi.lang.lpc.runtime.util.Signature;
 /**
  * 
  */
-public class MethodSupport
+public class MethodSupport implements MethodInfo
 {
     private final ASTMethod _node;
     private final String _name;
@@ -169,6 +170,10 @@ public class MethodSupport
         String name = ASTUtil.getImage(identifier);
 
         LpcType type = new TypeSupport(scope, fullType).getType();
+        if (expander && !type.isArray())
+        {
+            throw new CompileException(node, "Attempt to use expander (vargargs) '...' on argument '" + name + "' without declaring it as an array");
+        }
         return new ArgumentSpec(name, type, expander, ref ? ArgumentSemantics.EXPLICIT_REFERENCE : ArgumentSemantics.BY_VALUE);
     }
 

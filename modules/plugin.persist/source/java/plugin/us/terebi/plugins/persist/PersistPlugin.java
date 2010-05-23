@@ -18,6 +18,8 @@
 
 package us.terebi.plugins.persist;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
@@ -33,7 +35,7 @@ import us.terebi.plugins.persist.efun.SaveVariableEfun;
  */
 public class PersistPlugin extends AbstractPlugin implements Plugin
 {
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
         Efuns efuns = context.efuns();
         efuns.define("save_object", new SaveObjectEfun());

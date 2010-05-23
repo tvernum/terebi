@@ -66,11 +66,10 @@ public class LpcClass extends LpcRuntimeSupport
     private ClassDefinition loadDefinition()
     {
         Class< ? extends LpcClass> cls = getClass();
-        ObjectDefinition declaring = _declaring;
-        return getClassDefinition(cls, declaring);
+        return getClassDefinition(cls);
     }
 
-    public static ClassDefinition getClassDefinition(final Class< ? extends LpcClass> cls, ObjectDefinition declaring)
+    public static ClassDefinition getClassDefinition(final Class< ? extends LpcClass> cls)
     {
         // @TODO Cache these by class (weak hash map ?)
         LpcMember annotation = cls.getAnnotation(LpcMember.class);
@@ -78,7 +77,7 @@ public class LpcClass extends LpcRuntimeSupport
         {
             throw new LpcRuntimeException("Class object " + cls + " is not annotated with " + LpcMember.class.getSimpleName());
         }
-        final DynamicClassDefinition definition = new DynamicClassDefinition(annotation.name(), annotation.modifiers(), declaring);
+        final DynamicClassDefinition definition = new DynamicClassDefinition(annotation.name());
 
         Field[] fields = cls.getDeclaredFields();
         for (Field field : fields)
@@ -110,9 +109,4 @@ public class LpcClass extends LpcRuntimeSupport
         definition.setFactory(factory);
         return definition;
     }
-
-    //    public static <C extends LpcClass> C create(Class< ? extends C> type, ObjectInstance owner)
-    //    {
-    //        System.err.println("####" + type.getConstructors());
-    //    }
 }

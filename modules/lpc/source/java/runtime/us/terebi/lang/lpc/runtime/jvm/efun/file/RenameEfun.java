@@ -18,24 +18,26 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
-import us.terebi.lang.lpc.runtime.Callable;
-import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcSecurityException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class RenameEfun extends AbstractEfun implements FunctionSignature, Callable
+public class RenameEfun extends FileEfun
 {
-    // int cp(string src, string dst);
+    // int rename(string src, string dst);
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
@@ -51,8 +53,34 @@ public class RenameEfun extends AbstractEfun implements FunctionSignature, Calla
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO : EFUN */
-        return null;
+        checkArguments(arguments);
+        String src = arguments.get(0).asString();
+        String dst = arguments.get(1).asString();
+
+        try
+        {
+            Resource source = getResource(src);
+            if (!source.exists())
+            {
+                return LpcConstants.INT.ONE;
+            }
+            
+            Resource destination = getResource(dst);
+            source.rename(destination);
+            return LpcConstants.INT.ZERO;
+        }
+        catch (LpcSecurityException e)
+        {
+            return LpcConstants.INT.MINUS_ONE;
+        }
+        catch (IOException e)
+        {
+            return LpcConstants.INT.TWO;
+        }
+        catch (LpcRuntimeException e)
+        {
+            return LpcConstants.INT.MINUS_TWO;
+        }
     }
 
 }

@@ -21,6 +21,7 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.Arrays;
 import java.util.List;
 
+import us.terebi.lang.lpc.compiler.util.TypeSupport;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
@@ -67,6 +68,18 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
     }
 
     protected abstract List< ? extends ArgumentDefinition> defineArguments();
+
+    public boolean hasVarArgsArgument()
+    {
+        for (ArgumentDefinition arg : getArguments())
+        {
+            if (arg.isVarArgs())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
 
     public LpcValue execute(LpcValue... arguments)
     {
@@ -115,26 +128,18 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         {
             ArgumentDefinition def = argumentDefinitions.get(i);
             LpcValue val = argumentValues.get(i);
-            if (def.isVarArgs())
-            {
-                checkType(i + 1, Types.MIXED_ARRAY, val.getActualType(), val);
-                for (LpcValue element : val.asList())
-                {
-                    checkArgument(def, element, i + 1);
-                }
-            }
-            else
-            {
-                checkArgument(def, val, i + 1);
-            }
+            checkArgument(def, val, i + 1);
         }
     }
 
     private void checkArgument(ArgumentDefinition def, LpcValue val, int index)
     {
         LpcType valType = (val instanceof LpcReference) ? ((LpcReference) val).getType() : val.getActualType();
-        checkType(index, def.getType(), valType, val);
-        checkSemantics(index, def.getSemantics(), val);
+        checkType(index, def.getType(), valType);
+        if (!def.isVarArgs())
+        {
+            checkSemantics(index, def.getSemantics(), val);
+        }
     }
 
     protected void checkSemantics(int index, ArgumentSemantics semantics, LpcValue value)
@@ -148,21 +153,9 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         }
     }
 
-    private void checkType(int index, LpcType expectedType, LpcType actualType, LpcValue value)
+    private void checkType(int index, LpcType expectedType, LpcType actualType)
     {
-        if (expectedType.equals(actualType))
-        {
-            return;
-        }
-        if (expectedType.getKind() == LpcType.Kind.MIXED && expectedType.getArrayDepth() <= actualType.getArrayDepth())
-        {
-            return;
-        }
-        if (acceptsLessArguments() && actualType.getKind() == LpcType.Kind.NIL)
-        {
-            return;
-        }
-        if (Types.INT.equals(actualType) && value.asLong() == 0)
+        if (TypeSupport.isMatchingType(actualType, expectedType))
         {
             return;
         }

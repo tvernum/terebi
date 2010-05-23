@@ -33,6 +33,11 @@ public class LpcRuntimeException extends RuntimeException
         super(message);
     }
 
+    public LpcRuntimeException(LpcRuntimeException cause, String location)
+    {
+        super(location + ": " + cause.getMessage(), cause);
+    }
+
     public String getLpcMessage()
     {
         return "*" + getMessage();

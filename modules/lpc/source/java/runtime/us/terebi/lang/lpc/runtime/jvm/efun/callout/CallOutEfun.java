@@ -46,7 +46,7 @@ public class CallOutEfun extends AbstractEfun implements FunctionSignature, Call
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("function", Types.MIXED));
         list.add(new ArgumentSpec("delay", Types.INT));
-        list.add(new ArgumentSpec("arguments", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
+        list.add(new ArgumentSpec("arguments", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 

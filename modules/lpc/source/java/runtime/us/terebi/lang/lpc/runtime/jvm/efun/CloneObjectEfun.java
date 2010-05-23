@@ -38,7 +38,6 @@ import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ClassReference;
 import us.terebi.lang.lpc.runtime.jvm.value.ClassValue;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isClassReference;
@@ -53,7 +52,7 @@ public class CloneObjectEfun extends AbstractEfun implements FunctionSignature, 
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("name", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
+        list.add(new ArgumentSpec("args", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 

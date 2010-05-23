@@ -21,6 +21,8 @@ package us.terebi.engine.config;
 
 import java.io.File;
 
+import us.terebi.lang.lpc.io.Resource;
+
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
  */
@@ -46,7 +48,13 @@ public interface Config
     
     public File getFile(String key, FileType... allowedTypes);
     public File getFile(String key, File relativeTo, FileType... allowedTypes);
+
+    public Resource getResource(String key, FileType... allowedTypes);
+    public Resource getResource(String key, File relativeTo, FileType... allowedTypes);
     
-    public File[] getPath(String key, FileType... allowedTypes);
-    public File[] getPath(String key, File relativeTo, FileType... allowedTypes);
+    public File[] getFilePath(String key, FileType... allowedTypes);
+    public File[] getFilePath(String key, File relativeTo, FileType... allowedTypes);
+
+    public Resource[] getResourcePath(String key, FileType... allowedTypes);
+    public Resource[] getResourcePath(String key, File relativeTo, FileType... allowedTypes);
 }

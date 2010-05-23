@@ -29,7 +29,6 @@ import java.util.Map;
 import org.apache.commons.io.IOUtils;
 
 import us.terebi.lang.lpc.io.FileFinder;
-import us.terebi.lang.lpc.io.FileResource;
 import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.io.ResourceLexerSource;
@@ -88,9 +87,8 @@ public class LpcParser
         addSystemIncludeDirectory(vFile);
     }
 
-    public void addSystemIncludeDirectory(File dir)
+    public void addSystemIncludeDirectory(Resource resource)
     {
-        FileResource resource = new FileResource(dir);
         VirtualFile vFile = getVirtualFile(resource);
         addSystemIncludeDirectory(vFile);
     }
@@ -119,13 +117,7 @@ public class LpcParser
         addAutoIncludeFile(resource);
     }
 
-    public void addAutoIncludeFile(File auto)
-    {
-        FileResource resource = new FileResource(auto);
-        addAutoIncludeFile(resource);
-    }
-
-    private void addAutoIncludeFile(Resource resource)
+    public void addAutoIncludeFile(Resource resource)
     {
         _autoInclude.add(resource);
     }

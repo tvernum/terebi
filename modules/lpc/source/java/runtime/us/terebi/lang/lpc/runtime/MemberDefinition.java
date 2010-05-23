@@ -33,7 +33,7 @@ public interface MemberDefinition
 
     public enum Kind
     {
-        FIELD, CLASS, METHOD;
+        FIELD, METHOD;
     }
 
     public Set< ? extends Modifier> getModifiers();

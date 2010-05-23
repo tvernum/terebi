@@ -39,14 +39,19 @@ public class GenericSignature implements FunctionSignature
 
     public GenericSignature()
     {
-        _arguments = Collections.singletonList(new ArgumentSpec("args", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
+        _arguments = Collections.singletonList(new ArgumentSpec("args", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
     }
 
     public boolean hasUnstructuredArguments()
     {
         return true;
     }
-    
+
+    public boolean hasVarArgsArgument()
+    {
+        return true;
+    }
+
     public List< ? extends ArgumentDefinition> getArguments()
     {
         return _arguments;

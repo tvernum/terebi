@@ -17,6 +17,8 @@
 
 package us.terebi.plugins.privs;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
@@ -29,7 +31,7 @@ import us.terebi.plugins.privs.efun.QueryPrivsEfun;
  */
 public class PrivsPlugin extends AbstractPlugin implements Plugin
 {
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
         Efuns efuns = context.efuns();
         efuns.define("query_privs", new QueryPrivsEfun());

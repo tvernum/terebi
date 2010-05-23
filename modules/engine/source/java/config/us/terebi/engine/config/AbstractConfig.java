@@ -25,6 +25,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import us.terebi.lang.lpc.io.FileResource;
+import us.terebi.lang.lpc.io.Resource;
 import us.terebi.util.StringUtil;
 
 /**
@@ -34,7 +36,8 @@ public abstract class AbstractConfig implements Config
 {
     private static final long[] EMPTY_LONG_ARRAY = new long[0];
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
-    private static final File[] EMPTY_PATH = new File[0];
+    private static final File[] EMPTY_FILE_PATH = new File[0];
+    private static final Resource[] EMPTY_RESOURCE_PATH = new Resource[0];
 
     private final Set<String> _trueValues;
     private final Set<String> _falseValues;
@@ -89,7 +92,7 @@ public abstract class AbstractConfig implements Config
     {
         return getConfigValue(key) != null;
     }
-    
+
     private String getPath(File file)
     {
         try
@@ -245,16 +248,7 @@ public abstract class AbstractConfig implements Config
 
     public File getFile(String key, FileType... allowedTypes)
     {
-        String value = getConfigValue(key);
-        if (value == null)
-        {
-            return null;
-        }
-        if ("".equals(value))
-        {
-            return null;
-        }
-        return resolveFile(key, value, null, allowedTypes);
+        return getFile(key, null, allowedTypes);
     }
 
     public File getFile(String key, File relativeTo, FileType... allowedTypes)
@@ -271,21 +265,40 @@ public abstract class AbstractConfig implements Config
         return resolveFile(key, value, relativeTo, allowedTypes);
     }
 
-    public File[] getPath(String key, FileType... allowedTypes)
+    public Resource getResource(String key, FileType... allowedTypes)
     {
-        return getPath(key, null, allowedTypes);
+        return getResource(key, null, allowedTypes);
     }
 
-    public File[] getPath(String key, File relativeTo, FileType... allowedTypes)
+    public Resource getResource(String key, File relativeTo, FileType... allowedTypes)
     {
         String value = getConfigValue(key);
         if (value == null)
         {
-            return EMPTY_PATH;
+            return null;
         }
         if ("".equals(value))
         {
-            return EMPTY_PATH;
+            return null;
+        }
+        return resolveResource(key, value, relativeTo, allowedTypes);
+    }
+
+    public File[] getFilePath(String key, FileType... allowedTypes)
+    {
+        return getFilePath(key, null, allowedTypes);
+    }
+
+    public File[] getFilePath(String key, File relativeTo, FileType... allowedTypes)
+    {
+        String value = getConfigValue(key);
+        if (value == null)
+        {
+            return EMPTY_FILE_PATH;
+        }
+        if ("".equals(value))
+        {
+            return EMPTY_FILE_PATH;
         }
         String[] parts = value.split(":");
         File[] path = new File[parts.length];
@@ -294,6 +307,37 @@ public abstract class AbstractConfig implements Config
             path[i] = resolveFile(key, parts[i], relativeTo, allowedTypes);
         }
         return path;
+    }
+
+    public Resource[] getResourcePath(String key, FileType... allowedTypes)
+    {
+        return getResourcePath(key, null, allowedTypes);
+    }
+
+    public Resource[] getResourcePath(String key, File relativeTo, FileType... allowedTypes)
+    {
+        String value = getConfigValue(key);
+        if (value == null)
+        {
+            return EMPTY_RESOURCE_PATH;
+        }
+        if ("".equals(value))
+        {
+            return EMPTY_RESOURCE_PATH;
+        }
+        String[] parts = value.split(":");
+        Resource[] path = new Resource[parts.length];
+        for (int i = 0; i < path.length; i++)
+        {
+            path[i] = resolveResource(key, parts[i], relativeTo, allowedTypes);
+        }
+        return path;
+    }
+
+    protected Resource resolveResource(String key, String name, File relativeTo, FileType... allowedArray)
+    {
+        File file = resolveFile(key, name, relativeTo, allowedArray);
+        return new FileResource(file, name);
     }
 
     protected File resolveFile(String key, String name, File relativeTo, FileType... allowedArray)

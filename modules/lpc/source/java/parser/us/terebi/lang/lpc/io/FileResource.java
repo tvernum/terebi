@@ -58,7 +58,14 @@ public class FileResource implements Resource
 
     public Resource getChild(String name)
     {
-        return new FileResource(new File(_file, name));
+        if (_path == null)
+        {
+            return new FileResource(new File(_file, name));
+        }
+        else
+        {
+            return new FileResource(new File(_file, name), _path + "/" + name);
+        }
     }
 
     public Resource[] getChildren()
@@ -93,7 +100,14 @@ public class FileResource implements Resource
 
     public Resource getParent()
     {
-        return new FileResource(_file.getParentFile());
+        if (_path == null)
+        {
+            return new FileResource(_file.getParentFile());
+        }
+        else
+        {
+            return new FileResource(_file.getParentFile(), getParentName());
+        }
     }
 
     public String getPath()
@@ -187,9 +201,22 @@ public class FileResource implements Resource
         }
         return _file.lastModified() >= mod;
     }
-    
+
     public long lastModified()
     {
         return _file.lastModified();
+    }
+
+    public void rename(Resource to)
+    {
+        if (to instanceof FileResource)
+        {
+            FileResource destination = (FileResource) to;
+            _file.renameTo(destination._file);
+        }
+        else
+        {
+            _file.renameTo(new File(to.getPath()));
+        }
     }
 }

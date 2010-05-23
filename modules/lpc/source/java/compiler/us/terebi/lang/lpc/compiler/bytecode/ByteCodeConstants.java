@@ -19,6 +19,7 @@ package us.terebi.lang.lpc.compiler.bytecode;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import org.adjective.stout.core.ConstructorSignature;
@@ -123,4 +124,10 @@ public class ByteCodeConstants
 
     public static final MethodSignature AS_LONG = VM.Method.find(LpcValue.class, "asLong");
     public static final MethodSignature AS_DOUBLE = VM.Method.find(LpcValue.class, "asDouble");
+    public static final MethodSignature AS_LIST = VM.Method.find(LpcValue.class, "asList");
+
+    public static final ParameterisedClass COLLECTIONS = new ParameterisedClassImpl(Collections.class);
+    public static final ParameterisedClass LIST = new ParameterisedClassImpl(List.class);
+    public static final ParameterisedClass COLLECTION = new ParameterisedClassImpl(Collection.class);
+    public static final MethodSignature COLLECTION_SIZE = VM.Method.find(Collection.class, "size");
 }

@@ -32,6 +32,7 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
@@ -79,16 +80,13 @@ public class InputToEfun extends AbstractEfun implements Efun
             }
 
             LpcValue string = new StringValue(line);
-            final List<LpcValue> args;
-            if (_extraArgs.isEmpty())
+            int count = _func.getSignature().getArguments().size();
+            final List<LpcValue> args = new ArrayList<LpcValue>(count);
+            args.add(string);
+            args.addAll(_extraArgs);
+            while (args.size() < count)
             {
-                args = Collections.singletonList(string);
-            }
-            else
-            {
-                args = new ArrayList<LpcValue>(1 + _extraArgs.size());
-                args.add(string);
-                args.addAll(_extraArgs);
+                args.add(LpcConstants.NIL);
             }
 
             ObjectShell.setInputHandler(user, null);
@@ -113,7 +111,7 @@ public class InputToEfun extends AbstractEfun implements Efun
         return Arrays.asList( //
                 new ArgumentSpec("func", Types.MIXED), //
                 new ArgumentSpec("flag", Types.INT), //
-                new ArgumentSpec("args", Types.MIXED, true));
+                new ArgumentSpec("args", Types.MIXED_ARRAY, true));
     }
 
     public boolean acceptsLessArguments()

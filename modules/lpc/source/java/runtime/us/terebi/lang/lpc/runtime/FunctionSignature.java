@@ -41,4 +41,6 @@ public interface FunctionSignature
      */
     public boolean acceptsLessArguments();
 
+    public boolean hasVarArgsArgument();
+
 }

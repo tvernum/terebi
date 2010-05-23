@@ -26,18 +26,26 @@ import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ZeroValue;
 
 /**
  * 
  */
 public class LpcConstants
 {
+    public static final class MIXED
+    {
+        public static final LpcValue ZERO = new ZeroValue();
+    }
+
     public static final class INT
     {
         public static final IntValue ZERO = new IntValue(0);
         public static final IntValue ONE = new IntValue(1);
         public static final IntValue TWO = new IntValue(2);
         public static final IntValue MINUS_ONE = new IntValue(-1);
+        public static final IntValue MINUS_TWO = new IntValue(-2);
+        public static final IntValue MINUS_THREE = new IntValue(-3);
 
         public static final IntValue TRUE = ONE;
         public static final IntValue FALSE = ZERO;

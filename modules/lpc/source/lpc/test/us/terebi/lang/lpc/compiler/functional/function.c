@@ -132,3 +132,13 @@ public int a16()
     return field;
 }
 
+public int a17()
+{
+   int val = 17;
+   function f = function(int val)
+   {
+        return val;
+   };
+   return (*f)(val);
+}
+

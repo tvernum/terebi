@@ -18,23 +18,25 @@
 
 package us.terebi.lang.lpc.runtime.jvm.efun.file;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
+import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcSecurityException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class CreateDirectoryEfun extends AbstractEfun implements FunctionSignature, Callable
+public class CreateDirectoryEfun extends FileEfun implements FunctionSignature, Callable
 {
     // int mkdir( string directory );
     protected List< ? extends ArgumentDefinition> defineArguments()
@@ -50,8 +52,21 @@ public class CreateDirectoryEfun extends AbstractEfun implements FunctionSignatu
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        /* @TODO : EFUN */
-        return VoidValue.INSTANCE;
+        String dir = getArgument(arguments, 0).asString();
+        try
+        {
+            Resource resource = getResource(dir);
+            resource.mkdir();
+            return LpcConstants.INT.ONE;
+        }
+        catch (LpcSecurityException e)
+        {
+            return LpcConstants.INT.ZERO;
+        }
+        catch (IOException e)
+        {
+            return LpcConstants.INT.ZERO;
+        }
     }
 
 }

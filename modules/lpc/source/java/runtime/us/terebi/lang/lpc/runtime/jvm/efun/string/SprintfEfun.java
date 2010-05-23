@@ -51,7 +51,7 @@ public class SprintfEfun extends AbstractEfun implements FunctionSignature, Call
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("format", Types.STRING));
-        list.add(new ArgumentSpec("vars", Types.MIXED, true, ArgumentSemantics.BY_VALUE));
+        list.add(new ArgumentSpec("vars", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 
@@ -197,6 +197,12 @@ public class SprintfEfun extends AbstractEfun implements FunctionSignature, Call
 
     private void applyFormat(Output output, Format format, ListIterator< ? extends LpcValue> iterator)
     {
+        if (format.type == '%')
+        {
+            output.append('%');
+            return;
+        }
+        
         if (format.size == -2)
         {
             format.size = (int) iterator.next().asLong();
@@ -221,8 +227,6 @@ public class SprintfEfun extends AbstractEfun implements FunctionSignature, Call
     {
         switch (format.type)
         {
-            case '%':
-                output.append('%');
             case 'd':
             case 'i':
                 formatInteger(output, format, value.asLong(), 10, false);

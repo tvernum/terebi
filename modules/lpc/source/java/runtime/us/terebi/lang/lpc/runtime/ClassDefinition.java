@@ -21,7 +21,8 @@ package us.terebi.lang.lpc.runtime;
 
 /**
  */
-public interface ClassDefinition extends UserTypeDefinition, MemberDefinition
+public interface ClassDefinition extends UserTypeDefinition
 {
+    public String getName();
     public ClassInstance newInstance(ObjectInstance owner);
 }

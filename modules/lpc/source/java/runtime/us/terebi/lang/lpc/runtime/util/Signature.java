@@ -46,6 +46,18 @@ public class Signature implements FunctionSignature
         return _arguments;
     }
 
+    public boolean hasVarArgsArgument()
+    {
+        for (ArgumentDefinition arg : _arguments)
+        {
+            if (arg.isVarArgs())
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public LpcType getReturnType()
     {
         return _returnType;

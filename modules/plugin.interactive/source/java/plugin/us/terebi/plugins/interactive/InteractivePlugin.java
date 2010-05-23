@@ -18,6 +18,8 @@
 
 package us.terebi.plugins.interactive;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
@@ -36,7 +38,7 @@ import us.terebi.plugins.interactive.efun.WriteEfun;
  */
 public class InteractivePlugin extends AbstractPlugin implements Plugin
 {
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
         Efuns efuns = context.efuns();
         efuns.define("interactive", new InteractiveEfun());

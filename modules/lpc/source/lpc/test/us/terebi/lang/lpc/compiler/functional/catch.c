@@ -47,7 +47,7 @@ public int a1()
     return !s;
 }
 
-public string eq0()
+public string array eq0()
 {
     return ({ "*abcd", 
                catch( error("abcd" ) ) ,

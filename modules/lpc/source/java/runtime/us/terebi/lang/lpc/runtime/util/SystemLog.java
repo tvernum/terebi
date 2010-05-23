@@ -18,23 +18,23 @@
 
 package us.terebi.lang.lpc.runtime.util;
 
+import org.apache.log4j.Logger;
+
 /**
  * 
  */
 public class SystemLog
 {
+    private static final Logger LOG = Logger.getLogger(SystemLog.class);
+
     public static void message(String msg)
     {
-        System.out.println(msg);
+        LOG.info(msg);
     }
 
     public static void message(String msg, Throwable cause)
     {
-        System.out.println(msg);
-        if (cause != null)
-        {
-            cause.printStackTrace(System.out);
-        }
+        LOG.info(msg, cause);
     }
 
 }

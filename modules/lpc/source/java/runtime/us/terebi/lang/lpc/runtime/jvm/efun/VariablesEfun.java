@@ -42,7 +42,7 @@ public class VariablesEfun extends AbstractEfun implements Efun
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Arrays.asList( //
-                new ArgumentSpec("name", Types.STRING), //
+                new ArgumentSpec("name", Types.OBJECT), //
                 new ArgumentSpec("flag", Types.INT) //
         );
     }

@@ -22,6 +22,8 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNumber;
+
 /**
  * 
  */
@@ -62,6 +64,19 @@ public class FloatValue extends AbstractValue implements LpcValue
     public String asString()
     {
         return String.valueOf(_value);
+    }
+
+    protected boolean equalsOther(LpcValue other)
+    {
+        if (super.equalsOther(other))
+        {
+            return true;
+        }
+        if (isNumber(other) && other.asDouble() == this.asDouble())
+        {
+            return true;
+        }
+        return false;
     }
 
     protected boolean valueEquals(LpcValue other)

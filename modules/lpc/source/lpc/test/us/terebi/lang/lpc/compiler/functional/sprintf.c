@@ -1,6 +1,6 @@
 /* vim: set ft=lpc : */
 
-public string eq0()
+public string array eq0()
 {
     return ({
             "(  +42  )" ,
@@ -8,7 +8,7 @@ public string eq0()
         });
 }
 
-public string eq1()
+public string array eq1()
 {
     return ({
             "abcde",
@@ -16,7 +16,7 @@ public string eq1()
         });
 }
 
-public string eq2()
+public string array eq2()
 {
     return ({
             "a    bc   def  ghij klmn pqrs ",
@@ -24,7 +24,7 @@ public string eq2()
         });
 }
 
-public string eq3()
+public string array eq3()
 {
     return ({
             " . . . 30",
@@ -32,7 +32,7 @@ public string eq3()
         });
 }
 
-public string eq4()
+public string array eq4()
 {
     return ({
             "[ 1 ] [abcde] [nopqr] [ 2 ]\n       fghij   stuvw\n        klm \n[ x ] [  10 ] [  y  ] [ z ]\n" ,
@@ -40,7 +40,7 @@ public string eq4()
         });
 }
 
-public string eq5()
+public string array eq5()
 {
     return ({
             "001.00" ,
@@ -48,11 +48,16 @@ public string eq5()
         });
 }
 
-public string eq6()
+public string array eq6()
 {
     return ({
             "  12.34560/12.34560/     12.35/12.35" ,
              sprintf( "%10.5f/%5.5f/%10.2f/%5.2f" , 12.3456 , 12.3456 , 12.3456 , 12.3456 )
         });
+}
+
+public string array eq7()
+{
+    return ({ "%", sprintf( "%%") });
 }
 

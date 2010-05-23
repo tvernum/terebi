@@ -33,7 +33,6 @@ import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 
 /**
  * 

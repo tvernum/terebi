@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import us.terebi.engine.config.Config;
 import us.terebi.engine.config.ConfigNames;
+import us.terebi.lang.lpc.io.Resource;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>
@@ -26,8 +27,8 @@ public class CompileOptions
     private final File _javaOutputDirectory;
     private final List<Pattern> _debugPatterns;
 
-    private final File[] _includeDirectories;
-    private final File[] _autoIncludeFiles;
+    private final Resource[] _includeDirectories;
+    private final Resource[] _autoIncludeFiles;
 
     private final Map<String, String> _preprocessorDefinitions;
 
@@ -35,14 +36,14 @@ public class CompileOptions
     {
         this( //
                 config.getFile(ConfigNames.COMPILE_OUTPUT, Config.FileType.EXISTING_DIRECTORY), //
-                config.getPath(ConfigNames.COMPILE_INCLUDE_DIRECTORIES, mudlib.root(), Config.FileType.EXISTING_DIRECTORY), //
-                config.getPath(ConfigNames.COMPILE_AUTO_INCLUDE, mudlib.root(), Config.FileType.EXISTING_FILE), //
+                config.getResourcePath(ConfigNames.COMPILE_INCLUDE_DIRECTORIES, mudlib.root(), Config.FileType.EXISTING_DIRECTORY), //
+                config.getResourcePath(ConfigNames.COMPILE_AUTO_INCLUDE, mudlib.root(), Config.FileType.EXISTING_FILE), //
                 config.getStrings(ConfigNames.COMPILE_DEBUG) //        
         );
 
     }
 
-    public CompileOptions(File javaOutputDirectory, File[] include, File[] autoInclude, String[] debugPatterns)
+    public CompileOptions(File javaOutputDirectory, Resource[] include, Resource[] autoInclude, String[] debugPatterns)
     {
         _javaOutputDirectory = javaOutputDirectory;
         _includeDirectories = include;
@@ -60,12 +61,12 @@ public class CompileOptions
         return _javaOutputDirectory;
     }
 
-    public File[] includeDirectories()
+    public Resource[] includeDirectories()
     {
         return _includeDirectories;
     }
 
-    public File[] autoIncludeFiles()
+    public Resource[] autoIncludeFiles()
     {
         return _autoIncludeFiles;
     }

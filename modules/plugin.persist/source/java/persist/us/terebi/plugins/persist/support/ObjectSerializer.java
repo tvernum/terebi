@@ -56,9 +56,8 @@ import us.terebi.util.io.IOUtil;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isClass;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isFloat;
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInteger;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMapping;
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNil;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 
 /**
@@ -322,17 +321,13 @@ public class ObjectSerializer
 
     private static void writeValue(Writer writer, LpcValue value) throws IOException
     {
-        if (isInt(value))
+        if (isInteger(value))
         {
             writer.write(Long.toString(value.asLong()));
         }
         else if (isFloat(value))
         {
             writer.write(Double.toString(value.asDouble()));
-        }
-        else if (isNil(value))
-        {
-            writer.write("0");
         }
         else if (isString(value))
         {

@@ -30,6 +30,8 @@ import org.adjective.stout.operation.Expression;
 import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
 
+import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.util.MemberVisitor;
 import us.terebi.lang.lpc.compiler.util.MethodSupport;
@@ -46,6 +48,7 @@ import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcMemberType;
 import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
 import us.terebi.lang.lpc.runtime.jvm.LpcVariable;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 
 /**
  * 
@@ -117,10 +120,10 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
             LpcType argType = arg.getType();
             AnnotationSpec annotation = new AnnotationSpec(LpcParameter.class);
             annotation.withAttribute("kind", argType.getKind());
-            annotation.withAttribute("depth", type.getArrayDepth());
-            if (type.isClass())
+            annotation.withAttribute("depth", argType.getArrayDepth());
+            if (argType.isClass())
             {
-                annotation.withAttribute("className", type.getClassDefinition().getName());
+                annotation.withAttribute("className", argType.getClassDefinition().getName());
             }
             annotation.withAttribute("name", arg.getName());
             annotation.withAttribute("semantics", arg.getSemantics());
@@ -167,7 +170,18 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
                     )));
         }
 
-        new StatementCompiler(getScope(), _context, statements).compileBlock(support.getBody());
+        try
+        {
+            new StatementCompiler(getScope(), _context.enterMethod(support), statements).compileBlock(support.getBody());
+        }
+        catch (CompileException e)
+        {
+            throw new CompileException(e, "In method " + support.getMethodName());
+        }
+        catch (LpcRuntimeException e)
+        {
+            throw new LpcRuntimeException(e, "In method " + support.getMethodName());
+        }
 
         statements.add(VM.Statement.returnObject(ByteCodeConstants.NIL));
         return statements;

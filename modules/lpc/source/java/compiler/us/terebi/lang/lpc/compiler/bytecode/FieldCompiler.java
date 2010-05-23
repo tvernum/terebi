@@ -34,6 +34,7 @@ import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
 
 import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolution;
@@ -103,7 +104,7 @@ public class FieldCompiler extends MemberVisitor implements ParserVisitor
 
             FieldCompiler.addField(classSpec, field);
 
-            statements.add(FieldCompiler.initialiseLpcField(field, EnclosingType.OBJECT).create());
+            statements.add(initialiseLpcField(field, EnclosingType.OBJECT).create());
         }
 
         return statements;
@@ -136,7 +137,9 @@ public class FieldCompiler extends MemberVisitor implements ParserVisitor
         if (assignment != null)
         {
             ExpressionCompiler compiler = new ExpressionCompiler(scope, context);
-            init = ExpressionCompiler.getValue(compiler.compile(assignment));
+            LpcExpression expr = compiler.compile(assignment);
+            TypeSupport.checkType(node, expr.type, type);
+            init = ExpressionCompiler.getValue(expr);
         }
         return new FieldDescriptor(node.getVariableName(), type, modifiers, init);
     }

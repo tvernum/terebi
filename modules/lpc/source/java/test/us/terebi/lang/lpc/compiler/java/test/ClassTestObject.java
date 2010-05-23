@@ -67,7 +67,7 @@ public class ClassTestObject extends LpcObject
     LpcValue foo_()
     {
         final LpcValue _lpc_v3 = classReference(cls_huh.class);
-        final LpcValue _lpc_v4 = efun("new").execute(_lpc_v3, makeArray());
+        final LpcValue _lpc_v4 = efun("new").execute(_lpc_v3, makeArray(new LpcValue[0]));
         final LpcVariable _l_huh = new LpcVariable("huh", withType(classDefinition(cls_huh.class), 0), _lpc_v4);
         final LpcReference _lpc_v5 = ClassSupport.getField(_l_huh.get(), "i");
         final LpcValue _lpc_v6 = makeValue(7);

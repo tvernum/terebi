@@ -26,9 +26,13 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.compiler.java.context.LookupException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
+import us.terebi.lang.lpc.compiler.util.TypeSupport;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
@@ -45,6 +49,7 @@ import us.terebi.lang.lpc.runtime.jvm.LpcParameter;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.lang.lpc.runtime.util.BoundMethod;
@@ -56,6 +61,8 @@ import us.terebi.util.AnnotationUtil;
  */
 public class CompiledMethod implements CompiledMethodDefinition
 {
+    private final Logger LOG = Logger.getLogger(CompiledMethod.class);
+
     private final CompiledObjectDefinition _objectDefinition;
     private final String _name;
     private final Method _method;
@@ -67,27 +74,32 @@ public class CompiledMethod implements CompiledMethodDefinition
     public CompiledMethod(CompiledObjectDefinition object, Method method, ScopeLookup lookup)
     {
         _objectDefinition = object;
+        _lookup = lookup;
         _name = resolveName(method);
         _signature = resolveSignature(method);
         _modifiers = resolveModifiers(method);
-        _lookup = lookup;
 
-        Class[] interfaces = method.getDeclaringClass().getInterfaces();
-        assert interfaces.length == 1;
-        Class iface = interfaces[0];
-
-        try
+        for (Class iface : method.getDeclaringClass().getInterfaces())
         {
-            // Look for method on interface to support polymorphism
-            method = iface.getMethod(method.getName(), method.getParameterTypes());
+            try
+            {
+                // Look for method on interface to support polymorphism
+                method = iface.getMethod(method.getName(), method.getParameterTypes());
+                break;
+            }
+            catch (SecurityException e)
+            {
+                throw new InternalError(e);
+            }
+            catch (NoSuchMethodException e)
+            {
+                // Ignore
+            }
         }
-        catch (SecurityException e)
+        
+        if (!method.getDeclaringClass().isInterface())
         {
-            throw new InternalError(e);
-        }
-        catch (NoSuchMethodException e)
-        {
-            // Ignore
+            LOG.warn("Method " + method + " could not be found on any interface");
         }
         _method = method;
     }
@@ -110,6 +122,10 @@ public class CompiledMethod implements CompiledMethodDefinition
         {
             LpcParameter parameterAnnotation = AnnotationUtil.findAnnotation(LpcParameter.class, method.getParameterAnnotations()[i]);
             LpcType type = getType(parameterAnnotation.kind(), parameterAnnotation.className(), parameterAnnotation.depth());
+            if (parameterAnnotation.varargs() && !type.isArray())
+            {
+                throw new LpcRuntimeException("Argument " + parameterAnnotation + " to " + method + " is marked varargs, but is not an array");
+            }
             arguments[i] = new ArgumentSpec(parameterAnnotation.name(), type, parameterAnnotation.varargs(), parameterAnnotation.semantics());
         }
 
@@ -150,7 +166,15 @@ public class CompiledMethod implements CompiledMethodDefinition
         {
             return null;
         }
-        return _lookup.classes().findClass(name);
+        try
+        {
+            return _lookup.classes().findClass(name);
+        }
+        catch (LookupException e)
+        {
+            LOG.warn("Lookup " + _lookup + " / " + _lookup.classes() + " does not contain " + name);
+            throw new InternalError("Cannot find class '" + name + "' in " + _objectDefinition + " for method " + _name, e);
+        }
     }
 
     public LpcValue execute(ObjectInstance instance, List< ? extends LpcValue> arguments)
@@ -169,43 +193,18 @@ public class CompiledMethod implements CompiledMethodDefinition
     private LpcValue executeMethod(CompiledObjectInstance instance, List< ? extends LpcValue> arguments)
     {
         Object object = instance.getImplementingObject();
-        final int requiredArgumentCount = _method.getParameterTypes().length;
-        if (arguments.size() < requiredArgumentCount)
-        {
-            if (this._signature.acceptsLessArguments())
-            {
-                List<LpcValue> args = new ArrayList<LpcValue>(arguments);
-                for (int i = arguments.size(); i < requiredArgumentCount; i++)
-                {
-                    if (this._signature.getArguments().get(i).isVarArgs())
-                    {
-                        args.add(LpcConstants.ARRAY.EMPTY);
-                    }
-                    else
-                    {
-                        args.add(NilValue.INSTANCE);
-                    }
-                }
-                arguments = args;
-            }
-            else
-            {
-                throw new IllegalArgumentException("Wrong argument count to "
-                        + this
-                        + " (expected "
-                        + requiredArgumentCount
-                        + ", got "
-                        + arguments.size()
-                        + ")");
-            }
-        }
-        if (arguments.size() > requiredArgumentCount)
-        {
-            arguments = arguments.subList(0, requiredArgumentCount);
-        }
+        LpcValue[] array = getMethodArguments(arguments);
+
+        checkLpcTypes(array);
+
         try
         {
-            Object result = _method.invoke(object, arguments.toArray());
+            if (!_method.getDeclaringClass().isInstance(object))
+            {
+                throw new InternalError("Attempt to call method " + _method + " in " + object + " which is not the correct type");
+            }
+            // @TODO check arg types...
+            Object result = _method.invoke(object, (Object[]) array);
             if (result instanceof LpcValue)
             {
                 return (LpcValue) result;
@@ -239,6 +238,80 @@ public class CompiledMethod implements CompiledMethodDefinition
             }
             throw new LpcRuntimeException("During method " + _method + " - " + causeMessage, cause);
         }
+    }
+
+    private void checkLpcTypes(LpcValue[] array)
+    {
+        List< ? extends ArgumentDefinition> lpcSignature = _signature.getArguments();
+        for (int i = 0; i < array.length && i < lpcSignature.size(); i++)
+        {
+            ArgumentDefinition arg = lpcSignature.get(i);
+            LpcValue value = array[i];
+            if (!TypeSupport.isMatchingType(value.getActualType(), arg.getType()))
+            {
+                throw new LpcRuntimeException("Bad argument "
+                        + (i + 1)
+                        + " to "
+                        + toString()
+                        + " expected "
+                        + arg.getType()
+                        + " but was "
+                        + value.getActualType()
+                        + " ("
+                        + value.debugInfo()
+                        + ")");
+            }
+        }
+    }
+
+    private LpcValue[] getMethodArguments(List< ? extends LpcValue> arguments)
+    {
+        final int requiredArgumentCount = _method.getParameterTypes().length;
+        if (arguments.size() < requiredArgumentCount)
+        {
+            if (this._signature.acceptsLessArguments())
+            {
+                List<LpcValue> args = new ArrayList<LpcValue>(arguments);
+                for (int i = arguments.size(); i < requiredArgumentCount; i++)
+                {
+                    if (this._signature.getArguments().get(i).isVarArgs())
+                    {
+                        args.add(LpcConstants.ARRAY.EMPTY);
+                    }
+                    else
+                    {
+                        args.add(NilValue.INSTANCE);
+                    }
+                }
+                arguments = args;
+            }
+            else
+            {
+                throw new IllegalArgumentException("Wrong argument count to "
+                        + this
+                        + " (expected "
+                        + requiredArgumentCount
+                        + ", got "
+                        + arguments.size()
+                        + ")");
+            }
+        }
+        else if (_signature.hasVarArgsArgument())
+        {
+            List<LpcValue> newArgs = new ArrayList<LpcValue>(requiredArgumentCount);
+            if (requiredArgumentCount > 1)
+            {
+                newArgs.addAll(arguments.subList(0, requiredArgumentCount - 1));
+            }
+            newArgs.add(new ArrayValue(Types.MIXED_ARRAY, arguments.subList(requiredArgumentCount - 1, arguments.size())));
+            arguments = newArgs;
+        }
+        else if (arguments.size() > requiredArgumentCount)
+        {
+            arguments = arguments.subList(0, requiredArgumentCount);
+        }
+
+        return arguments.toArray(new LpcValue[arguments.size()]);
     }
 
     public CompiledObjectDefinition getDeclaringType()
@@ -278,6 +351,6 @@ public class CompiledMethod implements CompiledMethodDefinition
 
     public String toString()
     {
-        return _name + " : " + _signature.toString();
+        return _objectDefinition.getBaseName() + "->" + _name + " : " + _signature;
     }
 }

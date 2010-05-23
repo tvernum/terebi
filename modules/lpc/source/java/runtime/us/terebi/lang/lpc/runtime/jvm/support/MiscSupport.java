@@ -43,6 +43,16 @@ public class MiscSupport
         return isType(Types.NIL, value);
     }
 
+    public static boolean isZero(LpcValue value)
+    {
+        return isType(Types.ZERO, value);
+    }
+
+    public static boolean isNothing(LpcValue value)
+    {
+        return isZero(value) || isNil(value);
+    }
+
     public static boolean isString(LpcValue value)
     {
         return isType(Types.STRING, value);
@@ -58,6 +68,11 @@ public class MiscSupport
         return isType(Types.INT, value);
     }
 
+    public static boolean isInteger(LpcValue value)
+    {
+        return isInt(value) || isNothing(value);
+    }
+
     public static boolean isFloat(LpcValue value)
     {
         return isType(Types.FLOAT, value);
@@ -65,12 +80,12 @@ public class MiscSupport
 
     public static boolean isNumber(LpcValue value)
     {
-        return isInt(value) || isFloat(value);
+        return isNumber(value.getActualType());
     }
 
     public static boolean isNumber(LpcType type)
     {
-        return Types.INT.equals(type) || Types.FLOAT.equals(type) || Types.NIL.equals(type);
+        return Types.INT.equals(type) || Types.FLOAT.equals(type) || Types.NIL.equals(type) || Types.ZERO.equals(type);
     }
 
     public static boolean isFunction(LpcValue value)
@@ -202,6 +217,11 @@ public class MiscSupport
             return false;
         }
         return true;
+    }
+
+    public static boolean isDynamicType(LpcType type)
+    {
+        return Types.MIXED.equals(type) || Types.ZERO.equals(type) || Types.NIL.equals(type);
     }
 
 }

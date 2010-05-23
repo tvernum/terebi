@@ -41,6 +41,7 @@ import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
 
 import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.context.LookupException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver;
@@ -86,7 +87,7 @@ public class FunctionLiteralCompiler
     public FunctionLiteralCompiler(ScopeLookup parentScope, CompileContext context)
     {
         _parentScope = parentScope;
-        _context = context;
+        _context = context.enterFunctionLiteral();
         _scope = new InnerClassScopeLookup(parentScope, context.publicClass());
     }
 
@@ -425,8 +426,9 @@ public class FunctionLiteralCompiler
         Collection<ASTVariableReference> vars = findReferencedVariables(node);
         ClassSpec spec = createClassSpec(node);
 
-        List<Parameter> parameters = new ArrayList<Parameter>();
 
+        List<Parameter> parameters = new ArrayList<Parameter>();
+        
         parameters.add(new ParameterSpec("s$owner").withType(LpcObject.class).create());
         Map<String, VariableResolution> variables = getReferencedVariables(vars, spec, parameters);
 
@@ -437,9 +439,11 @@ public class FunctionLiteralCompiler
         MethodSpec constructor = getBlockConstructor(parameters, immediates, argumentDefinitions);
         spec.withMethod(constructor);
 
+        _scope.variables().pushScope();
         MethodSpec execute = getBlockExecute(blockNode, argumentDefinitions, compiler);
+        _scope.variables().popScope();
+        
         spec.withMethod(execute);
-
         store(spec);
 
         Expression[] args = new Expression[parameters.size()];

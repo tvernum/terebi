@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import org.objectweb.asm.Label;
 
 import org.adjective.stout.builder.ElementBuilder;
+import org.adjective.stout.core.ConstructorSignature;
 import org.adjective.stout.core.ExtendedType;
 import org.adjective.stout.impl.ParameterisedClassImpl;
 import org.adjective.stout.loop.Condition;
@@ -41,6 +42,7 @@ import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
 
 import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.StatementVisitor;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.util.StatementResult;
@@ -74,6 +76,7 @@ import us.terebi.lang.lpc.runtime.jvm.LpcVariable;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.support.ComparisonSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.TypedValue;
 import us.terebi.util.Pair;
 
 import static us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants.MAP_ENTRY_GET_KEY;
@@ -153,14 +156,30 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
     protected void visitReturn(ASTControlStatement node)
     {
         Expression expr;
+        LpcType type;
         if (node.jjtGetNumChildren() != 0)
         {
-            // @TODO check type
-            expr = processExpression(node.jjtGetChild(0)).expression;
+            LpcExpression lpcExpr = processExpression(node.jjtGetChild(0));
+            type = lpcExpr.type;
+            expr = lpcExpr.expression;
         }
         else
         {
+            type = Types.VOID;
             expr = ByteCodeConstants.VOID;
+        }
+
+        if (!_context.inFunctionLiteral())
+        {
+            LpcType returnType = _context.method().getReturnType();
+            TypeSupport.checkType(node, type, returnType);
+            if (!Types.MIXED.equals(returnType) && !returnType.isClass())
+            {
+                ConstructorSignature constructor = VM.Method.constructor(TypedValue.class, LpcType.Kind.class, Integer.TYPE, LpcValue.class);
+                Expression kind = VM.Expression.getEnum(returnType.getKind());
+                Expression depth = VM.Expression.constant(returnType.getArrayDepth());
+                expr = VM.Expression.construct(constructor, kind, depth, expr);
+            }
         }
         _statements.add(VM.Statement.returnObject(expr));
     }

@@ -21,6 +21,8 @@ package us.terebi.lang.lpc.runtime.jvm.support;
 import java.util.ArrayList;
 import java.util.List;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInteger;
+
 import us.terebi.lang.lpc.compiler.util.MathLength;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -98,7 +100,7 @@ public class BinarySupport
         {
             return NilValue.INSTANCE;
         }
-        if (MiscSupport.isInt(values[0]))
+        if (isInteger(values[0]))
         {
             long v = 0xFFFFFFFFFFFFFFFFL;
             for (LpcValue value : values)
@@ -113,7 +115,7 @@ public class BinarySupport
         }
         else
         {
-            throw new LpcRuntimeException("Incompatible type (" + values[0].getActualType() + ") to operator '|'");
+            throw new LpcRuntimeException("Incompatible type (" + values[0].getActualType() + ") to operator '&'");
         }
 
     }

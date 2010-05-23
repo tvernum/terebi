@@ -43,6 +43,7 @@ public interface Resource
     public OutputStream append() throws IOException;
     public void mkdir() throws IOException;
     public void delete() throws IOException;
+    public void rename(Resource to) throws IOException;
     
     public boolean newerThan(long mod);
     public long lastModified();

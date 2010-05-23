@@ -113,12 +113,17 @@ public class ByteArrayResource implements Resource
 
     public void delete() throws IOException
     {
-        throw new IOException(getClass().getSimpleName() + " is read-only");
+        throw readOnly();
+    }
+
+    private IOException readOnly()
+    {
+        return new IOException(getClass().getSimpleName() + " is read-only");
     }
 
     public void mkdir() throws IOException
     {
-        throw new IOException(getClass().getSimpleName() + " is read-only");
+        throw readOnly();
     }
 
     public boolean newerThan(long mod)
@@ -129,5 +134,10 @@ public class ByteArrayResource implements Resource
     public long lastModified()
     {
         return System.currentTimeMillis();
+    }
+
+    public void rename(Resource to) throws IOException
+    {
+        throw readOnly(); 
     }
 }

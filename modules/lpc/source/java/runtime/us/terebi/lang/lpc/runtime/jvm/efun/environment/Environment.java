@@ -77,7 +77,10 @@ public class Environment
     public static void move(ObjectInstance object, ObjectInstance destination)
     {
         ObjectInstance from = getEnvironment(object);
-        inventoryOf(from, false).remove(object);
+        if (from != null)
+        {
+            inventoryOf(from, false).remove(object);
+        }
         inventoryOf(destination, true).add(object);
         object.getAttributes().set(ENVIRONMENT, destination);
     }

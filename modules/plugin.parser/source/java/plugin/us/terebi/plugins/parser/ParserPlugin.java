@@ -18,6 +18,8 @@
 
 package us.terebi.plugins.parser;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
@@ -37,7 +39,7 @@ import us.terebi.plugins.parser.efun.VoidEfun;
  */
 public class ParserPlugin extends AbstractPlugin implements Plugin
 {
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
         Efuns efuns = context.efuns();
         efuns.define("parse_init", new VoidEfun());

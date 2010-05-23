@@ -17,20 +17,33 @@
 
 package us.terebi.plugins.net;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.plugins.net.efun.ResolveEfun;
+import us.terebi.plugins.net.efun.SocketCloseEfun;
+import us.terebi.plugins.net.efun.SocketCreateEfun;
+import us.terebi.plugins.net.efun.SocketStatusEfun;
 
 /**
  */
 public class NetPlugin extends AbstractPlugin implements Plugin
 {
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
+        //        CompileOptions compileOptions = context.attachments().get(CompileOptions.class);
+        //        compileOptions.defineTrue("__PACKAGE_SOCKETS__"); // Compat with (Mud|Fluff)OS
+
         Efuns efuns = context.efuns();
         efuns.define("resolve", new ResolveEfun());
+        efuns.define("socket_create", new SocketCreateEfun());
+        efuns.define("socket_status", new SocketStatusEfun());
+        efuns.define("socket_close", new SocketCloseEfun());
+
+        context.attachments().put(SocketManager.class, new SocketManager(context));
     }
 }

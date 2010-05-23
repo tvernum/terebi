@@ -15,14 +15,12 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.compiler.bytecode;
-
-import java.util.List;
-import java.util.regex.Pattern;
+package us.terebi.lang.lpc.compiler.bytecode.context;
 
 import org.adjective.stout.builder.ClassSpec;
 
 import us.terebi.lang.lpc.compiler.ClassStore;
+import us.terebi.lang.lpc.compiler.bytecode.CompileOptions;
 import us.terebi.lang.lpc.parser.LineMapping;
 import us.terebi.lang.lpc.parser.ast.ASTObjectDefinition;
 import us.terebi.util.collection.ArrayStack;
@@ -31,7 +29,7 @@ import us.terebi.util.collection.Stack;
 /**
  * 
  */
-public class CompileContext
+public class CompileSettings
 {
     private final ClassStore _store;
     private final CompileOptions _options;
@@ -39,18 +37,18 @@ public class CompileContext
     private final ClassSpec _publicClass;
     private final Stack<ClassSpec> _classes;
     private final LineMapping _lineMapping;
-    private final List<Pattern> _debugPatterns;
+    private final DebugOptions _debug;
     private final boolean _timeCheck;
 
-    public CompileContext(ClassStore store, CompileOptions options, ASTObjectDefinition tree, ClassSpec classSpec, LineMapping lineMapping,
-            List<Pattern> debugPatterns, boolean timeCheck)
+    public CompileSettings(ClassStore store, CompileOptions options, ASTObjectDefinition tree, ClassSpec classSpec, LineMapping lineMapping,
+            DebugOptions debug, boolean timeCheck)
     {
         _store = store;
         _options = options;
         _tree = tree;
         _publicClass = classSpec;
         _lineMapping = lineMapping;
-        _debugPatterns = debugPatterns;
+        _debug = debug;
         _timeCheck = timeCheck;
         _classes = new ArrayStack<ClassSpec>();
         _classes.push(classSpec);
@@ -97,10 +95,11 @@ public class CompileContext
         return _lineMapping;
     }
 
-    public List<Pattern> getDebugPatterns()
+    public DebugOptions getDebugOptions()
     {
-        return _debugPatterns;
+        return _debug;
     }
+    
 
     public boolean isTimeCheckEnabled()
     {

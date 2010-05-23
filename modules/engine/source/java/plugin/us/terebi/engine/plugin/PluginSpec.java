@@ -84,4 +84,9 @@ class PluginSpec
     {
         return _name + " (" + IOUtil.canonicalPath(_file) + ")";
     }
+    
+    public Properties getProperties()
+    {
+        return _properties;
+    }
 }

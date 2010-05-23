@@ -18,6 +18,8 @@
 
 package us.terebi.plugins.ed;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
@@ -34,7 +36,7 @@ import us.terebi.plugins.ed.efun.InEditEfun;
  */
 public class EdPlugin extends AbstractPlugin  implements Plugin
 {
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
         Efuns efuns = context.efuns();
         efuns.define("ed_start", new EdStartEfun());

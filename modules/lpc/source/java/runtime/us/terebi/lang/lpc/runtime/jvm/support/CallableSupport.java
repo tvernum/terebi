@@ -18,11 +18,15 @@
 
 package us.terebi.lang.lpc.runtime.jvm.support;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.MethodDefinition;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.util.CallableProxy;
@@ -91,5 +95,30 @@ public class CallableSupport
         {
             return new BoundCallable(callable, arguments);
         }
+    }
+
+    public static Callable findMethod(String name, ObjectDefinition object, ObjectInstance instance)
+    {
+        MethodDefinition method = object.getMethods().get(name);
+        if (method != null)
+        {
+            return method.getFunction(instance);
+        }
+        List<Callable> match = new ArrayList<Callable>();
+        Collection< ? extends ObjectDefinition> inherited = object.getInheritedObjects().values();
+        for (ObjectDefinition parent : inherited)
+        {
+            Callable callable = findMethod(name, parent, instance);
+            if (callable != null)
+            {
+                match.add(callable);
+            }
+        }
+        if (match.isEmpty())
+        {
+            return null;
+        }
+        // For compatability with MudOS, the last match is returned
+        return match.get(match.size() - 1);
     }
 }

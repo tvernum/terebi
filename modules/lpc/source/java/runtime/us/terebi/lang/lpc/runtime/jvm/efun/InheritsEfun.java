@@ -21,11 +21,17 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.terebi.lang.lpc.compiler.java.context.ObjectId;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
+import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -50,8 +56,40 @@ public class InheritsEfun extends AbstractEfun implements FunctionSignature, Cal
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO : EFUN */
-        return null;
+        checkArguments(arguments);
+        String file = ObjectId.normalise(arguments.get(0).asString());
+        ObjectInstance object = arguments.get(1).asObject();
+        ObjectDefinition definition = object.getDefinition();
+
+        ObjectManager objectManager = RuntimeContext.obtain().system().objectManager();
+
+        int result = inherits(file, definition, objectManager);
+        return ValueSupport.intValue(result);
+    }
+
+    private int inherits(String file, ObjectDefinition definition, ObjectManager objectManager)
+    {
+        if (definition.getName().equals(file))
+        {
+            ObjectDefinition current = objectManager.findObject(file);
+            if (current == definition)
+            {
+                return 1;
+            }
+            else
+            {
+                return 2;
+            }
+        }
+        for (ObjectDefinition parent : definition.getInheritedObjects().values())
+        {
+            int inherit = inherits(file, parent, objectManager);
+            if (inherit != 0)
+            {
+                return inherit;
+            }
+        }
+        return 0;
     }
 
 }

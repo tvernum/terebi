@@ -21,6 +21,7 @@ package us.terebi.lang.lpc.runtime.util;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 
 public class ArgumentSpec implements ArgumentDefinition
 {
@@ -41,6 +42,10 @@ public class ArgumentSpec implements ArgumentDefinition
 
     public ArgumentSpec(String name, LpcType type, boolean varargs, ArgumentSemantics semantics)
     {
+        if (varargs && !type.isArray())
+        {
+            throw new InternalError("Attempt to create varargs (collector) argument that is not an array");
+        }
         _name = name;
         _type = type;
         _semantics = semantics;

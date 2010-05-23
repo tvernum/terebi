@@ -30,6 +30,7 @@ import us.terebi.lang.lpc.parser.jj.Token;
 import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 /**
@@ -108,7 +109,6 @@ public class TypeSupport
         _type = Types.getType(kind, classDefinition, depth);
     }
 
-
     public LpcType getType()
     {
         return _type;
@@ -116,11 +116,28 @@ public class TypeSupport
 
     public static boolean checkType(Node node, LpcType actual, LpcType... allowedTypes)
     {
-        if (Types.MIXED.equals(actual))
+        if (isMatchingType(actual, allowedTypes))
         {
             return true;
         }
-    
+        StringBuilder expected = new StringBuilder();
+        for (LpcType lpcType : allowedTypes)
+        {
+            expected.append(lpcType);
+            expected.append("|");
+        }
+
+        expected.deleteCharAt(expected.length() - 1);
+        throw new CompileException((SimpleNode) node, "Type mismatch - expected " + expected + " but was " + actual);
+    }
+
+    public static boolean isMatchingType(LpcType actual, LpcType... allowedTypes)
+    {
+        if (MiscSupport.isDynamicType(actual))
+        {
+            return true;
+        }
+
         LpcType type = actual;
         for (LpcType allowed : allowedTypes)
         {
@@ -145,15 +162,7 @@ public class TypeSupport
                 return true;
             }
         }
-        StringBuilder expected = new StringBuilder();
-        for (LpcType lpcType : allowedTypes)
-        {
-            expected.append(lpcType);
-            expected.append("|");
-        }
-    
-        expected.deleteCharAt(expected.length() - 1);
-        throw new CompileException((SimpleNode) node, "Type mismatch - expected " + expected + " but was " + type);
+        return false;
     }
 
 }

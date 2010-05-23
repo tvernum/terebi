@@ -48,6 +48,7 @@ import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
 
 import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.FunctionLookup;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
@@ -87,8 +88,8 @@ public class ClassBuilder extends BaseASTVisitor
         _scope = scope;
         _spec = spec;
         _interface = ClassSpec.newInterface(_spec.getPackage(), _spec.getName() + "$I").withModifiers(ElementModifier.PUBLIC);
-        _declarationVisitor = new DelegatingDeclarationVisitor(new ClassCompiler(_scope, context), new FieldCompiler(_scope, context),
-                new MethodCompiler(_scope, context));
+        _declarationVisitor = new DelegatingDeclarationVisitor(//
+                new ClassCompiler(_scope, context), new FieldCompiler(_scope, context), new MethodCompiler(_scope, context));
         _initialisers = new ArrayList<Statement>();
     }
 
@@ -262,7 +263,7 @@ public class ClassBuilder extends BaseASTVisitor
                         + key.argumentCount);
             }
             MethodSpec method = new MethodSpec(key.name);
-            
+
             method.withModifiers(ElementModifier.PUBLIC, ElementModifier.FINAL, ElementModifier.SYNTHETIC);
             method.withAnnotation(new AnnotationSpec(Dispatch.class));
             method.withReturnType(ByteCodeConstants.LPC_VALUE);

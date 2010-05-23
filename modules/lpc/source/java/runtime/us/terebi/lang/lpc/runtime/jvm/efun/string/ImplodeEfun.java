@@ -59,7 +59,7 @@ public class ImplodeEfun extends AbstractEfun implements FunctionSignature, Call
 
     public LpcType getReturnType()
     {
-        return Types.STRING;
+        return Types.MIXED;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)

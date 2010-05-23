@@ -40,6 +40,11 @@ public class QueryIpNumberEfun extends AbstractEfun implements FunctionSignature
         return Collections.singletonList(new ArgumentSpec("ob", Types.OBJECT));
     }
 
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
+
     public LpcType getReturnType()
     {
         return Types.STRING;

@@ -28,7 +28,9 @@ import us.terebi.engine.config.ConfigNames;
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.ObjectBuilder;
 import us.terebi.lang.lpc.compiler.ObjectBuilderFactory;
+import us.terebi.lang.lpc.compiler.bytecode.context.DebugOptions;
 import us.terebi.lang.lpc.io.FileFinder;
+import us.terebi.lang.lpc.io.Resource;
 import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.parser.LpcParser;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
@@ -90,11 +92,11 @@ public class EngineInitialiser
         LpcParser parser = new LpcParser();
         FileFinder fileFinder = new FileFinder(_mudlib.root());
         parser.setSourceFinder(fileFinder);
-        for (File dir : _compileOptions.includeDirectories())
+        for (Resource dir : _compileOptions.includeDirectories())
         {
             parser.addSystemIncludeDirectory(dir);
         }
-        for (File auto : _compileOptions.autoIncludeFiles())
+        for (Resource auto : _compileOptions.autoIncludeFiles())
         {
             parser.addAutoIncludeFile(auto);
         }
@@ -108,7 +110,7 @@ public class EngineInitialiser
         ObjectBuilderFactory factory = new ObjectBuilderFactory(efuns);
         factory.setWorkingDir(_compileOptions.compilerOutputDirectory());
         factory.setParser(parser);
-        factory.setDebugPatterns(_compileOptions.getDebugPatterns());
+        factory.setDebugOptions(new DebugOptions(_compileOptions.getDebugPatterns()));
         ObjectBuilder builder = factory.createBuilder(fileFinder);
 
         CompilerObjectManager objectManager = builder.getObjectManager();

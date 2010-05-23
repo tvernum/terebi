@@ -34,10 +34,12 @@ import org.adjective.stout.operation.Expression;
 import org.adjective.stout.operation.VM;
 
 import us.terebi.lang.lpc.compiler.CompileException;
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
 import us.terebi.lang.lpc.compiler.java.context.VariableLookup.ObjectPath;
 import us.terebi.lang.lpc.compiler.util.FunctionCallSupport;
+import us.terebi.lang.lpc.compiler.util.TypeSupport;
 import us.terebi.lang.lpc.compiler.util.FunctionCallSupport.ArgumentData;
 import us.terebi.lang.lpc.parser.ast.ASTArgumentExpression;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionArguments;
@@ -46,11 +48,13 @@ import us.terebi.lang.lpc.parser.ast.ASTIdentifier;
 import us.terebi.lang.lpc.parser.ast.ExpressionNode;
 import us.terebi.lang.lpc.parser.ast.Node;
 import us.terebi.lang.lpc.parser.jj.ParserConstants;
+import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.parser.util.BaseASTVisitor;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
+import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
@@ -192,7 +196,7 @@ public class FunctionCallCompiler extends BaseASTVisitor
 
     public static boolean requiresDispatch(Set< ? extends Modifier> modifiers)
     {
-        if (modifiers.contains(Modifier.PRIVATE) || modifiers.contains(Modifier.NOMASK))
+        if (modifiers.contains(Modifier.PRIVATE))
         {
             return false;
         }
@@ -376,14 +380,41 @@ public class FunctionCallCompiler extends BaseASTVisitor
                             + " to "
                             + data.function.name);
                 }
-                return new FunctionArgument(compileExpression(node.jjtGetChild(0)), false, true);
+                return new FunctionArgument(compileExpandoArg(node), false, true);
             default:
                 if (data.definition.getSemantics() == ArgumentSemantics.IMPLICIT_REFERENCE)
                 {
                     return new FunctionArgument(compileRef(node, data), true, false);
                 }
-                return new FunctionArgument(compileExpression(node.jjtGetChild(0)), false, false);
+                return new FunctionArgument(compileSimpleArg(node, data), false, false);
         }
+    }
+
+    private LpcExpression compileExpandoArg(ASTArgumentExpression node)
+    {
+        // @TODO Check type
+        return compileExpression(node.jjtGetChild(0));
+    }
+
+    private LpcExpression compileSimpleArg(ASTArgumentExpression node, ArgumentData data)
+    {
+        LpcType requiredType = data.definition.getType();
+        if (data.function.name.equals("SetId"))
+        {
+            System.out.println("Function is " + data.function);
+            System.out.println("Compiling " + ASTUtil.getCompleteImage(node) + " as simple arg; required type = " + requiredType);
+        }
+        if (data.definition.isVarArgs())
+        {
+            requiredType = Types.elementOf(requiredType);
+            if (data.function.name.equals("SetId"))
+            {
+                System.out.println(data.definition.getName() + " is varargs; required type = " + requiredType);
+            }
+        }
+        LpcExpression expr = compileExpression(node.jjtGetChild(0));
+        TypeSupport.checkType(node, expr.type, requiredType);
+        return expr;
     }
 
     private LpcExpression compileRef(ASTArgumentExpression node, ArgumentData data)

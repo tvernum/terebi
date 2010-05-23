@@ -36,6 +36,7 @@ import org.adjective.stout.operation.VM;
 
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.bytecode.FieldCompiler.FieldDescriptor;
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.compiler.java.CompileTimeField;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.util.MemberVisitor;
@@ -80,7 +81,7 @@ public class ClassCompiler extends MemberVisitor implements ParserVisitor
         ClassSpec spec = ClassSpec.newClass(_context.publicClass().getPackage(), internalName);
         _context.pushClass(spec);
 
-        DynamicClassDefinition classDefinition = new CompiledClassDefinition(lpcName, getModifiers(MemberDefinition.Kind.CLASS), spec);
+        DynamicClassDefinition classDefinition = new CompiledClassDefinition(lpcName, spec);
 
         spec.withModifiers(ElementModifier.PUBLIC, ElementModifier.FINAL);
         spec.withSuperClass(LpcClass.class);
@@ -89,8 +90,7 @@ public class ClassCompiler extends MemberVisitor implements ParserVisitor
         AnnotationSpec annotation = new AnnotationSpec(LpcMember.class);
         annotation.withRuntimeVisibility(true);
         annotation.withAttribute("name", lpcName);
-        Set< ? extends Modifier> modifiers = classDefinition.getModifiers();
-        annotation.withAttribute("modifiers", modifiers.toArray(new MemberDefinition.Modifier[modifiers.size()]));
+        annotation.withAttribute("modifiers", new MemberDefinition.Modifier[0]);
         spec.withAnnotation(annotation);
 
         Set<FieldDescriptor> allFields = new HashSet<FieldDescriptor>();
@@ -120,7 +120,7 @@ public class ClassCompiler extends MemberVisitor implements ParserVisitor
         {
             throw new CompileException("Cannot write class file " + spec, e);
         }
-        
+
         _context.popClass(spec);
 
         return null;

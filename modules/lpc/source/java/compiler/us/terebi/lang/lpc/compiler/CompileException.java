@@ -89,6 +89,12 @@ public class CompileException extends LpcRuntimeException
     }
 
 
+    public CompileException(CompileException cause, String location)
+    {
+        super(cause, location);
+        _token = cause.getToken();
+    }
+
     public Token getToken()
     {
         return _token;

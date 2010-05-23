@@ -105,7 +105,7 @@ public class ObjectBuilder implements ObjectCompiler
 
     public CompiledObjectDefinition compile(Resource resource)
     {
-        LogContext lc = new LogContext(resource);
+        LogContext lc = new LogContext(resource.getPath());
         try
         {
             if (LOG.isDebugEnabled())
@@ -134,12 +134,18 @@ public class ObjectBuilder implements ObjectCompiler
         ASTObjectDefinition ast = null;
         if (resource.newerThan(mod))
         {
-            LOG.info("Compiling " + resource + " to bytecode (" + name + ")");
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("Compiling " + resource + " to bytecode (" + name + ")");
+            }
             ast = compile(resource, name);
         }
         else
         {
-            LOG.info("Bytecode (" + name + ") for " + resource + " is up to date");
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("Bytecode (" + name + ") for " + resource + " is up to date");
+            }
         }
 
         Class< ? extends LpcObject> cls = loadClass(ast, name);
@@ -175,7 +181,7 @@ public class ObjectBuilder implements ObjectCompiler
         }
         catch (LpcRuntimeException e)
         {
-            throw new InternalError("While compiling " + resource, e);
+            throw new InternalError("While compiling " + resource + " - " + e.getMessage(), e);
         }
         return ast;
     }

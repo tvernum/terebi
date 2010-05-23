@@ -17,8 +17,6 @@
 
 package us.terebi.lang.lpc.compiler.bytecode;
 
-import java.util.Set;
-
 import org.adjective.stout.core.UnresolvedType;
 
 import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
@@ -30,9 +28,9 @@ public class CompiledClassDefinition extends DynamicClassDefinition
 {
     private final UnresolvedType _implementation;
 
-    public CompiledClassDefinition(String name, Set< ? extends Modifier> modifiers, UnresolvedType implementation)
+    public CompiledClassDefinition(String name, UnresolvedType implementation)
     {
-        super(name, modifiers);
+        super(name);
         _implementation = implementation;
     }
     

@@ -20,10 +20,9 @@ package us.terebi.lang.lpc.compiler;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.regex.Pattern;
 
 import us.terebi.lang.lpc.compiler.bytecode.ByteCodeCompiler;
+import us.terebi.lang.lpc.compiler.bytecode.context.DebugOptions;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.LpcCompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
@@ -43,7 +42,7 @@ public class ObjectBuilderFactory
     private CompilerObjectManager _manager;
     private LpcParser _parser;
     private File _workingDir;
-    private List<Pattern> _debugPatterns;
+    private DebugOptions _debug;
     private boolean _insertTimeCheck;
 
     public ObjectBuilderFactory(Efuns efuns) throws IOException
@@ -85,7 +84,7 @@ public class ObjectBuilderFactory
         {
             _manager = new LpcCompilerObjectManager();
         }
-        Compiler javaCompiler = new ByteCodeCompiler(_manager, _efuns, _debugPatterns, _insertTimeCheck);
+        Compiler javaCompiler = new ByteCodeCompiler(_manager, _efuns, _debug, _insertTimeCheck);
         ScopeLookup scope = new BasicScopeLookup(_manager);
         ObjectBuilder builder = new ObjectBuilder(finder, _manager, scope, _parser, javaCompiler, _workingDir);
         for (Object object : asList(_manager, _parser, _efuns, finder))
@@ -104,9 +103,9 @@ public class ObjectBuilderFactory
         }
     }
 
-    public void setDebugPatterns(List<Pattern> debugPatterns)
+    public void setDebugOptions(DebugOptions debugOptions)
     {
-        _debugPatterns = debugPatterns;
+        _debug = debugOptions;
     }
     
     public void setInsertTimeCheck(boolean insertTimeCheck)

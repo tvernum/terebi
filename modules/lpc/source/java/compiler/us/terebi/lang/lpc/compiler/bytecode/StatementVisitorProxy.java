@@ -22,6 +22,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 
+import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
 import us.terebi.lang.lpc.parser.ast.Node;
 import us.terebi.lang.lpc.parser.ast.ParserVisitor;
 import us.terebi.lang.lpc.parser.ast.PragmaNode;

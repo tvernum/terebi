@@ -21,11 +21,11 @@ package us.terebi.lang.lpc.compiler;
 import java.io.File;
 import java.util.Collections;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import org.junit.Test;
 
 import us.terebi.lang.lpc.compiler.bytecode.ByteCodeCompiler;
+import us.terebi.lang.lpc.compiler.bytecode.context.DebugOptions;
 import us.terebi.lang.lpc.compiler.java.context.BasicScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
@@ -70,7 +70,7 @@ public class ObjectBuilderTest
         workingDir.delete();
         workingDir.mkdir();
 
-        ByteCodeCompiler compiler = new ByteCodeCompiler(manager, efuns, Collections.<Pattern>emptyList(), true);
+        ByteCodeCompiler compiler = new ByteCodeCompiler(manager, efuns, new DebugOptions(null), true);
         ScopeLookup scope = new BasicScopeLookup(manager);
         ObjectBuilder builder = new ObjectBuilder(finder, manager, scope, new LpcParser(), compiler, workingDir);
         CompiledObjectDefinition object = builder.compile("/area/foo/bar.c");

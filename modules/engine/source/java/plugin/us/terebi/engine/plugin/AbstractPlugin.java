@@ -17,6 +17,8 @@
 
 package us.terebi.engine.plugin;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 
@@ -30,7 +32,7 @@ public abstract class AbstractPlugin implements Plugin
         super();
     }
 
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
         // No-op
     }

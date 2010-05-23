@@ -15,7 +15,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.compiler.bytecode;
+package us.terebi.lang.lpc.compiler.bytecode.stout;
 
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Opcodes;
@@ -29,14 +29,17 @@ import org.adjective.stout.loop.ExpressionCondition;
 import org.adjective.stout.operation.DuplicateStackExpression;
 import org.adjective.stout.operation.Expression;
 
+import us.terebi.lang.lpc.compiler.bytecode.ByteCodeConstants;
+import us.terebi.lang.lpc.compiler.bytecode.ExpressionCompiler;
+
 /**
  * 
  */
-class LogicalOrExpression implements Expression
+public class LogicalAndExpression implements Expression
 {
     private final Expression[] _branches;
 
-    public LogicalOrExpression(Expression[] branches)
+    public LogicalAndExpression(Expression[] branches)
     {
         _branches = branches;
     }
@@ -52,14 +55,15 @@ class LogicalOrExpression implements Expression
         DuplicateStackExpression dup = new DuplicateStackExpression();
         GenericInstruction pop = new GenericInstruction(Opcodes.POP);
 
-        for (Expression branch : _branches)
+        for (int i = 0; i < _branches.length - 1; i++)
         {
+            Expression branch = _branches[i];
             branch.getInstructions(stack, collector);
-            new ExpressionCondition(ExpressionCompiler.toBoolean(dup)).jumpWhenTrue(end).getInstructions(stack, collector);
+            new ExpressionCondition(ExpressionCompiler.toBoolean(dup)).jumpWhenFalse(end).getInstructions(stack, collector);
             pop.getInstructions(stack, collector);
         }
-        
-        ByteCodeConstants.NIL.getInstructions(stack, collector);
+
+        _branches[_branches.length - 1].getInstructions(stack, collector);
         new LabelInstruction(end).getInstructions(stack, collector);
     }
 

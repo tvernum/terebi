@@ -138,9 +138,9 @@ public class LpcRuntimeSupport
         return Types.getType(kind, classDefinition, depth);
     }
 
-    public static DynamicClassDefinition createClass(String name, Set< ? extends Modifier> modifiers)
+    public static DynamicClassDefinition createClass(String name)
     {
-        return new DynamicClassDefinition(name, modifiers);
+        return new DynamicClassDefinition(name);
     }
 
     public static Set<Modifier> withModifiers(Modifier... modifiers)
@@ -165,6 +165,16 @@ public class LpcRuntimeSupport
     public ArrayValue makeArray(LpcValue... elements)
     {
         return ValueSupport.arrayValue(elements);
+    }
+    
+    public ArrayValue makeArray(List<LpcValue>... elements)
+    {
+        List<LpcValue> array = new ArrayList<LpcValue>(elements.length * 3);
+        for (List<LpcValue> element : elements)
+        {
+            array.addAll(element);
+        }
+        return ValueSupport.arrayValue(array);
     }
 
     public NilValue nil()

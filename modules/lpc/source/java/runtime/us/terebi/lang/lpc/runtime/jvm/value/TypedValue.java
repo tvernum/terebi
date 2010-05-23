@@ -28,6 +28,10 @@ import us.terebi.lang.lpc.runtime.ExtensionValue;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.type.Types;
+
+import static us.terebi.lang.lpc.compiler.util.TypeSupport.isMatchingType;
 
 /**
  * 
@@ -37,8 +41,17 @@ public class TypedValue implements LpcValue
     private final LpcType _type;
     private final LpcValue _value;
 
+    public TypedValue(LpcType.Kind kind, int arrayDepth, LpcValue value)
+    {
+        this(Types.getType(kind, null, arrayDepth), value);
+    }
+
     public TypedValue(LpcType type, LpcValue value)
     {
+        if (!isMatchingType(value.getActualType(), type))
+        {
+            throw new LpcRuntimeException("Invalid type: Expected " + type + " but is " + value.getActualType());
+        }
         _type = type;
         _value = value;
     }

@@ -38,7 +38,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
  */
 public class ValueSupport
 {
-    public static LpcValue intValue(long value)
+    public static IntValue intValue(long value)
     {
         if (value < 10 && value > -10)
         {
@@ -52,6 +52,10 @@ public class ValueSupport
                     return LpcConstants.INT.TWO;
                 case -1:
                     return LpcConstants.INT.MINUS_ONE;
+                case -2:
+                    return LpcConstants.INT.MINUS_TWO;
+                case -3:
+                    return LpcConstants.INT.MINUS_THREE;
             }
         }
         return new IntValue(value);

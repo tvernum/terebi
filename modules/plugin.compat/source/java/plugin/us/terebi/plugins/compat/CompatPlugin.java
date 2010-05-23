@@ -17,6 +17,8 @@
 
 package us.terebi.plugins.compat;
 
+import java.util.Properties;
+
 import us.terebi.engine.config.Config;
 import us.terebi.engine.config.ConfigException;
 import us.terebi.engine.config.ConfigNames;
@@ -34,7 +36,7 @@ import us.terebi.plugins.compat.efun.SetEvalLimitEfun;
  */
 public class CompatPlugin extends AbstractPlugin implements Plugin
 {
-    public void load(Config config, SystemContext context)
+    public void load(Config config, SystemContext context, Properties properties)
     {
         CompileOptions compileOptions = context.attachments().get(CompileOptions.class);
         if (compileOptions == null)
@@ -44,6 +46,7 @@ public class CompatPlugin extends AbstractPlugin implements Plugin
 
         String mudName = config.getString("compat.mud.name");
         compileOptions.defineString("MUD_NAME", mudName);
+        compileOptions.defineString("__VERSION__", "Terebi-" + properties.getProperty("plugin.version"));
 
         long[] ports = config.getLongs(ConfigNames.TELNET_PORT);
         if (ports != null && ports.length > 0)

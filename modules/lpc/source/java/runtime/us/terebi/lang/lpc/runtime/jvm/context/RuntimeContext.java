@@ -112,4 +112,10 @@ public class RuntimeContext
         return context;
     }
 
+    public static boolean hasActiveContext()
+    {
+        return CONTEXT.get() != null;
+    }
+    
+    
 }

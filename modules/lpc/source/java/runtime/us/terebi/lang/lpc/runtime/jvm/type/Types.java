@@ -31,6 +31,7 @@ public class Types
 {
     public static final LpcType VOID = new SimpleType(Kind.VOID);
     public static final LpcType NIL = new SimpleType(Kind.NIL);
+    public static final LpcType ZERO = new SimpleType(Kind.ZERO);
 
     public static final LpcType MIXED = new SimpleType(Kind.MIXED);
     public static final LpcType MIXED_ARRAY = new SimpleType(Kind.MIXED, 1);

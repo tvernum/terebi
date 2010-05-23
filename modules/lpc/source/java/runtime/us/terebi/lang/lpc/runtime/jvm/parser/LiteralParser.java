@@ -56,6 +56,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
 import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.lang.lpc.runtime.jvm.value.ZeroValue;
 
 /**
  * 
@@ -139,7 +140,12 @@ public class LiteralParser extends BaseASTVisitor
         if (constant instanceof Long)
         {
             Long num = (Long) constant;
-            return new IntValue(num.longValue());
+            long l = num.longValue();
+            if (l == 0)
+            {
+                return ZeroValue.INSTANCE;
+            }
+            return new IntValue(l);
         }
         if (constant instanceof Double)
         {

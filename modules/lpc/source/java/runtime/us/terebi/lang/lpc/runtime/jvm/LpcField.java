@@ -21,6 +21,7 @@ package us.terebi.lang.lpc.runtime.jvm;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
+import us.terebi.lang.lpc.runtime.jvm.value.TypedValue;
 
 /**
  * 
@@ -65,6 +66,6 @@ public class LpcField implements LpcReference
 
     public LpcValue set(LpcValue value)
     {
-        return _value = value;
+        return _value = new TypedValue(_type, value);
     }
 }

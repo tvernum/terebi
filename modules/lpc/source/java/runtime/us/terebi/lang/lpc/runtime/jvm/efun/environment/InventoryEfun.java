@@ -22,6 +22,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isNil;
+
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -31,7 +33,6 @@ import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
-import us.terebi.lang.lpc.runtime.jvm.value.ObjectValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -66,7 +67,7 @@ public class InventoryEfun extends AbstractEfun
         checkArguments(arguments);
 
         ObjectInstance obj;
-        if (arguments.isEmpty() || MiscSupport.isNil(arguments.get(0)))
+        if (arguments.isEmpty() || isNil(arguments.get(0)))
         {
             obj = ThisObjectEfun.this_object();
         }

@@ -97,14 +97,14 @@ public int a13()
     return a[2];
 }
 
-public int str_aaaa()
+public string str_aaaa()
 {
     string array a = ({ "a", "aa", "aaa", "aaaa", "aaaaa", "aaaaaa", "b", "bb", "bbb", "bbbb", "bbbbb", "bbbbbb" });
     a = filter_array(a, (: strlen($1) >= $2 :), 3 );
     return a[1];
 }
 
-public int str_bbbb()
+public string str_bbbb()
 {
     string array a = ({ "a", "aa", "aaa", "aaaa", "aaaaa", "aaaaaa", "b", "bb", "bbb", "bbbb", "bbbbb", "bbbbbb" });
     a = filter(a, (: strlen($1) >= $2 :), 3 );
@@ -162,18 +162,24 @@ public int b4()
     return sizeof(a);
 }
 
-public b5()
+public int b5()
 {
     int array a = ({ 1, 2, 3, 4, 5, 6, 7, 8 });
     int array b = ({ -3 , -2, -1, 0, 1, 2, 3, 4, 5 });
     return sizeof( a & b );
 }
 
-public b6()
+public int b6()
 {
     int array a = ({ 1, 2, 3, 4 });
     int array b = ({ 3, 4, 5, 6 });
     return sizeof( a | b );
 }
 
-
+public int b7()
+{
+    int array a = ({ 1, 2, 3 });
+    int array b = ({ 4, 5, 6 });
+    int array c = ({ a... , b... , 7 });
+    return sizeof( c );
+}

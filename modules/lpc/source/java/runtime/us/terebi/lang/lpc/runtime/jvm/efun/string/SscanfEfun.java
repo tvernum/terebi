@@ -253,7 +253,7 @@ public class SscanfEfun extends AbstractEfun implements FunctionSignature, Calla
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
         list.add(new ArgumentSpec("str", Types.STRING));
         list.add(new ArgumentSpec("format", Types.STRING));
-        list.add(new ArgumentSpec("vars", Types.MIXED, true, ArgumentSemantics.IMPLICIT_REFERENCE));
+        list.add(new ArgumentSpec("vars", Types.MIXED_ARRAY, true, ArgumentSemantics.IMPLICIT_REFERENCE));
         return list;
     }
 

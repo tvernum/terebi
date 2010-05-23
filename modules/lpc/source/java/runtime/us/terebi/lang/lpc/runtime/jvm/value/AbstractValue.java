@@ -114,10 +114,16 @@ public abstract class AbstractValue implements LpcValue
         if (obj instanceof LpcValue)
         {
             LpcValue other = (LpcValue) obj;
-            if (this.getActualType().equals(other.getActualType()))
-            {
-                return valueEquals(other);
-            }
+            return equalsOther(other);
+        }
+        return false;
+    }
+
+    protected boolean equalsOther(LpcValue other)
+    {
+        if (this.getActualType().equals(other.getActualType()))
+        {
+            return valueEquals(other);
         }
         return false;
     }

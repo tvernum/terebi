@@ -195,4 +195,29 @@ public class CompiledField implements FieldDefinition
         return Kind.FIELD;
     }
 
+    public boolean equals(Object obj)
+    {
+        if (obj == null)
+        {
+            return false;
+        }
+        if (obj == this)
+        {
+            return true;
+        }
+        if (obj instanceof CompiledField)
+        {
+            CompiledField other = (CompiledField) obj;
+            if (this._declaringObject.equals(other._declaringObject) && this._field.equals(other._field))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    public int hashCode()
+    {
+        return _declaringObject.hashCode() ^ _field.hashCode();
+    }
 }

@@ -131,7 +131,7 @@ class PluginResolver
         {
             return;
         }
-        _plugin.load(config, context);
+        _plugin.load(config, context, _config.getProperties());
     }
 
     private void create(ClassLoader classLoader)

@@ -94,8 +94,7 @@ public class ClassLookup
         return match.iterator().next();
     }
 
-    private void findMatchingClasses(String className, Map<String, ? extends ObjectDefinition> inherited,
-            Set<ClassDefinition> match)
+    private void findMatchingClasses(String className, Map<String, ? extends ObjectDefinition> inherited, Set<ClassDefinition> match)
     {
         ClassDefinition definition;
         for (ObjectDefinition parent : inherited.values())
@@ -130,6 +129,11 @@ public class ClassLookup
         {
             defineClass(classDefinition);
         }
+    }
+
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + _local.keySet() + ";" + _inherited.keySet() + "}";
     }
 
 }
