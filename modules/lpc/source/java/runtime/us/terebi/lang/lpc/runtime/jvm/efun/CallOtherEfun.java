@@ -26,6 +26,7 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
@@ -113,7 +114,7 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
 
     public static LpcValue callOther(ObjectInstance target, String name, List< ? extends LpcValue> args)
     {
-        Callable method = CallableSupport.findMethod(name, target.getDefinition(), target);
+        MethodDefinition method = CallableSupport.findMethod(name, target.getDefinition(), target);
         if (method == null)
         {
             return NilValue.INSTANCE;
@@ -123,7 +124,7 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
         stack.pushFrame(CallStack.Origin.CALL_OTHER, target);
         try
         {
-            return method.execute(args);
+            return method.execute(target, args);
         }
         finally
         {

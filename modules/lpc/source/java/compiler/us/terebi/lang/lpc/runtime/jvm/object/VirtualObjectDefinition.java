@@ -71,7 +71,7 @@ public class VirtualObjectDefinition extends AbstractObjectDefinition implements
 
     protected CompiledObjectInstance newInstance(long id, InstanceType type, CompiledObjectInstance forInstance, List< ? extends LpcValue> createArguments)
     {
-        CompiledObjectInstance instance = _definition.getPrototypeInstance();
+        CompiledObjectInstance instance = _definition.getPrototypeInstance(forInstance);
         for (FieldDefinition fieldDefinition : _definition.getFields().values())
         {
             LpcValue value = fieldDefinition.getValue(_object);

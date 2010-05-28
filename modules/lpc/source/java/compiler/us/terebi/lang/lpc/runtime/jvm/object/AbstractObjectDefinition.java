@@ -84,7 +84,8 @@ public abstract class AbstractObjectDefinition implements CompiledObjectDefiniti
         MASTER, INSTANCE, INHERIT, PROTOTYPE;
     }
 
-    protected abstract CompiledObjectInstance newInstance(long id, InstanceType type, CompiledObjectInstance forInstance, List< ? extends LpcValue> createArguments);
+    protected abstract CompiledObjectInstance newInstance(long id, InstanceType type, CompiledObjectInstance forInstance,
+            List< ? extends LpcValue> createArguments);
 
     public void instanceDestructed(ObjectInstance instance)
     {
@@ -123,9 +124,13 @@ public abstract class AbstractObjectDefinition implements CompiledObjectDefiniti
         }
     }
 
-    public CompiledObjectInstance getPrototypeInstance()
+    public CompiledObjectInstance getPrototypeInstance(ObjectInstance forInstance)
     {
-        return newInstance(0, InstanceType.PROTOTYPE, null, Collections.<LpcValue> emptyList());
+        if (forInstance == null || forInstance instanceof CompiledObjectInstance)
+        {
+            return newInstance(0, InstanceType.PROTOTYPE, (CompiledObjectInstance) forInstance, Collections.<LpcValue> emptyList());
+        }
+        throw new IllegalArgumentException("Cannot create instance for non-compiled object " + forInstance);
     }
 
     protected LpcValue create(CompiledObjectInstance instance, List< ? extends LpcValue> createArguments)

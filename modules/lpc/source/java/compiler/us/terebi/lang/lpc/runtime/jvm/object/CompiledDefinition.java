@@ -91,7 +91,7 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
                 _lookup.addInherit(inherited.name(), parent);
             }
         }
-        
+
         Class[] classes = _implementation.getDeclaredClasses();
         for (Class cls : classes)
         {
@@ -169,40 +169,45 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
         return Collections.unmodifiableMap(_inherited);
     }
 
-    protected CompiledObject<T> newInstance(long id, InstanceType type, CompiledObjectInstance forInstance, List< ? extends LpcValue> createArguments)
+    protected CompiledObject<T> newInstance( //
+            long id, InstanceType type, CompiledObjectInstance actualInstance, List< ? extends LpcValue> createArguments)
     {
         if (id != 0)
         {
             getMasterInstance();
         }
 
-        T object = createObject(forInstance == null ? null : forInstance.getImplementingObject());
+        T newImplementation = createObject(actualInstance == null ? null : actualInstance.getImplementingObject());
 
-        Map<String, ObjectInstance> parents = new HashMap<String, ObjectInstance>();
+        Map<String, ObjectInstance> parentMap = new HashMap<String, ObjectInstance>();
 
-        CompiledObject<T> instance = new CompiledObject<T>(this, id, object, parents);
+        CompiledObject<T> newInstance = new CompiledObject<T>(this, id, newImplementation, parentMap);
+        if (actualInstance == null)
+        {
+            actualInstance = newInstance;
+        }
 
-        Field[] fields = object.getClass().getDeclaredFields();
+        Field[] fields = newImplementation.getClass().getDeclaredFields();
         for (Field field : fields)
         {
-            InheritedObject< ? > inherited = setInheritedField(instance, field);
+            InheritedObject< ? > inherited = setInheritedField(newInstance, field, actualInstance);
             if (inherited != null)
             {
-                parents.put(inherited.getName(), inherited.getObjectInstance());
+                parentMap.put(inherited.getName(), inherited.getObjectInstance());
             }
         }
 
-        object.setDefinition(this);
-        object.setInstance(forInstance == null ? instance : forInstance);
+        newImplementation.setDefinition(this);
+        newImplementation.setInstance(actualInstance);
         if (type == InstanceType.MASTER || type == InstanceType.INSTANCE)
         {
-            register(instance);
-            create(instance, createArguments);
+            register(newInstance);
+            create(newInstance, createArguments);
         }
-        return instance;
+        return newInstance;
     }
 
-    private InheritedObject< ? > setInheritedField(CompiledObject<T> instance, Field field)
+    private InheritedObject< ? > setInheritedField(CompiledObject<T> parentInstance, Field field, CompiledObjectInstance actualInstance)
     {
         LpcInherited annotation = field.getAnnotation(LpcInherited.class);
         if (annotation == null)
@@ -210,11 +215,12 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
             return null;
         }
         CompiledObjectDefinition definition = _inherited.get(annotation.name());
-        InheritedObject< ? > inherited = new InheritedObject<Object>(annotation.name(), definition.getImplementationClass(), definition, instance);
+        InheritedObject< ? > inherited = new InheritedObject<Object>( //
+                annotation.name(), definition.getImplementationClass(), definition, actualInstance);
         try
         {
             field.setAccessible(true);
-            field.set(instance.getImplementingObject(), inherited);
+            field.set(parentInstance.getImplementingObject(), inherited);
         }
         catch (Exception e)
         {

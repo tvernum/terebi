@@ -36,7 +36,6 @@
     <pathelement location="../net/output/ant/classes" />
     <pathelement location="../engine/output/ant/classes" />
     <fileset dir="../engine/lib/server" />
-    <fileset dir="./lib/" />
   </path>
 
   <target name="compile.plugin">

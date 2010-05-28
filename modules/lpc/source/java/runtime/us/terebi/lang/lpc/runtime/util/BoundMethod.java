@@ -27,6 +27,7 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
 
 /**
  * 
@@ -49,7 +50,7 @@ public class BoundMethod implements Callable
 
     private static MethodDefinition findMethod(String name, ObjectInstance instance)
     {
-        MethodDefinition method = instance.getDefinition().getMethods().get(name);
+        MethodDefinition method = CallableSupport.findMethod(name, instance.getDefinition(), instance);
         if (method == null)
         {
             throw new LpcRuntimeException("No such method " + name + " in " + instance);

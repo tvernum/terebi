@@ -97,21 +97,21 @@ public class CallableSupport
         }
     }
 
-    public static Callable findMethod(String name, ObjectDefinition object, ObjectInstance instance)
+    public static MethodDefinition findMethod(String name, ObjectDefinition object, ObjectInstance instance)
     {
         MethodDefinition method = object.getMethods().get(name);
         if (method != null)
         {
-            return method.getFunction(instance);
+            return method;
         }
-        List<Callable> match = new ArrayList<Callable>();
+        List<MethodDefinition> match = new ArrayList<MethodDefinition>();
         Collection< ? extends ObjectDefinition> inherited = object.getInheritedObjects().values();
         for (ObjectDefinition parent : inherited)
         {
-            Callable callable = findMethod(name, parent, instance);
-            if (callable != null)
+            method = findMethod(name, parent, instance);
+            if (method != null)
             {
-                match.add(callable);
+                match.add(method);
             }
         }
         if (match.isEmpty())

@@ -33,6 +33,7 @@ import us.terebi.lang.lpc.parser.util.BaseASTVisitor;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
 import us.terebi.util.Range;
 
@@ -76,7 +77,11 @@ public class FunctionCallSupport extends BaseASTVisitor implements ParserVisitor
     {
         List<FunctionReference> functions = _scope.functions().getInheritedMethods(name, argCount);
         functions = filterVirtualFunctions(functions);
-        return extractFunctionReferences(null, name, functions);
+        if (functions.isEmpty())
+        {
+            throw new InternalError("No such function " + name);
+        }
+        return functions.get(functions.size() - 1);
     }
 
     public FunctionReference findFunction(TokenNode node, String scope, String name)

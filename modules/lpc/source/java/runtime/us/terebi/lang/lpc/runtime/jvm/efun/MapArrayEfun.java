@@ -65,15 +65,24 @@ public class MapArrayEfun extends AbstractEfun implements FunctionSignature, Cal
 
         LpcValue func = arguments.get(1);
 
+        List< ? extends LpcValue> args = arguments.get(2).asList();
+
+        Callable callable;
         if (isFunction(func))
         {
-            Callable callable = func.asCallable();
-            List< ? extends LpcValue> args = arguments.get(2).asList();
-            List<LpcValue> result = map_array(list, callable, args);
-            return new ArrayValue(Types.arrayOf(MiscSupport.commonType(result)), result);
+            callable = func.asCallable();
         }
-        // @TODO
-        throw new UnsupportedOperationException(getName() + "(array," + func.getActualType() + ", ..) - Not implemented");
+        else if (MiscSupport.isString(func))
+        {
+            callable = this.getFunctionReference(func.asString(), getArgument(args, 0).asObject());
+            args = args.subList(1, args.size());
+        }
+        else
+        {
+            throw new UnsupportedOperationException(getName() + "(array," + func.getActualType() + ", ..) - Not implemented");
+        }
+        List<LpcValue> result = map_array(list, callable, args);
+        return new ArrayValue(Types.arrayOf(MiscSupport.commonType(result)), result);
     }
 
     private List<LpcValue> map_array(List<LpcValue> list, Callable function, List< ? extends LpcValue> additionalArguments)
