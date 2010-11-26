@@ -36,6 +36,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.ThreadContext;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.MajorFrame;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 import static org.junit.Assert.assertEquals;
@@ -73,7 +74,7 @@ public class MethodTestCase implements Callable<Object>
 
     private void testMethod(CompiledMethodDefinition method) throws Exception
     {
-        ObjectInstance instance ;
+        ObjectInstance instance;
 
         SystemContext system = getContext();
         synchronized (system.lock())
@@ -82,12 +83,12 @@ public class MethodTestCase implements Callable<Object>
             new ExecutionTimeCheck(1500).begin();
             instance = method.getDeclaringType().newInstance(Collections.<LpcValue> emptyList());
         }
-        
+
         List< ? extends LpcValue> arguments = Collections.emptyList();
         String name = method.getName();
 
         LpcValue result = execute(method, instance, arguments);
-        
+
         Matcher matcher = STRING_REGEX.matcher(name);
         if (matcher.matches())
         {
@@ -131,7 +132,10 @@ public class MethodTestCase implements Callable<Object>
             else
             {
                 Integer expectedValue = Integer.parseInt(number);
-                assertEquals(result.debugInfo() + " is not an int", Types.INT, result.getActualType());
+                if (!MiscSupport.isZero(result))
+                {
+                    assertEquals(result.debugInfo() + " is not an int", Types.INT, result.getActualType());
+                }
                 assertEquals(expectedValue.longValue(), result.asLong());
             }
             return;

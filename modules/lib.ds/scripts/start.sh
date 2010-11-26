@@ -24,7 +24,7 @@ echo "Config = ${CONFIG_FILE}"
 DEBUG=0
 CLEAN=0
 
-while getopts "dc" option
+while getopts "dcv" option
 do
     case $option in
         d)
@@ -44,11 +44,12 @@ fi
 
 if [ $DEBUG -eq 1 ]
 then
-    JAVA_OPTS="-Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=9800,server=y,suspend=n"
+    JAVA_OPTS="-Xshare:off -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=9800,server=y,suspend=n"
 else
     JAVA_OPTS=""
 fi
 
+JAVA_OPTS="${JAVA_OPTS} -Xmx512M"
 
 set -x
 java -cp ${CP} ${JAVA_OPTS} ${MAIN} ${CONFIG_FILE}

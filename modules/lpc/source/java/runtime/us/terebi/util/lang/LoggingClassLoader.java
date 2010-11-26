@@ -24,23 +24,18 @@ import java.util.Enumeration;
 
 import org.apache.log4j.Logger;
 
+
+
 /**
  * 
  */
-public class LoggingClassLoader extends ClassLoader
+public class LoggingClassLoader extends DelegatingClassLoader
 {
     private final Logger LOG = Logger.getLogger(LoggingClassLoader.class);
-
-    private final ClassLoader _delegate;
-
+    
     public LoggingClassLoader(ClassLoader delegate)
     {
-        _delegate = delegate;
-    }
-
-    public void clearAssertionStatus()
-    {
-        _delegate.clearAssertionStatus();
+        super( delegate) ;
     }
 
     public URL getResource(String name)
@@ -48,7 +43,7 @@ public class LoggingClassLoader extends ClassLoader
         URL resource = null;
         try
         {
-            resource = _delegate.getResource(name);
+            resource = super.getResource(name);
         }
         finally
         {
@@ -62,7 +57,7 @@ public class LoggingClassLoader extends ClassLoader
         InputStream stream = null;
         try
         {
-            stream = _delegate.getResourceAsStream(name);
+            stream = super.getResourceAsStream(name);
         }
         finally
         {
@@ -70,13 +65,13 @@ public class LoggingClassLoader extends ClassLoader
         }
         return stream;
     }
-
+    
     public Enumeration<URL> getResources(String name) throws IOException
     {
         Enumeration<URL> resources = null;
         try
         {
-            resources = _delegate.getResources(name);
+            resources = super.getResources(name);
         }
         finally
         {
@@ -90,33 +85,13 @@ public class LoggingClassLoader extends ClassLoader
         Class< ? > cls = null;
         try
         {
-            cls = _delegate.loadClass(name);
+            cls = super.loadClass(name);
         }
         finally
         {
             LOG.info("Loading " + name + " = " + cls);
         }
         return cls;
-    }
-
-    public void setClassAssertionStatus(String className, boolean enabled)
-    {
-        _delegate.setClassAssertionStatus(className, enabled);
-    }
-
-    public void setDefaultAssertionStatus(boolean enabled)
-    {
-        _delegate.setDefaultAssertionStatus(enabled);
-    }
-
-    public void setPackageAssertionStatus(String packageName, boolean enabled)
-    {
-        _delegate.setPackageAssertionStatus(packageName, enabled);
-    }
-
-    public String toString()
-    {
-        return getClass().getSimpleName() + ":" + _delegate.toString();
     }
 
 }

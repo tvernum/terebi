@@ -41,7 +41,6 @@ import us.terebi.lang.lpc.runtime.jvm.efun.DestructEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
 import us.terebi.lang.lpc.runtime.jvm.efun.ErrorEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.EvaluateEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ExecEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FetchVariableEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FileNameEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.FilterEfun;
@@ -121,6 +120,7 @@ import us.terebi.lang.lpc.runtime.jvm.efun.file.ReadBytesEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.ReadFileEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.RemoveFileEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.RenameEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.file.StatEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.file.WriteFileEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.heartbeat.HeartBeatsEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.heartbeat.QueryHeartBeatEfun;
@@ -247,7 +247,6 @@ public class StandardEfuns
     public static class INTERACTIVE
     {
         public static final Efun userp = new UserpEfun();
-        public static final Efun exec = new ExecEfun();
         public static final Efun find_player = new FindPlayerEfun();
         public static final Efun find_living = new FindLivingEfun();
         public static final Efun living = new LivingEfun();
@@ -303,6 +302,7 @@ public class StandardEfuns
         public static final Efun rm = new RemoveFileEfun();
         public static final Efun mkdir = new CreateDirectoryEfun();
         public static final Efun get_dir = new GetDirectoryInfoEfun();
+        public static final Efun stat = new StatEfun();
         public static final Efun match_path = new MatchPathEfun();
     }
 

@@ -71,7 +71,7 @@ public class InheritsEfun extends AbstractEfun implements FunctionSignature, Cal
     {
         if (definition.getName().equals(file))
         {
-            ObjectDefinition current = objectManager.findObject(file);
+            ObjectDefinition current = objectManager.findObject(file, true);
             if (current == definition)
             {
                 return 1;

@@ -35,6 +35,7 @@ import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.jvm.LpcFunction;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
@@ -90,7 +91,9 @@ public class VariableLookup implements VariableResolver
                 }
                 else if (step.type == Type.ENCLOSING)
                 {
-                    target = VM.Expression.callMethod(VM.Expression.thisObject(), LpcObject.class, ByteCodeConstants.FUNCTION_OWNER);
+                    target = VM.Expression.callMethod(VM.Expression.thisObject(), LpcFunction.class, ByteCodeConstants.FUNCTION_OWNER);
+                    target = VM.Expression.cast(CompiledInstance.class ,target);
+                    target = VM.Expression.callMethod(target,  CompiledInstance.class, ByteCodeConstants.GET_IMPLEMENTING_OBJECT);
                 }
                 else
                 {

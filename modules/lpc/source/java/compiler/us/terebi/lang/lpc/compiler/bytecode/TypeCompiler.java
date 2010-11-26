@@ -36,7 +36,7 @@ public class TypeCompiler
     public static Expression getTypeExpression(LpcType type)
     {
         Expression typeExpression;
-        if (type.isClass())
+        if (type.getKind() == LpcType.Kind.CLASS)
         {
             typeExpression = VM.Expression.callStatic(//
                     LpcObject.class, VM.Method.find(LpcRuntimeSupport.class, "withType", ClassDefinition.class, Integer.TYPE), //

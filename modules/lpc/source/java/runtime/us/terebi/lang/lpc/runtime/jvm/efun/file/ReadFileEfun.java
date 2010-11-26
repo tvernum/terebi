@@ -76,10 +76,12 @@ public class ReadFileEfun extends FileEfun implements FunctionSignature, Callabl
             stream = resource.read();
             if (!hasArgument(arguments, 1))
             {
+                LOG.info("Reading entire contents of file " + resource);
                 return readFile(stream);
             }
             long start = arguments.get(1).asLong();
             long end = hasArgument(arguments, 2) ? start + arguments.get(2).asLong() : Long.MAX_VALUE;
+            LOG.info("Reading lines " + start + '-' + end + " of file " + resource);
             return readLines(stream, start, end);
         }
         catch (IOException e)
@@ -115,6 +117,10 @@ public class ReadFileEfun extends FileEfun implements FunctionSignature, Callabl
     private LpcValue readFile(InputStream stream) throws IOException
     {
         String content = IOUtils.toString(stream);
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("Read " + content.length() + " chars from stream " + stream);
+        }
         return new StringValue(content);
     }
 

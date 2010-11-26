@@ -205,5 +205,10 @@ class GameResource implements Resource
         destination.checkWriteAccess();
         _resource.rename(to);
     }
+    
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + _object + ":-" + _efun + ' ' + _resource + "}";
+    }
 
 }

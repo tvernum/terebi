@@ -43,9 +43,10 @@ public interface ObjectManager
     public ObjectInstance getSimulatedEfunObject();
 
     /**
-     * @throws ObjectNotFoundException If no object can be found for <code>name</code>.
+     * @throws ObjectNotFoundException If <code>load</code> is <code>true</code>, but object cannot be found
+     * @return The loaded object, or <code>null</code> if <code>load</code> is <code>false</code> and the object is not already loaded
      */
-    public ObjectDefinition findObject(String name);
+    public ObjectDefinition findObject(String name, boolean load);
     public ObjectInstance findObject(ObjectId id);
     
     public int objectCount();

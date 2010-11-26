@@ -32,6 +32,15 @@ class SimpleType extends AbstractType implements LpcType
 
     public SimpleType(Kind kind, int depth)
     {
+        if (kind == Kind.CLASS || kind == Kind.EXTENSION)
+        {
+            throw new IllegalArgumentException("Cannot create a "
+                    + SimpleType.class.getSimpleName()
+                    + " with a "
+                    + Kind.class.getSimpleName()
+                    + " of "
+                    + kind);
+        }
         _kind = kind;
         _depth = depth;
     }

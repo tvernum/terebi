@@ -31,6 +31,7 @@ import org.adjective.stout.core.MethodDescriptor;
 import org.adjective.stout.instruction.LoadConstantInstruction;
 import org.adjective.stout.instruction.MethodInstruction;
 import org.adjective.stout.operation.ConstantIntegerExpression;
+import org.adjective.stout.operation.ThisExpression;
 import org.adjective.stout.operation.VM;
 import org.adjective.stout.writer.ByteCodeWriter;
 
@@ -91,11 +92,12 @@ public class LpcByteCodeWriter extends ByteCodeWriter
             {
                 return;
             }
-            new LoadConstantInstruction(_class.getPackage() + "." + _class.getName()).accept(_delegate);
+//            new LoadConstantInstruction(_class.getPackage() + "." + _class.getName()).accept(_delegate);
+            ThisExpression.LOAD_THIS.accept(_delegate);
             new LoadConstantInstruction(_method.getName()).accept(_delegate);
             ConstantIntegerExpression.getInstruction(_count).accept(_delegate);
             MethodInstruction instruction = new MethodInstruction(Opcodes.INVOKESTATIC, Type.getInternalName(DebugPoint.class),//
-                    VM.Method.find(DebugPoint.class, "breakpoint", String.class, String.class, Integer.TYPE));
+                    VM.Method.find(DebugPoint.class, "breakpoint", Object.class, String.class, Integer.TYPE));
             instruction.accept(_delegate);
             _count++;
         }

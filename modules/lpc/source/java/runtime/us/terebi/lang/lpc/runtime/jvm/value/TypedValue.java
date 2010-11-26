@@ -28,7 +28,9 @@ import us.terebi.lang.lpc.runtime.ExtensionValue;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.LpcType.Kind;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 
 import static us.terebi.lang.lpc.compiler.util.TypeSupport.isMatchingType;
@@ -41,12 +43,7 @@ public class TypedValue implements LpcValue
     private final LpcType _type;
     private final LpcValue _value;
 
-    public TypedValue(LpcType.Kind kind, int arrayDepth, LpcValue value)
-    {
-        this(Types.getType(kind, null, arrayDepth), value);
-    }
-
-    public TypedValue(LpcType type, LpcValue value)
+    private TypedValue(LpcType type, LpcValue value)
     {
         if (!isMatchingType(value.getActualType(), type))
         {
@@ -56,8 +53,34 @@ public class TypedValue implements LpcValue
         _value = value;
     }
 
+    public static TypedValue type(LpcType type, LpcValue value)
+    {
+        if (value instanceof TypedValue)
+        {
+            TypedValue typed = (TypedValue) value;
+            if (typed._type.equals(type))
+            {
+                return typed;
+            }
+        }
+        return new TypedValue(type, value);
+    }
+
+    public static TypedValue type(Kind kind, int arrayDepth, LpcValue value)
+    {
+        return type(Types.getType(kind, null, arrayDepth), value);
+    }
+
     public LpcType getActualType()
     {
+        if (MiscSupport.isZero(_value))
+        {
+            return Types.ZERO;
+        }
+        if (MiscSupport.isNil(_value))
+        {
+            return Types.NIL;
+        }
         return _type;
     }
 

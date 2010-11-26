@@ -51,6 +51,7 @@ import us.terebi.lang.lpc.runtime.jvm.parser.LiteralParser;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.Apply;
+import us.terebi.lang.lpc.runtime.util.reflect.TypeIntrospector;
 import us.terebi.util.io.IOUtil;
 
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
@@ -134,18 +135,22 @@ public class ObjectSerializer
         }
 
         Resource resource = getResource();
-        LOG.info("Restoring " + object + " from " + resource);
+        LOG.info("Restoring " + object + " from " + resource + " (" + resource.getSizeInBytes() + " bytes)");
+        if (resource.getSizeInBytes() < 3)
+        {
+            return false;
+        }
         InputStream input = resource.read();
         try
         {
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             restore(object, reader, zeroNoSave);
+            return true;
         }
         finally
         {
             IOUtil.close(input);
         }
-        return false;
     }
 
     private Resource getResource() throws IOException
@@ -171,6 +176,10 @@ public class ObjectSerializer
         SystemContext system = RuntimeContext.obtain().system();
         ObjectInstance master = system.objectManager().getMasterObject();
 
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("checkAccess - " + apply + " : " + _file + " , " + object + " , " + name);
+        }
         LpcValue access = apply.invoke(master, new StringValue(_file), object.asValue(), name);
         return access.asLong() != 0;
     }
@@ -240,7 +249,7 @@ public class ObjectSerializer
             {
                 eq = line.indexOf('=');
             }
-            if (eq == -1)
+            if (eq == -1 || eq == line.length() - 1)
             {
                 LOG.warn("Invalid line (" + summarise(line) + ") in save file " + _file);
                 continue;
@@ -371,10 +380,14 @@ public class ObjectSerializer
             }
             writer.write("$)");
         }
-        /* TODO: Save extension types ? */
+        else
+        {
+            /* TODO: Save extension types ? */
+            LOG.warn("Cannot save value " + value);
+        }
     }
 
-    private void setField(ObjectInstance object, String name, LpcValue value)
+    private boolean setField(ObjectInstance object, String name, LpcValue value)
     {
         int sep = name.indexOf("::");
         if (sep == -1)
@@ -382,22 +395,42 @@ public class ObjectSerializer
             ObjectDefinition definition = object.getDefinition();
             Map<String, ? extends FieldDefinition> fields = definition.getFields();
             FieldDefinition field = fields.get(name);
-            if (field == null)
+            if (field != null)
             {
-                LOG.info("Object " + object + " does not have a field " + name);
-                LOG.info("Object " + object + " has " + fields);
+                field.setValue(object, value);
+                return true;
             }
             else
             {
-                field.setValue(object, value);
+                LOG.debug("Object " + object + " does not have a field " + name);
             }
         }
         else
         {
             String scope = name.substring(0, sep);
+            name = name.substring(sep + 2);
             ObjectInstance parent = object.getInheritedObjects().get(scope);
-            setField(parent, name.substring(sep + 2), value);
+            if (parent != null)
+            {
+                if (setField(parent, name, value))
+                {
+                    return true;
+                }
+            }
+            else
+            {
+                LOG.debug("The scope " + scope + " does not exist in " + object);
+            }
         }
+        TypeIntrospector introspector = new TypeIntrospector(object.getDefinition());
+        FieldDefinition field = introspector.getField(name);
+        if (field != null)
+        {
+            LOG.debug("Found field " + field + " for " + name);
+            field.setValue(object, value);
+            return true;
+        }
+        return false;
     }
 
     private static String getFileName(String file, SaveBehaviour behaviour)

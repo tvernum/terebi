@@ -37,7 +37,6 @@ import us.terebi.lang.lpc.runtime.jvm.context.ObjectLifecycleListener;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
-import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.object.VirtualObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 import us.terebi.lang.lpc.runtime.util.Apply;
@@ -81,13 +80,10 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         _compiler = compiler;
     }
 
-    /**
-     * @throws LpcRuntimeException If object cannot be found
-     */
-    public CompiledObjectDefinition findObject(String name)
+    public CompiledObjectDefinition findObject(String name, boolean load)
     {
         CompiledObjectDefinition definition = _definitions.get(ObjectId.normalise(name));
-        if (definition == null && _compiler != null)
+        if (definition == null && load && _compiler != null)
         {
             definition = compile(name);
         }
@@ -191,7 +187,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
     {
         return _objects.size();
     }
-    
+
     public Iterable< ? extends ObjectInstance> objects()
     {
         return _objects.values();
@@ -232,7 +228,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         {
             throw new IllegalStateException("Master object is already defined as " + _master + " cannot redfined as " + name);
         }
-        return findObject(_master);
+        return findObject(_master, true);
     }
 
     public ObjectDefinition defineSimulatedEfunObject(String name)
@@ -241,7 +237,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         {
             throw new IllegalStateException("Simulated Efun object is already defined as " + _sefun + " cannot redfined as " + name);
         }
-        CompiledObjectDefinition definition = findObject(name);
+        CompiledObjectDefinition definition = findObject(name, true);
         _sefun = name;
         return definition;
     }
@@ -252,7 +248,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         {
             return null;
         }
-        return findObject(_master).getMasterInstance();
+        return findObject(_master, true).getMasterInstance();
     }
 
     public ObjectInstance getSimulatedEfunObject()
@@ -261,7 +257,7 @@ public class LpcCompilerObjectManager implements CompilerObjectManager, Compiler
         {
             return null;
         }
-        return findObject(_sefun).getMasterInstance();
+        return findObject(_sefun, true).getMasterInstance();
     }
 
     public void instanceDestructed(ObjectInstance instance)

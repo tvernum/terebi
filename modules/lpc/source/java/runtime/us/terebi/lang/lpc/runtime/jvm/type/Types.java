@@ -64,6 +64,10 @@ public class Types
 
     public static LpcType getType(Kind kind, ClassDefinition classDefinition, int depth)
     {
+        if (kind == Kind.CLASS && classDefinition == null)
+        {
+            throw new IllegalArgumentException("Cannot create a class type without a class-definiton");
+        }
         if (depth == 0)
         {
             switch (kind)

@@ -47,8 +47,10 @@ import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.LpcObject;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.util.InContext;
 
 /**
  * 
@@ -73,7 +75,14 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
         _fields = new LinkedHashMap<String, CompiledField>();
         _classes = new LinkedHashMap<String, ClassDefinition>();
         _methods = new LinkedHashMap<String, CompiledMethod>();
-        introspect(manager);
+        try
+        {
+            introspect(manager);
+        }
+        catch (Exception e)
+        {
+            throw new InternalError("For class " + implementation.getName() + ": " + e.getMessage(), e);
+        }
     }
 
     @SuppressWarnings("unchecked")
@@ -126,7 +135,7 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
     private CompiledObjectDefinition findInherited(CompilerObjectManager manager, LpcInherited inherited)
     {
         String lpc = inherited.lpc();
-        CompiledObjectDefinition object = manager.findObject(lpc);
+        CompiledObjectDefinition object = manager.findObject(lpc, true);
         if (object == null)
         {
             throw new LpcRuntimeException("Internal error - Object manager "
@@ -177,7 +186,7 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
             getMasterInstance();
         }
 
-        T newImplementation = createObject(actualInstance == null ? null : actualInstance.getImplementingObject());
+        final T newImplementation = createObject(actualInstance == null ? null : actualInstance.getImplementingObject());
 
         Map<String, ObjectInstance> parentMap = new HashMap<String, ObjectInstance>();
 
@@ -185,6 +194,14 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
         if (actualInstance == null)
         {
             actualInstance = newInstance;
+        }
+        else if (actualInstance instanceof VirtualInstance)
+        {
+            VirtualInstance virtualInstance = (VirtualInstance) actualInstance;
+            if (!virtualInstance.isSet())
+            {
+                virtualInstance.setInstance(newInstance);
+            }
         }
 
         Field[] fields = newImplementation.getClass().getDeclaredFields();
@@ -199,6 +216,15 @@ public class CompiledDefinition<T extends LpcObject> extends AbstractObjectDefin
 
         newImplementation.setDefinition(this);
         newImplementation.setInstance(actualInstance);
+
+        InContext.execute(Origin.DRIVER, newInstance, new InContext.Exec<Object>()
+        {
+            public Object execute()
+            {
+                newImplementation.init();
+                return null;
+            }
+        });
         if (type == InstanceType.MASTER || type == InstanceType.INSTANCE)
         {
             register(newInstance);

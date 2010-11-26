@@ -17,7 +17,7 @@
 
     <appender name="DEBUG_FILE" class="org.apache.log4j.RollingFileAppender"> 
         <param name="file" value="debug.log"/>
-        <param name="MaxFileSize" value="100KB"/>
+        <param name="MaxFileSize" value="250KB"/>
         <param name="MaxBackupIndex" value="9"/>
         <layout class="org.apache.log4j.PatternLayout"> 
           <param name="ConversionPattern" value="%d [%t] %-5p %c {%x} - %m%n"/> 
@@ -28,8 +28,20 @@
         <appender-ref ref="DEBUG_FILE"/>
     </appender>
 
+    <logger name="us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun" additivity="false">
+        <level value="INFO" />
+    </logger>
+
     <logger name="us.terebi.lang.lpc" additivity="true">
         <level value="DEBUG" />
+    </logger>
+
+    <logger name="us.terebi.plugins.persist" additivity="true">
+        <level value="DEBUG" />
+    </logger>
+
+    <logger name="us.terebi.net" additivity="true">
+        <level value="INFO" />
     </logger>
 
     <logger name="us.terebi" additivity="true">

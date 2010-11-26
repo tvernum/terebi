@@ -31,12 +31,14 @@ public abstract class AbstractCompiledObjectInstance implements CompiledObjectIn
 {
     private final CompiledObjectDefinition _definition;
     private final long _id;
+    private final long _creationTime;
     private WeakReference<ObjectValue> _value;
 
     public AbstractCompiledObjectInstance(CompiledObjectDefinition definition, long id)
     {
         _definition = definition;
         _id = id;
+        _creationTime = System.currentTimeMillis();
         _value = new WeakReference<ObjectValue>(null);
     }
 
@@ -48,6 +50,11 @@ public abstract class AbstractCompiledObjectInstance implements CompiledObjectIn
     public long getId()
     {
         return _id;
+    }
+
+    public long getCreationTime()
+    {
+        return _creationTime;
     }
 
     public String getCanonicalName()

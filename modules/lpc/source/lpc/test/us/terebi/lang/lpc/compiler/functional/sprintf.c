@@ -61,3 +61,10 @@ public string array eq7()
     return ({ "%", sprintf( "%%") });
 }
 
+public string array eq8()
+{
+    return ({ "[a][ b ][  c][d ]",
+              sprintf( "[%c][%|3c][%3c][%-2c]", 'a', "b", 'a'+2, "def" )
+           });
+}
+

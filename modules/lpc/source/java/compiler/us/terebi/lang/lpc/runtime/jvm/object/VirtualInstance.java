@@ -19,6 +19,7 @@ package us.terebi.lang.lpc.runtime.jvm.object;
 
 import java.util.Map;
 
+import us.terebi.lang.lpc.compiler.java.context.CompiledImplementation;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.runtime.AttributeMap;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
@@ -30,11 +31,28 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
  */
 public class VirtualInstance extends AbstractCompiledObjectInstance implements CompiledObjectInstance
 {
-    private final CompiledObjectInstance _instance;
+    private CompiledObjectInstance _instance;
 
-    public VirtualInstance(VirtualObjectDefinition definition, long id, CompiledObjectInstance instance)
+    public VirtualInstance(VirtualObjectDefinition definition, long id)
     {
         super(definition, id);
+    }
+
+    public CompiledObjectInstance getInstance()
+    {
+        return _instance;
+    }
+
+    public void setInstance(CompiledObjectInstance instance)
+    {
+        if (instance == _instance)
+        {
+            return;
+        }
+        if (_instance != null)
+        {
+            throw new IllegalStateException("Instance already exists (" + instance + ")");
+        }
         _instance = instance;
     }
 
@@ -63,13 +81,22 @@ public class VirtualInstance extends AbstractCompiledObjectInstance implements C
         return _instance.getFieldValues();
     }
 
-    public Object getImplementingObject()
+    public CompiledImplementation getImplementingObject()
     {
+        if (_instance == null)
+        {
+            return null;
+        }
         return _instance.getImplementingObject();
     }
 
     public boolean isVirtual()
     {
         return true;
+    }
+
+    public boolean isSet()
+    {
+        return _instance != null;
     }
 }

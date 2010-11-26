@@ -42,6 +42,7 @@ import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
+import us.terebi.lang.lpc.runtime.jvm.naming.MethodNamer;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.lang.lpc.runtime.util.Signature;
 
@@ -54,10 +55,10 @@ public class MethodSupport implements MethodInfo
     private final String _name;
     private final ASTStatementBlock _body;
     private final ScopeLookup _scope;
-    private boolean _avoidJavaReservedWords;
     private final Set< ? extends Modifier> _modifiers;
     private final LpcType _returnType;
     private final List< ? extends ArgumentDefinition> _argumentDefinitions;
+    private final MethodNamer _namer;
 
     public MethodSupport(ScopeLookup scope, ASTMethod node, Set< ? extends Modifier> modifiers, LpcType returnType)
     {
@@ -69,13 +70,18 @@ public class MethodSupport implements MethodInfo
         _scope = scope;
         _modifiers = modifiers;
         _returnType = returnType;
-        _avoidJavaReservedWords = false;
+        _namer = new MethodNamer(true, false);
         _argumentDefinitions = buildArgumentDefinitions();
     }
 
     public void setAvoidJavaReservedWords(boolean avoidJavaReservedWords)
     {
-        _avoidJavaReservedWords = avoidJavaReservedWords;
+        _namer.setAvoidJavaReservedWords(avoidJavaReservedWords);
+    }
+
+    public void setAvoidStandardMethodNames(boolean avoidStandardMethodNames)
+    {
+        _namer.setAvoidStandardMethodNames(avoidStandardMethodNames);
     }
 
     public String getMethodName()
@@ -95,14 +101,7 @@ public class MethodSupport implements MethodInfo
 
     public String getInternalName()
     {
-        if (_avoidJavaReservedWords && ReservedWords.isReservedWord(_name))
-        {
-            return _name + "_";
-        }
-        else
-        {
-            return _name;
-        }
+        return _namer.getInternalName(_name);
     }
 
     public List< ? extends ArgumentDefinition> getArgumentDefinitions()

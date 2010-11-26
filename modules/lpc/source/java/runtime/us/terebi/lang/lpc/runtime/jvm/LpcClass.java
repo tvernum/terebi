@@ -23,10 +23,13 @@ import java.lang.reflect.Field;
 
 import us.terebi.lang.lpc.compiler.java.context.CompiledClass;
 import us.terebi.lang.lpc.compiler.java.context.CompiledClassInstance;
+import us.terebi.lang.lpc.compiler.java.context.CompiledImplementation;
+import us.terebi.lang.lpc.compiler.java.context.CompiledInstance;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.UserTypeDefinition;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.object.CompiledField;
 import us.terebi.lang.lpc.runtime.util.type.DynamicClassDefinition;
@@ -35,7 +38,7 @@ import us.terebi.util.Factory;
 /**
  * 
  */
-public class LpcClass extends LpcRuntimeSupport
+public abstract class LpcClass extends LpcRuntimeSupport implements CompiledImplementation
 {
     private final ObjectDefinition _declaring;
     private ClassDefinition _definition;
@@ -44,6 +47,11 @@ public class LpcClass extends LpcRuntimeSupport
     {
         _declaring = declaring;
         _definition = null;
+    }
+
+    public void init()
+    {
+        // no-op
     }
 
     public ClassDefinition getClassDefinition()
@@ -109,4 +117,10 @@ public class LpcClass extends LpcRuntimeSupport
         definition.setFactory(factory);
         return definition;
     }
+
+    public UserTypeDefinition getTypeDefinition()
+    {
+        return getClassDefinition();
+    }
+
 }

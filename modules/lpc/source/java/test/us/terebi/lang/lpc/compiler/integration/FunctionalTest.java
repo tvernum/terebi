@@ -26,6 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
 
+import org.apache.commons.io.FileUtils;
 import org.junit.runner.RunWith;
 
 import us.terebi.lang.lpc.compiler.ObjectBuilder;
@@ -66,6 +67,8 @@ public class FunctionalTest
         list.addAll(getTests("catch.c", builder));
         list.addAll(getTests("sprintf.c", builder));
         list.addAll(getTests("sscanf.c", builder));
+        list.addAll(getTests("field.c", builder));
+        list.addAll(getTests("namer.c", builder));
 
         return list;
     }
@@ -74,7 +77,7 @@ public class FunctionalTest
     {
         try
         {
-            CompiledObjectDefinition definition ;
+            CompiledObjectDefinition definition;
             SystemContext system = new SystemContext(StandardEfuns.getImplementation(), builder.getObjectManager(), builder.getSourceFinder());
             synchronized (system.lock())
             {
@@ -82,7 +85,7 @@ public class FunctionalTest
                 new ExecutionTimeCheck(1500).begin();
                 definition = builder.compile(file);
             }
-            
+
             Collection< ? extends CompiledMethodDefinition> methods = definition.getMethods().values();
             List<MethodTestCase> tests = new ArrayList<MethodTestCase>(methods.size());
             for (CompiledMethodDefinition method : methods)
@@ -128,9 +131,18 @@ public class FunctionalTest
     {
         ObjectBuilderFactory factory = new ObjectBuilderFactory(StandardEfuns.getImplementation());
         factory.setInsertTimeCheck(false);
+        factory.setWorkingDir(getOutputDirectory());
         ObjectBuilder builder = factory.createBuilder(directory);
         builder.setPrintStats(System.out);
         return builder;
+    }
+
+    private static File getOutputDirectory() throws IOException
+    {
+        File output = new File("output/test/" + FunctionalTest.class.getSimpleName());
+        FileUtils.deleteDirectory(output);
+        output.mkdirs();
+        return output;
     }
 
 }

@@ -61,7 +61,7 @@ public class MoveObjectEfun extends AbstractEfun
         {
             SystemContext system = RuntimeContext.obtain().system();
             ObjectManager objectManager = system.objectManager();
-            destination = objectManager.findObject(arg1.asString()).getMasterInstance();
+            destination = objectManager.findObject(arg1.asString(), true).getMasterInstance();
         }
         else
         {

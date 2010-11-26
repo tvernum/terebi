@@ -31,7 +31,7 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
  */
 public interface CompiledObjectDefinition extends ObjectDefinition, ObjectInstance.DestructListener
 {
-    public Class<?> getImplementationClass(); 
+    public Class<? extends CompiledImplementation> getImplementationClass(); 
     public CompiledObjectInstance getMasterInstance();
     public CompiledObjectInstance newInstance(List<? extends LpcValue> arguments);
     public CompiledObjectInstance getInheritableInstance(ObjectInstance forInstance);

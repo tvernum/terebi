@@ -69,12 +69,16 @@ import us.terebi.lang.lpc.runtime.jvm.InheritedObject;
 import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
+import us.terebi.lang.lpc.runtime.jvm.naming.MethodNamer;
+import us.terebi.lang.lpc.runtime.util.SystemLog;
 
 /**
  * 
  */
 public class ClassBuilder extends BaseASTVisitor
 {
+    private static final String INIT_METHOD_NAME = "init";
+
     private final ScopeLookup _scope;
     private final ClassSpec _spec;
     private final ClassSpec _interface;
@@ -103,6 +107,7 @@ public class ClassBuilder extends BaseASTVisitor
         createDispatchMethodStubs();
         _scope.variables().popScope();
         _spec.withMethod(getConstructor());
+        _spec.withMethod(getInitMethod());
     }
 
     private FieldSpec createThisField()
@@ -190,25 +195,54 @@ public class ClassBuilder extends BaseASTVisitor
         }
     }
 
-    private class MethodKey
+    private static class MethodKey
     {
-        public final String name;
+        public final String lpcName;
+        public final String byteCodeName;
         public final int argumentCount;
 
-        public MethodKey(String n, int count)
+        public MethodKey(String name, String internalName, int count)
         {
-            this.name = n;
+            if (name == null)
+            {
+                throw new NullPointerException("Cannot have null method lpc-name");
+            }
+            if (internalName == null)
+            {
+                throw new NullPointerException("Cannot have null method byte-code-name");
+            }
+            this.lpcName = name;
+            this.byteCodeName = internalName;
             this.argumentCount = count;
         }
 
         public MethodKey(MethodDescriptor methodDescriptor)
         {
-            this(methodDescriptor.getName(), methodDescriptor.getParameters().length);
+            this(getLpcName(methodDescriptor), methodDescriptor.getName(), methodDescriptor.getParameters().length);
+        }
+
+        private static String getLpcName(MethodDescriptor methodDescriptor)
+        {
+            for (AnnotationDescriptor annotation : methodDescriptor.getAnnotations())
+            {
+                if (annotation.getType() == LpcMember.class)
+                {
+                    for (Attribute attribute : annotation.getAttributes())
+                    {
+                        if (attribute.getName() == MethodCompiler.ATTRIBUTE_NAME)
+                        {
+                            return attribute.getValue().toString();
+                        }
+                    }
+                }
+
+            }
+            return methodDescriptor.getName();
         }
 
         public int hashCode()
         {
-            return name.hashCode() ^ argumentCount;
+            return lpcName.hashCode() ^ argumentCount;
         }
 
         public boolean equals(Object obj)
@@ -224,14 +258,16 @@ public class ClassBuilder extends BaseASTVisitor
             if (obj instanceof ClassBuilder.MethodKey)
             {
                 ClassBuilder.MethodKey other = (ClassBuilder.MethodKey) obj;
-                return this.name.equals(other.name) && this.argumentCount == other.argumentCount;
+                return this.lpcName.equals(other.lpcName)
+                        && this.byteCodeName.equals(other.byteCodeName)
+                        && this.argumentCount == other.argumentCount;
             }
             return false;
         }
 
         public String toString()
         {
-            return getClass().getSimpleName() + ':' + name + '(' + argumentCount + ')';
+            return getClass().getSimpleName() + ':' + lpcName + '(' + argumentCount + ')';
         }
     }
 
@@ -250,7 +286,7 @@ public class ClassBuilder extends BaseASTVisitor
         FunctionCallSupport support = new FunctionCallSupport(_scope);
         for (MethodKey key : required)
         {
-            FunctionReference reference = support.findInheritedFunction(key.name, key.argumentCount);
+            FunctionReference reference = support.findInheritedFunction(key.lpcName, key.argumentCount);
 
             List< ? extends ArgumentDefinition> arguments = reference.signature.getArguments();
             if (arguments.size() != key.argumentCount)
@@ -262,7 +298,7 @@ public class ClassBuilder extends BaseASTVisitor
                         + " arguments, but dispatch is expecting "
                         + key.argumentCount);
             }
-            MethodSpec method = new MethodSpec(key.name);
+            MethodSpec method = new MethodSpec(key.byteCodeName);
 
             method.withModifiers(ElementModifier.PUBLIC, ElementModifier.FINAL, ElementModifier.SYNTHETIC);
             method.withAnnotation(new AnnotationSpec(Dispatch.class));
@@ -290,10 +326,12 @@ public class ClassBuilder extends BaseASTVisitor
 
     private void getAllMethodNames(Set<MethodKey> names, ObjectDefinition obj)
     {
+        // @TODO this shouldn't be here
+        MethodNamer namer = new MethodNamer(true, false);
         for (String name : obj.getMethods().keySet())
         {
             MethodDefinition definition = obj.getMethods().get(name);
-            MethodKey key = new MethodKey(name, definition.getSignature().getArguments().size());
+            MethodKey key = new MethodKey(name, namer.getInternalName(name), definition.getSignature().getArguments().size());
             if (names.contains(key))
             {
                 continue;
@@ -319,7 +357,8 @@ public class ClassBuilder extends BaseASTVisitor
         Set<String> declared = functions.getLocalMethodNames();
         for (String dec : declared)
         {
-            MethodKey key = new MethodKey(dec, functions.getLocalMethodSignature(dec).getArguments().size());
+            FunctionSignature sig = functions.getLocalMethodSignature(dec);
+            MethodKey key = new MethodKey(dec, functions.getInternalName(sig), sig.getArguments().size());
             if (!implemented.contains(key))
             {
                 unimplemented.add(key);
@@ -328,14 +367,14 @@ public class ClassBuilder extends BaseASTVisitor
 
         for (MethodKey key : unimplemented)
         {
-            List<FunctionReference> inherited = functions.findFunctions("", key.name, false);
+            List<FunctionReference> inherited = functions.findFunctions("", key.lpcName, false);
             if (!inherited.isEmpty())
             {
                 continue;
             }
-            FunctionSignature signature = functions.getLocalMethodSignature(key.name);
-            Set< ? extends Modifier> modifiers = functions.getLocalMethodModifiers(key.name);
-            addEmptyMethod(key.name, signature, modifiers);
+            FunctionSignature signature = functions.getLocalMethodSignature(key.lpcName);
+            Set< ? extends Modifier> modifiers = functions.getLocalMethodModifiers(key.lpcName);
+            addEmptyMethod(key, signature, modifiers);
         }
     }
 
@@ -349,7 +388,7 @@ public class ClassBuilder extends BaseASTVisitor
         return implemented;
     }
 
-    private void addEmptyMethod(String name, FunctionSignature signature, Set< ? extends Modifier> modifiers)
+    private void addEmptyMethod(MethodKey key, FunctionSignature signature, Set< ? extends Modifier> modifiers)
     {
         Modifier[] modifierArray = new Modifier[modifiers.size() + 1];
         modifiers.toArray(modifierArray);
@@ -357,14 +396,15 @@ public class ClassBuilder extends BaseASTVisitor
 
         List< ? extends ElementBuilder< ? extends Statement>> body = Collections.singletonList(VM.Statement.returnObject(ByteCodeConstants.NIL));
 
-        MethodSpec method = MethodCompiler.buildMethodSpec(modifierArray, signature.getReturnType(), name, signature.getArguments(), body);
+        MethodSpec method = MethodCompiler.buildMethodSpec(modifierArray, signature.getReturnType(), key.lpcName, key.byteCodeName,
+                signature.getArguments(), body);
         _spec.withMethod(method);
     }
 
     @SuppressWarnings("unchecked")
     private MethodDescriptor getConstructor()
     {
-        Statement[] statements = new Statement[3 + _initialisers.size()];
+        Statement[] statements = new Statement[3];
         statements[0] = VM.Statement.superConstructor(new Class[] { CompiledObjectDefinition.class }, VM.Expression.variable("definition")).create();
 
         Condition isNull = VM.Condition.isNull(VM.Expression.variable("this"));
@@ -373,20 +413,32 @@ public class ClassBuilder extends BaseASTVisitor
                 VM.Condition.conditional(isNull, VM.Expression.thisObject(), VM.Expression.variable("this")) //
         ).create();
 
-        int i = 2;
-        for (Statement statement : _initialisers)
-        {
-            statements[i] = statement;
-            i++;
-        }
-
-        statements[i] = VM.Statement.returnVoid().create();
+        statements[2] = VM.Statement.returnVoid().create();
 
         MethodSpec method = new MethodSpec(InvokeSuperConstructorStatement.CONSTRUCTOR_NAME);
         method.withParameters( //
                 new ParameterSpec("this").withType(_interface),//
                 new ParameterSpec("definition").withType(CompiledObjectDefinition.class) //
         );
+        method.withModifiers(ElementModifier.PUBLIC).withBody(statements);
+        return method.create();
+    }
+
+    private MethodDescriptor getInitMethod()
+    {
+        Statement[] statements = new Statement[_initialisers.size() + 2];
+        int i = 1;
+        statements[0] = VM.Statement.callStatic(new ParameterisedClassImpl(SystemLog.class),
+                VM.Method.find((SystemLog.class), "message", String.class), VM.Expression.constant("--INIT--" + this._spec.getInternalName())).create();
+        for (Statement statement : _initialisers)
+        {
+            statements[i] = statement;
+            i++;
+        }
+        statements[i] = VM.Statement.returnVoid().create();
+
+        MethodSpec method = new MethodSpec(INIT_METHOD_NAME);
+        method.withReturnType(Void.TYPE);
         method.withModifiers(ElementModifier.PUBLIC).withBody(statements);
         return method.create();
     }

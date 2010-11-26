@@ -75,7 +75,7 @@ public class CallStackTest
 
             final LpcValue val2 = new ObjectValue(obj2);
 
-            InContext.execute(Origin.HEART_BEAT, obj1, new Exec<Object>()
+            InContext.execute(Origin.DRIVER, obj1, new Exec<Object>()
             {
                 public Object execute()
                 {
@@ -89,15 +89,15 @@ public class CallStackTest
 
             Assert.assertEquals(2, major.size());
             Assert.assertEquals(Origin.CALL_OTHER, major.get(0).origin());
-            Assert.assertEquals(Origin.HEART_BEAT, major.get(1).origin());
+            Assert.assertEquals(Origin.DRIVER, major.get(1).origin());
             Assert.assertEquals(obj2, major.get(0).instance());
             Assert.assertEquals(obj1, major.get(1).instance());
 
             Assert.assertEquals(4, detail.size());
             Assert.assertEquals(Origin.CALL_OTHER, detail.get(0).origin());
             Assert.assertEquals(Origin.CALL_OTHER, detail.get(1).origin());
-            Assert.assertEquals(Origin.HEART_BEAT, detail.get(2).origin());
-            Assert.assertEquals(Origin.HEART_BEAT, detail.get(3).origin());
+            Assert.assertEquals(Origin.DRIVER, detail.get(2).origin());
+            Assert.assertEquals(Origin.DRIVER, detail.get(3).origin());
             Assert.assertEquals(obj2, detail.get(0).instance());
             Assert.assertEquals(obj2, detail.get(1).instance());
             Assert.assertEquals(obj1, detail.get(2).instance());

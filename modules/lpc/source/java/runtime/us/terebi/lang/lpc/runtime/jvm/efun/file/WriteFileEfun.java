@@ -42,7 +42,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class WriteFileEfun extends FileEfun implements FunctionSignature, Callable
 {
     private final Logger LOG = Logger.getLogger(WriteFileEfun.class);
-    
+
     // int write_file( string file, string str, int flag );
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
@@ -73,6 +73,10 @@ public class WriteFileEfun extends FileEfun implements FunctionSignature, Callab
         try
         {
             Resource resource = getResource(file);
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug((overwrite ? "Write" : "Append") + ' ' + content.length() + " chars to " + resource);
+            }
             if (overwrite)
             {
                 stream = resource.write();

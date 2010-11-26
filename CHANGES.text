@@ -1,3 +1,79 @@
+2010-11-26
+    Don't allow LPC method to over-ride standard LpcObject/Object methods with the same name
+    Require all compiled objects to implement "CompileImplementation" interface.
+    Initialise fields after object is fully constructed so certain efuns (like this_object()) work
+
+2010-11-25
+    Make this_player() do the right thing after an exec() call
+
+2010-11-24
+    Implement stat() efun
+    Implement sprintf(%c)
+    Implement Exec efun
+    Fix warning message
+    Improve introspection of fields for persist/fetch
+    Hand co-variant return types from methods
+
+2010-11-22
+    Fixes to bytecode inside function literals
+
+2010-11-16
+    Automatically recompile missing classfiles
+    Fixes for Virtual Objects
+    Don't keep wrapping typed values in more and more wrappers
+    Better searching of inheritance tree for fields
+
+2010-05-25
+    Set $this pointer to concrete object (was pointing to parent)
+
+2010-05-24
+    Implement map_array(array, string, object, ...)
+
+2010-05-23
+    Better error reporting
+    Create interface methods for nomask functions
+    Allow arguments to block functions to mask variables in enclosing scope
+    Allow nil values to be used in a foreach loop
+
+2010-05-21
+    Support expando ("...") in array creation
+    Do better type checking on function calls
+    Do type checking on function return
+    Include correct path in error message when a compile error occurs in an include file
+    Add a 'zero' value, distinct from 'nil'
+
+2010-05-14
+    Allow function literals to return a type that doesn't match the enclosing method
+    Check return values against method type
+
+2010-05-13
+    Make classes non-members (since they can be defined in include files)
+    Improved type checking
+
+2010-04-29
+    Add support for calling varargs ('...') functions from call_other
+
+2010-04-28
+    Implement 'inherits' efun
+    When multiple methods match, return last inherited as per MudOS
+    Support move from nowhere
+    Allow plugins to get access to their properties file
+    Fix some imports
+    Fix call_other efun to search inherited methods
+
+2010-04-26
+    Fix sprintf('%%')
+    Implement 'mkdir' efun
+
+2010-04-25
+    Implement 'rename' efun 
+    Fix 'get_dir' efun
+
+2010-04-24
+    Support (int & nil) and (array - array)
+    Implement 'cp' efun
+    Additional socket efuns
+
 2010-04-23
     Add 'find_call_out' efun
     Implement 'objects' efun

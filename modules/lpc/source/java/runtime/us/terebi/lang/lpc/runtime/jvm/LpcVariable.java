@@ -78,7 +78,7 @@ public class LpcVariable implements LpcReference
         }
         if (value != null && isMoreSpecific(_type, value.getActualType()))
         {
-            return _value = new TypedValue(_type, value);
+            return _value = TypedValue.type(_type, value);
         }
         else
         {

@@ -57,7 +57,7 @@ public class LoadObjectEfun extends AbstractEfun implements FunctionSignature, C
         ObjectManager manager = RuntimeContext.obtain().system().objectManager();
         try
         {
-            ObjectDefinition definition = manager.findObject(file);
+            ObjectDefinition definition = manager.findObject(file, true);
             ObjectInstance instance = definition.getMasterInstance();
             return instance.asValue();
         }

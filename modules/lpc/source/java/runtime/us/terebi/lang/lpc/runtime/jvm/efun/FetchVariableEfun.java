@@ -20,19 +20,23 @@ package us.terebi.lang.lpc.runtime.jvm.efun;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
-import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.lang.lpc.runtime.util.reflect.ObjectIntrospector;
 
 /**
  * 
  */
 public class FetchVariableEfun extends AbstractEfun implements Efun
 {
+    private final Logger LOG = Logger.getLogger(FetchVariableEfun.class);
+    
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("name", Types.STRING));
@@ -50,8 +54,9 @@ public class FetchVariableEfun extends AbstractEfun implements Efun
         ObjectInstance thisObject = ThisObjectEfun.this_object();
         String name = arguments.get(0).asString();
 
-        FieldDefinition field = thisObject.getDefinition().getFields().get(name);
-        return field.getValue(thisObject);
+        LpcValue value = new ObjectIntrospector(thisObject).getField(name);
+        LOG.debug("Field " + thisObject  + "->" + name + " = " + value);
+        return value;
     }
 
 }

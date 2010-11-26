@@ -68,7 +68,7 @@ public class ByteCodeCompiler implements Compiler
         CompileSettings settings = new CompileSettings(store, new CompileOptions(), ast, spec, lineMapping, _debug, _insertTimeCheck);
 
         CompileContext context = CompilerState.root(settings);
-        
+
         compile(context, spec);
         store(spec, context);
     }
@@ -95,9 +95,15 @@ public class ByteCodeCompiler implements Compiler
         ClassDescriptor cls = spec.create();
         ByteCodeWriter writer = new LpcByteCodeWriter(debugOptions, execTimeCheck);
         byte[] bytes = writer.write(cls);
-        OutputStream stream = store.open(cls.getPackage(), cls.getName());
-        stream.write(bytes);
-        stream.close();
-        return cls;
+        OutputStream stream = store.open(new ClassName(cls.getPackage(), cls.getName()));
+        try
+        {
+            stream.write(bytes);
+            return cls;
+        }
+        finally
+        {
+            stream.close();
+        }
     }
 }

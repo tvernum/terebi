@@ -15,7 +15,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.compiler.util;
+package us.terebi.lang.lpc.runtime.jvm.naming;
 
 import java.util.Arrays;
 import java.util.HashSet;

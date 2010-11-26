@@ -27,6 +27,7 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -48,7 +49,7 @@ public class FindPlayerEfun extends AbstractEfun implements FunctionSignature, C
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         /* @TODO : EFUN */
-        return VoidValue.INSTANCE;
+        return NilValue.INSTANCE;
     }
 
 }

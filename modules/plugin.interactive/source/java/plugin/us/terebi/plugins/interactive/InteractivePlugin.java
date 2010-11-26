@@ -25,6 +25,7 @@ import us.terebi.engine.plugin.AbstractPlugin;
 import us.terebi.engine.plugin.Plugin;
 import us.terebi.lang.lpc.runtime.jvm.context.Efuns;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.plugins.interactive.efun.ExecEfun;
 import us.terebi.plugins.interactive.efun.InputToEfun;
 import us.terebi.plugins.interactive.efun.InteractiveEfun;
 import us.terebi.plugins.interactive.efun.ReceiveEfun;
@@ -42,6 +43,7 @@ public class InteractivePlugin extends AbstractPlugin implements Plugin
     {
         Efuns efuns = context.efuns();
         efuns.define("interactive", new InteractiveEfun());
+        efuns.define("exec", new ExecEfun());
         efuns.define("users", new UsersEfun());
         efuns.define("this_player", new ThisPlayerEfun());
         efuns.define("write", new WriteEfun());

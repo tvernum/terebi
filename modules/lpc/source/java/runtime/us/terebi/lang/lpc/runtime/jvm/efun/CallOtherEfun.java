@@ -33,6 +33,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
 import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.object.VirtualObjectDefinition;
 import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
@@ -92,7 +93,7 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
         {
             ObjectManager objectManager = RuntimeContext.obtain().system().objectManager();
             String objectName = arg1.asString();
-            ObjectDefinition objectDefinition = objectManager.findObject(objectName);
+            ObjectDefinition objectDefinition = objectManager.findObject(objectName, true);
             if (objectDefinition == null)
             {
                 throw new LpcRuntimeException("No such object " + objectName);

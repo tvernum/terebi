@@ -23,6 +23,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isObject;
+
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
@@ -109,6 +111,10 @@ public class MathSupport
             return addMapping(left.asMap(), right.asMap());
         }
         if (isNumber(left) && isString(right))
+        {
+            return new StringValue(left.asString() + right.asString());
+        }
+        if (isObject(left) && isString(right))
         {
             return new StringValue(left.asString() + right.asString());
         }

@@ -34,7 +34,16 @@ public class LowerCaseEfun extends AbstractStringEfun implements FunctionSignatu
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        LpcValue str = arguments.get(0);
-        return new StringValue(str.asString().toLowerCase());
+        LpcValue val = arguments.get(0);
+        String str = val.asString();
+        String lc = str.toLowerCase();
+        if (lc.equals(str))
+        {
+            return val;
+        }
+        else
+        {
+            return new StringValue(lc);
+        }
     }
 }

@@ -23,11 +23,11 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.Date;
 
 import org.apache.log4j.Logger;
 
+import us.terebi.lang.lpc.compiler.classloader.AutoCompilingClassLoader;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.io.Resource;
@@ -75,12 +75,11 @@ public class ObjectBuilder implements ObjectCompiler
         _printStats = null;
     }
 
-    private URLClassLoader getClassLoader(File workingDirectory)
+    private ClassLoader getClassLoader(File workingDirectory)
     {
         try
         {
-            /*new LoggingClassLoader*/
-            return new URLClassLoader(new URL[] { workingDirectory.toURL() }, getClass().getClassLoader());
+            return new AutoCompilingClassLoader(new URL[] { workingDirectory.toURL() }, getClass().getClassLoader(), this);
         }
         catch (MalformedURLException e)
         {
@@ -98,6 +97,7 @@ public class ObjectBuilder implements ObjectCompiler
         Resource resource = getResource(objectSource);
         if (!resource.exists())
         {
+            LOG.debug("Resource (" + resource + ") for " + objectSource + " does not exist");
             return null;
         }
         return compile(resource);
@@ -113,7 +113,7 @@ public class ObjectBuilder implements ObjectCompiler
                 LOG.debug("Compiling " + resource);
             }
             long startAt = System.currentTimeMillis();
-            CompiledObjectDefinition definition = doCompilation(resource);
+            CompiledObjectDefinition definition = doCompilation(resource, true);
             long endAt = System.currentTimeMillis();
             if (_printStats != null)
             {
@@ -127,18 +127,18 @@ public class ObjectBuilder implements ObjectCompiler
         }
     }
 
-    private CompiledObjectDefinition doCompilation(Resource resource)
+    private CompiledObjectDefinition doCompilation(Resource resource, boolean initialise)
     {
-        ClassName name = getOutputName(resource);
-        long mod = _store.getLastModified(name.packageName, name.className);
-        ASTObjectDefinition ast = null;
+        ClassName name = ClassNameMapper.getImplementingClass(resource);
+        long mod = _store.getLastModified(name);
+        ASTObjectDefinition ast1 = null;
         if (resource.newerThan(mod))
         {
             if (LOG.isDebugEnabled())
             {
                 LOG.debug("Compiling " + resource + " to bytecode (" + name + ")");
             }
-            ast = compile(resource, name);
+            ast1 = compile(resource, name);
         }
         else
         {
@@ -147,11 +147,24 @@ public class ObjectBuilder implements ObjectCompiler
                 LOG.debug("Bytecode (" + name + ") for " + resource + " is up to date");
             }
         }
+        ASTObjectDefinition ast = ast1;
+        if (initialise)
+        {
+            Class< ? extends LpcObject> cls = loadClass(ast, name);
+            CompiledDefinition<LpcObject> definition = loadObjectDefinition(resource, cls);
 
-        Class< ? extends LpcObject> cls = loadClass(ast, name);
-        CompiledDefinition<LpcObject> definition = loadObjectDefinition(resource, cls);
+            return definition;
+        }
+        else
+        {
+            return null;
+        }
+    }
 
-        return definition;
+    public void precompile(String objectSource) throws CompileException
+    {
+        Resource resource = getResource(objectSource);
+        doCompilation(resource, false);
     }
 
     private ASTObjectDefinition compile(Resource resource, ClassName name)
@@ -189,7 +202,7 @@ public class ObjectBuilder implements ObjectCompiler
     private CompiledDefinition<LpcObject> loadObjectDefinition(Resource resource, Class< ? extends LpcObject> cls)
     {
         long start = System.currentTimeMillis();
-        String name = dropExtension(resource.getPath());
+        String name = ClassNameMapper.dropExtension(resource.getPath());
         CompiledDefinition<LpcObject> definition = new CompiledDefinition<LpcObject>(_manager, _scope, name, cls);
         long end = System.currentTimeMillis();
         if (_printStats != null)
@@ -305,35 +318,6 @@ public class ObjectBuilder implements ObjectCompiler
     private Source getSource(Resource resource, ASTObjectDefinition ast)
     {
         return new Source(resource.getPath(), ast);
-    }
-
-    private ClassName getOutputName(Resource resource)
-    {
-        String path = resource.getParentName();
-        path = dropExtension(path);
-
-        String pkg = "lpc." + path.replace('/', '.');
-        pkg = pkg.replace("..", ".");
-        if (pkg.endsWith("."))
-        {
-            pkg = pkg.substring(0, pkg.length() - 1);
-        }
-
-        String cls = dropExtension(resource.getName());
-        cls = cls.replaceAll("[^A-Za-z0-9]", "_");
-
-        return new ClassName(pkg, cls);
-    }
-
-    private String dropExtension(String path)
-    {
-        int slash = path.lastIndexOf('/');
-        int dot = path.lastIndexOf('.');
-        if (dot > slash)
-        {
-            path = path.substring(0, dot);
-        }
-        return path;
     }
 
     private ASTObjectDefinition parse(Resource resource) throws IOException, ParserException

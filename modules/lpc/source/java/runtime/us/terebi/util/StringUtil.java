@@ -72,4 +72,9 @@ public class StringUtil
         }
         return builder;
     }
+
+    public static boolean isBlank(String name)
+    {
+        return name == null || "".equals(name);
+    }
 }

@@ -141,19 +141,15 @@ public class TypeSupport
         LpcType type = actual;
         for (LpcType allowed : allowedTypes)
         {
+            if (isCoVariant(allowed, type))
+            {
+                return true;
+            }
             if (Types.MIXED.equals(allowed))
             {
                 return true;
             }
-            if (allowed.equals(type))
-            {
-                return true;
-            }
             if (type.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() >= allowed.getArrayDepth())
-            {
-                return true;
-            }
-            if (allowed.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() >= allowed.getArrayDepth())
             {
                 return true;
             }
@@ -163,6 +159,28 @@ public class TypeSupport
             }
         }
         return false;
+    }
+
+    public static boolean isCoVariant(LpcType parent, LpcType child)
+    {
+        if (parent.equals(child))
+        {
+            return true;
+        }
+        if (Types.VOID.equals(child))
+        {
+            return false;
+        }
+        if (Types.MIXED.equals(parent))
+        {
+            return true;
+        }
+        if (parent.getKind() == LpcType.Kind.MIXED && parent.getArrayDepth() <= child.getArrayDepth())
+        {
+            return true;
+        }
+        return false;
+
     }
 
 }

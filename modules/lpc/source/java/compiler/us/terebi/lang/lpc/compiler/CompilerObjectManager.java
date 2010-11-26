@@ -31,7 +31,7 @@ import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
  */
 public interface CompilerObjectManager extends ObjectManager, ObjectInstance.DestructListener
 {
-    public CompiledObjectDefinition findObject(String name);
+    public CompiledObjectDefinition findObject(String name, boolean load);
     public CompiledObjectInstance findObject(ObjectId id);
     public void registerObject(CompiledObjectDefinition definition);
     public void registerObject(CompiledObjectInstance object);

@@ -25,5 +25,5 @@ import us.terebi.lang.lpc.runtime.UserTypeInstance;
  */
 public interface CompiledInstance extends UserTypeInstance
 {
-    public Object getImplementingObject();
+    public CompiledImplementation getImplementingObject();
 }

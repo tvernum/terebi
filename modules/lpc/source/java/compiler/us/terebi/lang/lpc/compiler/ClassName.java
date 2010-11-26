@@ -40,6 +40,12 @@ public final class ClassName
         this.className = name;
     }
 
+    public String fileName()
+    {
+        String path = packageName.replace('.', '/');
+        return path + '/' + className + ".class";
+    }
+
     public String toString()
     {
         return packageName + "." + className;

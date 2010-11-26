@@ -26,4 +26,9 @@ public class DebugPoint
     {
         System.err.println("Breakpoint: " + fullQualifiedClass + " " + method + " " + count);
     }
+
+    public static void breakpoint(Object object, String method, int count)
+    {
+        System.err.println("Breakpoint: " + object.getClass() + " (@" + System.identityHashCode(object) + ") " + method + " " + count);
+    }
 }

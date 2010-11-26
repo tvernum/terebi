@@ -66,6 +66,11 @@ public class LpcField implements LpcReference
 
     public LpcValue set(LpcValue value)
     {
-        return _value = new TypedValue(_type, value);
+        return _value = TypedValue.type(_type, value);
+    }
+    
+    public String toString()
+    {
+        return getClass().getSimpleName() + '{' + _type + ' ' + _name + " = " + _value + '}';
     }
 }

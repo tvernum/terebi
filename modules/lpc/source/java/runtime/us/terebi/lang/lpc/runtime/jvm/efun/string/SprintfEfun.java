@@ -202,7 +202,7 @@ public class SprintfEfun extends AbstractEfun implements FunctionSignature, Call
             output.append('%');
             return;
         }
-        
+
         if (format.size == -2)
         {
             format.size = (int) iterator.next().asLong();
@@ -248,6 +248,16 @@ public class SprintfEfun extends AbstractEfun implements FunctionSignature, Call
                 return;
             case 'O':
                 formatValue(output, format, value);
+                return;
+            case 'c':
+                if (isString(value))
+                {
+                    formatChar(output, format, value.asString().charAt(0));
+                }
+                else
+                {
+                    formatChar(output, format, value.asLong());
+                }
                 return;
             default:
                 throw new UnsupportedOperationException("sprintf( %" + format.type + " ) - Not implemented");
@@ -348,6 +358,16 @@ public class SprintfEfun extends AbstractEfun implements FunctionSignature, Call
                 break;
         }
         output.append(align(builder, format));
+    }
+
+    private void formatChar(Output output, Format format, long value)
+    {
+        if (value < 0 || value > Character.MAX_VALUE)
+        {
+            throw new LpcRuntimeException("Invalid integer value " + value + " for character output");
+        }
+        char ch = (char) value;
+        formatString(output, format, Character.toString(ch));
     }
 
     private CharSequence align(StringBuilder builder, Format format)

@@ -30,6 +30,7 @@ import org.adjective.stout.impl.ParameterisedClassImpl;
 import org.adjective.stout.operation.Expression;
 import org.adjective.stout.operation.VM;
 
+import us.terebi.lang.lpc.compiler.java.context.CompiledInstance;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -111,6 +112,7 @@ public class ByteCodeConstants
     public static final MethodSignature FUNCTION_OWNER_DEFINITION = VM.Method.find(LpcFunction.class, "getOwnerDefinition");
     public static final MethodSignature FUNCTION_OWNER= VM.Method.find(LpcFunction.class, "getOwner");
     public static final MethodSignature EXCEPTION_GET_LPC_MESSAGE = VM.Method.find(LpcRuntimeException.class, "getLpcMessage");
+    public static final MethodSignature GET_IMPLEMENTING_OBJECT = VM.Method.find(CompiledInstance.class, "getImplementingObject");
 
     public static final ConstructorSignature STRING_VALUE_CONSTRUCTOR = VM.Method.constructor(StringValue.class, String.class);
 

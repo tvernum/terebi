@@ -20,7 +20,10 @@ package us.terebi.lang.lpc.runtime.jvm.object;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
+import us.terebi.lang.lpc.compiler.java.context.CompiledImplementation;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
@@ -28,12 +31,15 @@ import us.terebi.lang.lpc.runtime.CompiledMethodDefinition;
 import us.terebi.lang.lpc.runtime.FieldDefinition;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectDefinition;
+import us.terebi.lang.lpc.runtime.util.reflect.TypeIntrospector;
 
 /**
  * 
  */
 public class VirtualObjectDefinition extends AbstractObjectDefinition implements CompiledObjectDefinition
 {
+    private static final Logger LOG = Logger.getLogger(VirtualObjectDefinition.class);
+
     private final CompiledObjectInstance _object;
     private final CompiledObjectDefinition _definition;
 
@@ -44,7 +50,7 @@ public class VirtualObjectDefinition extends AbstractObjectDefinition implements
         _definition = _object.getDefinition();
     }
 
-    public Class< ? > getImplementationClass()
+    public Class< ? extends CompiledImplementation> getImplementationClass()
     {
         return _definition.getImplementationClass();
     }
@@ -69,22 +75,39 @@ public class VirtualObjectDefinition extends AbstractObjectDefinition implements
         return _definition.getFields();
     }
 
-    protected CompiledObjectInstance newInstance(long id, InstanceType type, CompiledObjectInstance forInstance, List< ? extends LpcValue> createArguments)
+    protected CompiledObjectInstance newInstance(long id, InstanceType type, CompiledObjectInstance forInstance,
+            List< ? extends LpcValue> createArguments)
     {
+        VirtualInstance virtual = new VirtualInstance(this, id);
+        if (forInstance == null)
+        {
+            forInstance = virtual;
+        }
         CompiledObjectInstance instance = _definition.getPrototypeInstance(forInstance);
-        for (FieldDefinition fieldDefinition : _definition.getFields().values())
+        for (FieldDefinition fieldDefinition : new TypeIntrospector(_definition).getFields(true))
         {
             LpcValue value = fieldDefinition.getValue(_object);
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("Set " + instance + " -> " + fieldDefinition + " = " + value);
+            }
             fieldDefinition.setValue(instance, value);
         }
-        VirtualInstance virtual = new VirtualInstance(this, id, instance);
+        virtual.setInstance(instance);
         if (type != InstanceType.INHERIT && type != InstanceType.PROTOTYPE)
         {
             register(virtual);
             create(virtual, createArguments);
         }
+
         return virtual;
     }
+
+//    public static void printKeyName(ObjectInstance instance)
+//    {
+//        MethodDefinition m = CallableSupport.findMethod("GetKeyName", instance.getDefinition(), instance);
+//        LOG.debug(instance + ".GetKeyName() = " + (m == null ? "<null>" : m.execute(instance, Collections.<LpcValue> emptyList())));
+//    }
 
     public String toString()
     {

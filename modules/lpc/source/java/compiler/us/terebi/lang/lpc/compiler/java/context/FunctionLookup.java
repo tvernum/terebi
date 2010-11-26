@@ -32,6 +32,7 @@ import org.apache.log4j.Logger;
 import org.adjective.stout.core.UnresolvedType;
 
 import us.terebi.lang.lpc.compiler.java.context.VariableLookup.ObjectPath;
+import us.terebi.lang.lpc.compiler.util.TypeSupport;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
@@ -292,6 +293,11 @@ public class FunctionLookup
 
         return null;
     }
+    
+    public String getInternalName(FunctionSignature func)
+    {
+        return _internalNames.get(func);
+    }
 
     private List<VariableLookup.ObjectPath> getInheritedObject(Map<String, ? extends ObjectDefinition> inherited, String scope)
     {
@@ -420,7 +426,7 @@ public class FunctionLookup
         {
             return;
         }
-        if (!existing.getReturnType().equals(replacement.getReturnType()))
+        if (!TypeSupport.isCoVariant(existing.getReturnType(), replacement.getReturnType()))
         {
             throw new LookupException("Attempt to redefine return type for " + name + " from " + existing + " to " + replacement);
         }

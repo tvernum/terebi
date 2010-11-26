@@ -197,7 +197,7 @@ public class FieldCompiler extends MemberVisitor implements ParserVisitor
                 ByteCodeConstants.WITH_TYPE_4, //
                 objectDefinition, //
                 VM.Expression.getEnum(type.getKind()), //
-                (type.isClass() ? VM.Expression.constant(type.getClassDefinition().getName()) : VM.Expression.nullObject()), //
+                (type.getKind() == LpcType.Kind.CLASS ? VM.Expression.constant(type.getClassDefinition().getName()) : VM.Expression.nullObject()), //
                 VM.Expression.constant(type.getArrayDepth()));
         return typeExpr;
     }

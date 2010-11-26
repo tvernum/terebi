@@ -18,6 +18,7 @@
 
 package us.terebi.lang.lpc.runtime.jvm.object;
 
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 import us.terebi.lang.lpc.runtime.util.BoundMethod;
 import us.terebi.lang.lpc.runtime.util.Signature;
+import us.terebi.lang.lpc.runtime.util.SystemLog;
 import us.terebi.util.AnnotationUtil;
 
 /**
@@ -96,7 +98,7 @@ public class CompiledMethod implements CompiledMethodDefinition
                 // Ignore
             }
         }
-        
+
         if (!method.getDeclaringClass().isInterface())
         {
             LOG.warn("Method " + method + " could not be found on any interface");
@@ -115,6 +117,7 @@ public class CompiledMethod implements CompiledMethodDefinition
         {
             throw new LpcRuntimeException("Method " + method + " is not annotated with a return value (" + LpcMemberType.class.getSimpleName() + ")");
         }
+        validateAnnotation(returnAnnotation, method);
         LpcType returnType = getType(returnAnnotation.kind(), returnAnnotation.className(), returnAnnotation.depth());
 
         ArgumentDefinition[] arguments = new ArgumentDefinition[method.getParameterTypes().length];
@@ -133,6 +136,25 @@ public class CompiledMethod implements CompiledMethodDefinition
         boolean varargs = Arrays.asList(methodAnnotation.modifiers()).contains(Modifier.VARARGS);
 
         return new Signature(varargs, returnType, Arrays.asList(arguments));
+    }
+
+    private void validateAnnotation(LpcMemberType annotation, AnnotatedElement element)
+    {
+        if (annotation.kind() == LpcType.Kind.CLASS)
+        {
+            if (annotation.className() == null || "".equals(annotation.className()))
+            {
+                throw new InternalError("Invalid annotation "
+                        + annotation
+                        + " on "
+                        + element
+                        + " : "
+                        + " kind = "
+                        + annotation.kind()
+                        + " but class-name="
+                        + annotation.className());
+            }
+        }
     }
 
     private boolean isLpcValue(Method method)
@@ -168,7 +190,12 @@ public class CompiledMethod implements CompiledMethodDefinition
         }
         try
         {
-            return _lookup.classes().findClass(name);
+            ClassDefinition cls = _lookup.classes().findClass(name);
+            if (cls == null)
+            {
+                throw new LookupException("No class '" + name + "'found in " + _lookup);
+            }
+            return cls;
         }
         catch (LookupException e)
         {
@@ -204,6 +231,9 @@ public class CompiledMethod implements CompiledMethodDefinition
                 throw new InternalError("Attempt to call method " + _method + " in " + object + " which is not the correct type");
             }
             // @TODO check arg types...
+            if(_method.getName().equals("var1")) {
+                SystemLog.message("---VAR1---");
+            }
             Object result = _method.invoke(object, (Object[]) array);
             if (result instanceof LpcValue)
             {

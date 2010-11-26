@@ -21,6 +21,7 @@ package us.terebi.lang.lpc.runtime.jvm;
 import us.terebi.lang.lpc.compiler.java.context.ClassFinder;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectInstance;
+import us.terebi.lang.lpc.compiler.java.context.CompiledImplementation;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.ClassDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
@@ -34,7 +35,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.ClassReference;
 /**
  * 
  */
-public class LpcObject extends LpcRuntimeSupport
+public class LpcObject extends LpcRuntimeSupport implements CompiledImplementation
 {
     private CompiledObjectDefinition _definition;
     private CompiledObjectInstance _instance;
@@ -55,6 +56,11 @@ public class LpcObject extends LpcRuntimeSupport
         _instance = instance;
     }
 
+    public void init()
+    {
+        // no-op
+    }
+
     public void setDefinition(CompiledObjectDefinition definition)
     {
         if (_definition == null)
@@ -70,6 +76,11 @@ public class LpcObject extends LpcRuntimeSupport
     public CompiledObjectDefinition getObjectDefinition()
     {
         return _definition;
+    }
+
+    public CompiledObjectDefinition getTypeDefinition()
+    {
+        return getObjectDefinition();
     }
 
     public void setInstance(CompiledObjectInstance instance)
@@ -89,6 +100,11 @@ public class LpcObject extends LpcRuntimeSupport
         return _instance;
     }
 
+    public CompiledObjectInstance getInstance()
+    {
+        return getObjectInstance();
+    }
+
     protected LpcType withType(Class< ? extends LpcClass> cls, int depth)
     {
         return withType(classDefinition(cls), depth);
@@ -96,7 +112,7 @@ public class LpcObject extends LpcRuntimeSupport
 
     protected LpcValue classReference(Class< ? extends LpcClass> cls)
     {
-        return new ClassReference(classDefinition(cls), getObjectInstance());
+        return new ClassReference(classDefinition(cls), getInstance());
     }
 
     protected ClassDefinition classDefinition(Class< ? extends LpcClass> cls)
@@ -113,7 +129,7 @@ public class LpcObject extends LpcRuntimeSupport
 
     public Callable method(String name)
     {
-        CompiledObjectDefinition object = getObjectDefinition();
+        CompiledObjectDefinition object = getTypeDefinition();
         Callable callable = findMethod(name, object);
         if (callable != null)
         {
@@ -124,7 +140,7 @@ public class LpcObject extends LpcRuntimeSupport
 
     private Callable findMethod(String name, ObjectDefinition object)
     {
-        CompiledObjectInstance instance = getObjectInstance();
+        CompiledObjectInstance instance = getInstance();
         MethodDefinition method = CallableSupport.findMethod(name, object, instance);
         if (method == null)
         {

@@ -25,6 +25,18 @@ import java.io.OutputStream;
  */
 public interface ClassStore
 {
-    public OutputStream open(String packageName, String className) throws IOException;
-    public long getLastModified(String packageName, String className);
+    /**
+     * Opens a class to be written to
+     */
+    public OutputStream open(ClassName name) throws IOException;
+
+    /**
+     * @returns The {@link System#currentTimeMillis() timestamp} that the class was last written to, or <code>0</code> if the class does not exist
+     */
+    public long getLastModified(ClassName className);
+    
+    /**
+     * @return All "user" (lpc) classes that are directly used by '<code>className</code>', or null if '<code>className</code>' does not exist.
+     */
+    public Iterable<ClassName> getDependencies(ClassName className);
 }

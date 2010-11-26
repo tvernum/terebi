@@ -21,6 +21,8 @@ package us.terebi.plugins.interactive.efun;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.engine.server.ObjectShell;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.AttributeMap;
@@ -40,6 +42,8 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
  */
 public class ThisPlayerEfun extends AbstractEfun
 {
+    private static final Logger LOG = Logger.getLogger(ThisPlayerEfun.class);
+
     private static final String CONTEXT_ATTRIBUTE = "this_player";
 
     public List< ? extends ArgumentDefinition> defineArguments()
@@ -71,21 +75,31 @@ public class ThisPlayerEfun extends AbstractEfun
         Object tp = attributes.get(CONTEXT_ATTRIBUTE);
         if (tp != null)
         {
-            return (ObjectInstance) tp;
+            ObjectInstance instance = (ObjectInstance) tp;
+            return getUser(instance);
         }
         CallStack stack = context.callStack();
         MajorFrame frame = stack.topFrame();
-        if (isUser(frame.instance()))
+        ObjectInstance user = getUser(frame.instance());
+        if (user != null)
         {
             attributes.set(CONTEXT_ATTRIBUTE, frame.instance());
             return frame.instance();
         }
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("Top of stack is not a user: " + frame);
+            LOG.debug("Full stack is " + stack);
+        }
         return null;
     }
 
-    private static boolean isUser(ObjectInstance instance)
+    private static ObjectInstance getUser(ObjectInstance instance)
     {
-        return ObjectShell.isConnectionObject(instance);
+        if(ObjectShell.isConnectionObject(instance)) {
+            return instance;
+        }
+        return ObjectShell.getSwitchedObject(instance);
     }
 
 }

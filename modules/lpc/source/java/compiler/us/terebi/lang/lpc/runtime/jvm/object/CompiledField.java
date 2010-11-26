@@ -37,6 +37,9 @@ import us.terebi.lang.lpc.runtime.jvm.LpcReference;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.util.reflect.ObjectIntrospector;
+
+import static us.terebi.util.StringUtil.isBlank;
 
 /**
  * 
@@ -51,37 +54,67 @@ public class CompiledField implements FieldDefinition
 
     public CompiledField(UserTypeDefinition declaringObject, Field field)
     {
-        // @TODO - Optimise for when field is "final" and "LpcReference"
-        _declaringObject = declaringObject;
-        _field = field;
-
-        LpcMember member = _field.getAnnotation(LpcMember.class);
-        if (member == null)
+        try
         {
-            throw new InternalError("Field " + field + " is not annotated with " + LpcMember.class.getName());
+            // @TODO - Optimise for when field is "final" and "LpcReference"
+            _declaringObject = declaringObject;
+            _field = field;
+
+            LpcMember member = getMemberAnnotation();
+            _name = member.name();
+            _modifiers = toSet(member.modifiers());
+
+            LpcMemberType type = getTypeAnnotation();
+            ClassDefinition cls = getClassDefintion(type);
+            _type = Types.getType(type.kind(), cls, type.depth());
         }
+        catch (Exception e)
+        {
+            throw new InternalError("For field " + getSimpleName(field) + ": " + e.getMessage(), e);
+        }
+    }
 
-        _name = member.name();
-        _modifiers = new HashSet<Modifier>(Arrays.asList(member.modifiers()));
+    private static String getSimpleName(Field field)
+    {
+        return field.getDeclaringClass().getName() + "." + field.getName();
+    }
 
+    private ClassDefinition getClassDefintion(LpcMemberType type)
+    {
+        String className = type.className();
+        if (isBlank(className))
+        {
+            return null;
+        }
+        else
+        {
+            return new ClassFinder(_declaringObject).find(className);
+        }
+    }
+
+    private LpcMemberType getTypeAnnotation()
+    {
         LpcMemberType type = _field.getAnnotation(LpcMemberType.class);
         if (type == null)
         {
-            throw new InternalError("Field " + field + " is not annotated with " + LpcMemberType.class.getName());
+            throw new InternalError("Field " + _field + " is not annotated with " + LpcMemberType.class.getName());
         }
-
-        ClassDefinition cls = null;
-        String className = type.className();
-        if (!isBlank(className))
-        {
-            cls = new ClassFinder(declaringObject).find(className);
-        }
-        _type = Types.getType(type.kind(), cls, type.depth());
+        return type;
     }
 
-    private boolean isBlank(String className)
+    private Set<Modifier> toSet(Modifier[] modifiers)
     {
-        return className == null || className.length() == 0;
+        return new HashSet<Modifier>(Arrays.asList(modifiers));
+    }
+
+    private LpcMember getMemberAnnotation()
+    {
+        LpcMember member = _field.getAnnotation(LpcMember.class);
+        if (member == null)
+        {
+            throw new InternalError("Field " + _field + " is not annotated with " + LpcMember.class.getName());
+        }
+        return member;
     }
 
     public LpcType getType()
@@ -115,9 +148,14 @@ public class CompiledField implements FieldDefinition
 
     private Object getFieldValue(UserTypeInstance instance)
     {
-        if (instance instanceof CompiledInstance)
+        UserTypeInstance implementing = new ObjectIntrospector(instance).getParent(_declaringObject);
+        if (implementing == null)
         {
-            CompiledInstance ci = (CompiledInstance) instance;
+            throw new LpcRuntimeException("Internal Error - Type " + instance + " does not implement " + _declaringObject + " for field " + this);
+        }
+        if (implementing instanceof CompiledInstance)
+        {
+            CompiledInstance ci = (CompiledInstance) implementing;
             try
             {
                 return _field.get(ci.getImplementingObject());
@@ -141,9 +179,14 @@ public class CompiledField implements FieldDefinition
 
     public void setValue(UserTypeInstance instance, LpcValue value)
     {
-        if (instance instanceof CompiledInstance)
+        UserTypeInstance implementing = new ObjectIntrospector(instance).getParent(_declaringObject);
+        if (implementing == null)
         {
-            CompiledInstance ci = (CompiledInstance) instance;
+            throw new LpcRuntimeException("Internal Error - Type " + instance + " does not implement " + _declaringObject + " for field " + this);
+        }
+        if (implementing instanceof CompiledInstance)
+        {
+            CompiledInstance ci = (CompiledInstance) implementing;
             try
             {
                 if (_field.getType().isAssignableFrom(LpcValue.class))
@@ -215,9 +258,14 @@ public class CompiledField implements FieldDefinition
         }
         return false;
     }
-    
+
     public int hashCode()
     {
         return _declaringObject.hashCode() ^ _field.hashCode();
+    }
+
+    public String toString()
+    {
+        return getClass().getSimpleName() + "{" + getSimpleName(_field) + "}";
     }
 }

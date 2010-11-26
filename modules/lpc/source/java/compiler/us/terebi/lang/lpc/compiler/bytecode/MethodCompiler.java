@@ -55,6 +55,13 @@ import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
  */
 public class MethodCompiler extends MemberVisitor implements ParserVisitor
 {
+    private static final String ATTRIBUTE_VARARGS = "varargs";
+    private static final String ATTRIBUTE_SEMANTICS = "semantics";
+    public static final String ATTRIBUTE_NAME = "name";
+    private static final String ATTRIBUTE_CLASS = "className";
+    private static final String ATTRIBUTE_DEPTH = "depth";
+    private static final String ATTRIBUTE_KIND = "kind";
+
     private static final Modifier[] MODIFIER_ARRAY = new Modifier[0];
     private final CompileContext _context;
 
@@ -92,26 +99,27 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
         Modifier[] modifiers = super.getModifiers(Kind.METHOD).toArray(MODIFIER_ARRAY);
         LpcType type = getType();
         String name = support.getMethodName();
+        String internalName = support.getInternalName();
         List< ? extends ArgumentDefinition> arguments = support.getArgumentDefinitions();
         List< ? extends ElementBuilder< ? extends Statement>> body = buildBody(support);
 
-        MethodSpec method = buildMethodSpec(modifiers, type, name, arguments, body);
+        MethodSpec method = buildMethodSpec(modifiers, type, name, internalName, arguments, body);
 
         return method;
     }
 
-    public static MethodSpec buildMethodSpec(Modifier[] modifiers, LpcType type, String name, List< ? extends ArgumentDefinition> arguments,
+    public static MethodSpec buildMethodSpec(Modifier[] modifiers, LpcType type, String name, String internalName, List< ? extends ArgumentDefinition> arguments,
             List< ? extends ElementBuilder< ? extends Statement>> body)
     {
-        MethodSpec method = new MethodSpec(name);
+        MethodSpec method = new MethodSpec(internalName);
         method.withModifiers(ElementModifier.PUBLIC).withReturnType(LpcValue.class);
 
-        method.withAnnotation(new AnnotationSpec(LpcMember.class).withRuntimeVisibility(true).withAttribute("name", name).withAttribute("modifiers",
+        method.withAnnotation(new AnnotationSpec(LpcMember.class).withRuntimeVisibility(true).withAttribute(ATTRIBUTE_NAME, name).withAttribute("modifiers",
                 modifiers));
 
         AnnotationSpec typeAnnotation = getMemberTypeAnnotation(type);
         method.withAnnotation(typeAnnotation);
-
+        
         ParameterSpec[] parameters = new ParameterSpec[arguments.size()];
 
         for (int i = 0; i < arguments.size(); i++)
@@ -119,15 +127,15 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
             ArgumentDefinition arg = arguments.get(i);
             LpcType argType = arg.getType();
             AnnotationSpec annotation = new AnnotationSpec(LpcParameter.class);
-            annotation.withAttribute("kind", argType.getKind());
-            annotation.withAttribute("depth", argType.getArrayDepth());
-            if (argType.isClass())
+            annotation.withAttribute(ATTRIBUTE_KIND, argType.getKind());
+            annotation.withAttribute(ATTRIBUTE_DEPTH, argType.getArrayDepth());
+            if (argType.getKind() == LpcType.Kind.CLASS)
             {
-                annotation.withAttribute("className", argType.getClassDefinition().getName());
+                annotation.withAttribute(ATTRIBUTE_CLASS, argType.getClassDefinition().getName());
             }
-            annotation.withAttribute("name", arg.getName());
-            annotation.withAttribute("semantics", arg.getSemantics());
-            annotation.withAttribute("varargs", arg.isVarArgs());
+            annotation.withAttribute(ATTRIBUTE_NAME, arg.getName());
+            annotation.withAttribute(ATTRIBUTE_SEMANTICS, arg.getSemantics());
+            annotation.withAttribute(ATTRIBUTE_VARARGS, arg.isVarArgs());
             parameters[i] = new ParameterSpec("p$" + arg.getName()).withType(LpcValue.class).withAnnotation(annotation);
         }
         method.withParameters(parameters);
@@ -140,11 +148,11 @@ public class MethodCompiler extends MemberVisitor implements ParserVisitor
     {
         AnnotationSpec typeAnnotation = new AnnotationSpec(LpcMemberType.class) //
         .withRuntimeVisibility(true) //
-        .withAttribute("kind", type.getKind())//
-        .withAttribute("depth", type.getArrayDepth());
-        if (type.isClass())
+        .withAttribute(ATTRIBUTE_KIND, type.getKind())//
+        .withAttribute(ATTRIBUTE_DEPTH, type.getArrayDepth());
+        if (type.getKind() == LpcType.Kind.CLASS)
         {
-            typeAnnotation.withAttribute("classname", type.getClassDefinition().getName());
+            typeAnnotation.withAttribute(ATTRIBUTE_CLASS, type.getClassDefinition().getName());
         }
         return typeAnnotation;
     }

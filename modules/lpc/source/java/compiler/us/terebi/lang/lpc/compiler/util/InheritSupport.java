@@ -41,7 +41,7 @@ public class InheritSupport
     {
         ConstantHandler constants = new ConstantHandler();
         String from = constants.getString(ASTUtil.children(_node)).toString();
-        CompiledObjectDefinition parent = _scope.objectManager().findObject(from);
+        CompiledObjectDefinition parent = _scope.objectManager().findObject(from, true);
         
         if (parent == null)
         {

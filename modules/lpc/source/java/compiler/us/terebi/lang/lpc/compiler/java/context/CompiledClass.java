@@ -39,7 +39,7 @@ public class CompiledClass implements CompiledClassInstance
         _object = object;
     }
 
-    public Object getImplementingObject()
+    public LpcClass getImplementingObject()
     {
         return _object;
     }

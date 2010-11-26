@@ -16,18 +16,22 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.plugins.interactive.efun;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import us.terebi.engine.server.ObjectShell;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.net.core.Connection;
 
 /**
  * 
@@ -49,8 +53,12 @@ public class ExecEfun extends AbstractEfun implements FunctionSignature, Callabl
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        /* @TODO : EFUN */
-        return null;
+        checkArguments(arguments);
+        ObjectInstance to = getArgument(arguments, 0).asObject();
+        ObjectInstance from = getArgument(arguments, 1).asObject();
+        Connection connection = ObjectShell.getConnection(from);
+        boolean ok = ObjectShell.switchConnectionObject(connection, to);
+        return getValue(ok);
     }
 
 }

@@ -48,18 +48,7 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
     private final Logger LOG = Logger.getLogger(GetDirectoryInfoEfun.class);
 
     //    mixed array get_dir(string dir);
-    //
     //    mixed array get_dir(string dir, int flag);
-    //
-    //    If `dir' is a filename ('*' and '?' wildcards are supported), an array of 
-    //    strings is returned containing all filenames that match the specification. 
-    //    If `dir' is a directory name (ending with a slash--ie: "/u/", "/adm/", etc),
-    //    all filenames in that directory are returned.  
-    //
-    //    If called with a second argument equal to -1, get_dir will return an array
-    //    of subarrays, where the format of each subarray is:
-    //
-    //      ({ filename, size_of_file, last_time_file_touched })
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
@@ -86,7 +75,7 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
 
         try
         {
-            return ValueSupport.arrayValue(getDirectoryInfo(path, flag));
+            return ValueSupport.arrayValue(getDirectoryInfo(this, path, flag));
         }
         catch (IOException e)
         {
@@ -95,12 +84,12 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         }
     }
 
-    private List<LpcValue> getDirectoryInfo(String path, long flag) throws IOException
+    public static List<LpcValue> getDirectoryInfo(FileEfun efun, String path, long flag) throws IOException
     {
         boolean listDirectory = path.endsWith("/");
         boolean longListing = (flag == -1);
 
-        Resource[] files = resolveWildCard(path);
+        Resource[] files = resolveWildCard(efun, path);
         List<LpcValue> array = new ArrayList<LpcValue>(files.length);
 
         for (Resource resource : files)
@@ -125,7 +114,7 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         return array;
     }
 
-    private LpcValue getInfo(Resource resource, boolean longListing)
+    private static LpcValue getInfo(Resource resource, boolean longListing)
     {
         if (longListing)
         {
@@ -138,11 +127,11 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         }
     }
 
-    private Resource[] resolveWildCard(String path) throws IOException
+    private static Resource[] resolveWildCard(FileEfun efun, String path) throws IOException
     {
         if (path.indexOf('*') == -1 && path.indexOf('?') == -1)
         {
-            return new Resource[] { getResource(path) };
+            return new Resource[] { efun.getResource(path) };
         }
 
         List<Resource> match = new ArrayList<Resource>();
@@ -151,7 +140,7 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         String parentPath = path.substring(0, slash);
         String childPath = path.substring(slash);
 
-        Resource[] parents = resolveWildCard(parentPath);
+        Resource[] parents = resolveWildCard(efun, parentPath);
         for (Resource parent : parents)
         {
             Resource[] children = parent.getChildren();

@@ -230,6 +230,9 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
         return builder.toString();
     }
 
+    /**
+     * @deprecated Why did I deprecate this?
+     */
     @Deprecated
     protected Callable getFunction(LpcValue value, int index)
     {

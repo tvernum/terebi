@@ -91,7 +91,7 @@ public class CloneObjectEfun extends AbstractEfun implements FunctionSignature, 
         {
             throw new IllegalStateException("No object manager in context " + system);
         }
-        ObjectDefinition definition = objectManager.findObject(name);
+        ObjectDefinition definition = objectManager.findObject(name, true);
         if (definition == null)
         {
             throw new LpcRuntimeException("Object not found - " + name);

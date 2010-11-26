@@ -30,6 +30,8 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.util.Factory;
 
+import static us.terebi.util.StringUtil.isBlank;
+
 /**
  * 
  */
@@ -41,6 +43,10 @@ public class DynamicClassDefinition implements ClassDefinition
 
     public DynamicClassDefinition(String name)
     {
+        if (isBlank(name))
+        {
+            throw new IllegalArgumentException("Cannot create a class without a name");
+        }
         _name = name;
         _fields = new HashMap<String, FieldDefinition>();
     }

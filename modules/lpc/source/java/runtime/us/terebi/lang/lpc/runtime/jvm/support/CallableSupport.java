@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -99,7 +100,8 @@ public class CallableSupport
 
     public static MethodDefinition findMethod(String name, ObjectDefinition object, ObjectInstance instance)
     {
-        MethodDefinition method = object.getMethods().get(name);
+        Map<String, ? extends MethodDefinition> methods = object.getMethods();
+        MethodDefinition method = methods.get(name);
         if (method != null)
         {
             return method;

@@ -41,12 +41,13 @@ import us.terebi.net.core.Shell;
  */
 public class ObjectShell implements Shell
 {
-    private final Logger LOG = Logger.getLogger(ObjectShell.class);
+    private final static Logger LOG = Logger.getLogger(ObjectShell.class);
 
     private static final Apply INPUT_HANDLER = new Apply("process_input");
     private static final Apply LOGON_HANDLER = new Apply("logon");
 
     public static final String OBJECT_CONNECTION_ATTRIBUTE = "net.connection";
+    private static final String OBJECT_SWITCH_TO = "net.connection.switch";
     public static final String OBJECT_IDLE_ATTRIBUTE = "net.idle";
     private static final String OBJECT_INPUT_HANDLER_ATTRIBUTE = "net.handler.input";
     private static final String OBJECT_DESTRUCT_LISTENER = "net.connection.listener";
@@ -122,6 +123,27 @@ public class ObjectShell implements Shell
         return getConnection(instance) != null;
     }
 
+    public static boolean switchConnectionObject(Connection connection, ObjectInstance toObject)
+    {
+        if (isConnectionObject(toObject))
+        {
+            LOG.info("Object " + toObject.getCanonicalName() + " is already linked to a connection");
+            return false;
+        }
+        ObjectInstance oldObject = getConnectionObject(connection);
+        oldObject.getAttributes().set(OBJECT_CONNECTION_ATTRIBUTE, null);
+        connection.getAttributes().setAttribute(CONNECTION_OBJECT_ATTRIBUTE, toObject);
+        toObject.getAttributes().set(OBJECT_CONNECTION_ATTRIBUTE, connection);
+        oldObject.getAttributes().set(OBJECT_SWITCH_TO, toObject);
+        LOG.info("Switch connection " + connection + " from " + oldObject + " to " + toObject);
+        return true;
+    }
+
+    public static ObjectInstance getSwitchedObject(ObjectInstance instance)
+    {
+        return (ObjectInstance) instance.getAttributes().get(OBJECT_SWITCH_TO);
+    }
+
     public void connectionClosed(boolean clientInitiated, Connection connection)
     {
         ObjectInstance instance = getConnectionObject(connection);
@@ -174,7 +196,7 @@ public class ObjectShell implements Shell
         {
             LOG.debug("Handle input for " + user);
         }
-        
+
         Object attribute = user.getAttributes().get(OBJECT_INPUT_HANDLER_ATTRIBUTE);
         if (attribute != null)
         {
@@ -199,4 +221,5 @@ public class ObjectShell implements Shell
     {
         return (InputHandler) user.getAttributes().get(OBJECT_INPUT_HANDLER_ATTRIBUTE);
     }
+
 }

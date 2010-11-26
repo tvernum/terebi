@@ -33,6 +33,7 @@ public interface ObjectInstance extends UserTypeInstance
     public Map<String, ? extends ObjectInstance> getInheritedObjects();
     public long getId();
     public AttributeMap getAttributes();
+    public long getCreationTime();
     public String getCanonicalName();
     public void destruct();
     public boolean isDestructed();

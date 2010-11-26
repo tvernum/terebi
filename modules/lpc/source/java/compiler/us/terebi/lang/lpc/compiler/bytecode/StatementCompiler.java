@@ -26,8 +26,8 @@ import java.util.Map.Entry;
 import org.objectweb.asm.Label;
 
 import org.adjective.stout.builder.ElementBuilder;
-import org.adjective.stout.core.ConstructorSignature;
 import org.adjective.stout.core.ExtendedType;
+import org.adjective.stout.core.MethodSignature;
 import org.adjective.stout.impl.ParameterisedClassImpl;
 import org.adjective.stout.loop.Condition;
 import org.adjective.stout.loop.DoWhileLoopSpec;
@@ -175,10 +175,10 @@ public class StatementCompiler extends StatementVisitor<LpcExpression>
             TypeSupport.checkType(node, type, returnType);
             if (!Types.MIXED.equals(returnType) && !returnType.isClass())
             {
-                ConstructorSignature constructor = VM.Method.constructor(TypedValue.class, LpcType.Kind.class, Integer.TYPE, LpcValue.class);
+                MethodSignature method = VM.Method.find(TypedValue.class, "type", LpcType.Kind.class, Integer.TYPE, LpcValue.class);
                 Expression kind = VM.Expression.getEnum(returnType.getKind());
                 Expression depth = VM.Expression.constant(returnType.getArrayDepth());
-                expr = VM.Expression.construct(constructor, kind, depth, expr);
+                expr = VM.Expression.callStatic(TypedValue.class, method, kind, depth, expr);
             }
         }
         _statements.add(VM.Statement.returnObject(expr));
