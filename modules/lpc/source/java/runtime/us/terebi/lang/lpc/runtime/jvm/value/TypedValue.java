@@ -53,7 +53,7 @@ public class TypedValue implements LpcValue
         _value = value;
     }
 
-    public static TypedValue type(LpcType type, LpcValue value)
+    public static LpcValue type(LpcType type, LpcValue value)
     {
         if (value instanceof TypedValue)
         {
@@ -63,10 +63,14 @@ public class TypedValue implements LpcValue
                 return typed;
             }
         }
+        if (MiscSupport.isDynamicType(type))
+        {
+            return value;
+        }
         return new TypedValue(type, value);
     }
 
-    public static TypedValue type(Kind kind, int arrayDepth, LpcValue value)
+    public static LpcValue type(Kind kind, int arrayDepth, LpcValue value)
     {
         return type(Types.getType(kind, null, arrayDepth), value);
     }

@@ -19,7 +19,8 @@ package us.terebi.lang.lpc.runtime.util;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+
+import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.LpcValue;
@@ -27,6 +28,7 @@ import us.terebi.lang.lpc.runtime.MethodDefinition;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack.Origin;
+import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 
 /**
@@ -34,6 +36,8 @@ import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
  */
 public class Apply
 {
+    private final Logger LOG = Logger.getLogger(Apply.class);
+
     private final String _name;
 
     public Apply(String name)
@@ -51,14 +55,21 @@ public class Apply
         final MethodDefinition method = getMethod(instance);
         if (method == null)
         {
+            LOG.debug("No method " + _name + " found in " + instance);
             return NilValue.INSTANCE;
         }
 
         return InContext.execute(Origin.APPLY, instance, new InContext.Exec<LpcValue>()
         {
+            @SuppressWarnings("synthetic-access")
             public LpcValue execute()
             {
-                return method.execute(instance, arguments);
+                LpcValue value = method.execute(instance, arguments);
+                if (LOG.isDebugEnabled())
+                {
+                    LOG.debug("Method " + method + " in " + instance + " ->" + value);
+                }
+                return value;
             }
         });
     }
@@ -76,14 +87,17 @@ public class Apply
 
     private MethodDefinition getMethod(ObjectInstance instance)
     {
-        Map<String, ? extends MethodDefinition> methods = instance.getDefinition().getMethods();
-        MethodDefinition method = methods.get(_name);
-        return method;
+        return CallableSupport.findMethod(_name, instance.getDefinition(), instance);
     }
 
     public String toString()
     {
         return "apply " + _name;
+    }
+
+    public boolean existsIn(ObjectInstance instance)
+    {
+        return getMethod(instance) != null;
     }
 
 }

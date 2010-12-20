@@ -84,7 +84,7 @@ public class ThisPlayerEfun extends AbstractEfun
         if (user != null)
         {
             attributes.set(CONTEXT_ATTRIBUTE, frame.instance());
-            return frame.instance();
+            return user;
         }
         if (LOG.isDebugEnabled())
         {
@@ -96,10 +96,12 @@ public class ThisPlayerEfun extends AbstractEfun
 
     private static ObjectInstance getUser(ObjectInstance instance)
     {
-        if(ObjectShell.isConnectionObject(instance)) {
+        if (ObjectShell.isConnectionObject(instance))
+        {
             return instance;
         }
-        return ObjectShell.getSwitchedObject(instance);
+        ObjectInstance switchedObject = ObjectShell.getSwitchedObject(instance);
+        return switchedObject;
     }
 
 }

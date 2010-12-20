@@ -28,6 +28,7 @@ import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
@@ -61,7 +62,7 @@ public class RegexpEfun extends AbstractEfun implements FunctionSignature, Calla
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         // @TODO Auto-generated method stub
-        return null;
+        return NilValue.INSTANCE;
     }
 
 }

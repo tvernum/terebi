@@ -89,7 +89,7 @@ public class InputToEfun extends AbstractEfun implements Efun
                 args.add(LpcConstants.NIL);
             }
 
-            ObjectShell.setInputHandler(user, null);
+            ObjectShell.getInputHandlers(user).remove(this);
 
             final Callable func = _func;
             InContext.<Object> execute(Origin.EFUN, user, new InContext.Exec<Object>()
@@ -101,6 +101,11 @@ public class InputToEfun extends AbstractEfun implements Efun
             });
 
             return null;
+        }
+        
+        public String toString()
+        {
+            return "input_to:" + _func;
         }
     }
 
@@ -165,7 +170,7 @@ public class InputToEfun extends AbstractEfun implements Efun
             LOG.info("Attempt to use 'input_to' when there is no active user");
         }
 
-        if (ObjectShell.getInputHandler(user) != null)
+        if (ObjectShell.getInputHandlers(user).contains(Handler.class))
         {
             LOG.info("Attempt to use 'input_to' when there is already an active input handler");
         }
@@ -175,7 +180,7 @@ public class InputToEfun extends AbstractEfun implements Efun
             ObjectShell.getConnection(user).getFeatures().disableFeature(NetworkFeatures.CLIENT_ECHO);
         }
         Handler handler = new Handler(func, isSet(flag, 0x2), extraArgs);
-        ObjectShell.setInputHandler(user, handler);
+        ObjectShell.getInputHandlers(user).prepend(handler);
     }
 
     private boolean isSet(long flag, int i)

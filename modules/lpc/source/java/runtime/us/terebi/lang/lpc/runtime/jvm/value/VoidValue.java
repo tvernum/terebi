@@ -41,7 +41,7 @@ public class VoidValue extends AbstractValue
 
     public boolean asBoolean()
     {
-        throw this.isNot("a value");
+        return false;
     }
 
     protected boolean valueEquals(LpcValue other)

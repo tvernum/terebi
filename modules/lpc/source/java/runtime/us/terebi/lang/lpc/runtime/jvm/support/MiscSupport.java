@@ -35,6 +35,10 @@ public class MiscSupport
 {
     public static boolean isType(LpcType type, LpcValue value)
     {
+        if (value == null)
+        {
+            return false;
+        }
         return type.equals(value.getActualType());
     }
 
@@ -222,6 +226,11 @@ public class MiscSupport
     public static boolean isDynamicType(LpcType type)
     {
         return Types.MIXED.equals(type) || Types.ZERO.equals(type) || Types.NIL.equals(type);
+    }
+
+    public static boolean isVoid(LpcValue value)
+    {
+        return isType(Types.VOID, value);
     }
 
 }

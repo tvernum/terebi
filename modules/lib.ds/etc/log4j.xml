@@ -32,6 +32,10 @@
         <level value="INFO" />
     </logger>
 
+    <logger name="us.terebi.lang.lpc.compiler.classloader.AutoCompilingClassLoader" additivity="false">
+        <level value="INFO" />
+    </logger>
+
     <logger name="us.terebi.lang.lpc" additivity="true">
         <level value="DEBUG" />
     </logger>

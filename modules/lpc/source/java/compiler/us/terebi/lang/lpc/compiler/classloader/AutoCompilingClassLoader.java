@@ -56,12 +56,18 @@ public class AutoCompilingClassLoader extends URLClassLoader
         }
         try
         {
-            LOG.debug("Attempt to compile " + lpc);
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("Attempt to compile " + lpc);
+            }
             _compiler.precompile(lpc);
         }
         catch (CompileException e)
         {
-            LOG.debug("Cannot compile " + lpc + "for " + name + " - " + e);
+            if (LOG.isDebugEnabled())
+            {
+                LOG.debug("Cannot compile " + lpc + "for " + name + " - " + e);
+            }
         }
     }
 }

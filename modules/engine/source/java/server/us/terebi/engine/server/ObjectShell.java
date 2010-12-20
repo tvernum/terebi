@@ -20,15 +20,19 @@
 package us.terebi.engine.server;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import org.apache.log4j.Logger;
 
 import us.terebi.engine.server.TerebiServer.ConnectionObjectFactory;
+import us.terebi.lang.lpc.runtime.AttributeMap;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
-import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.util.Apply;
 import us.terebi.net.core.AttributeChange;
 import us.terebi.net.core.Connection;
@@ -41,19 +45,22 @@ import us.terebi.net.core.Shell;
  */
 public class ObjectShell implements Shell
 {
+    public static final String SWITCHABLE_ATTRIBUTE_PREFIX = "user.";
+
     private final static Logger LOG = Logger.getLogger(ObjectShell.class);
 
-    private static final Apply INPUT_HANDLER = new Apply("process_input");
+    private static final String[] EMPTY_INPUT = new String[] { "" };
+
     private static final Apply LOGON_HANDLER = new Apply("logon");
 
-    public static final String OBJECT_CONNECTION_ATTRIBUTE = "net.connection";
-    private static final String OBJECT_SWITCH_TO = "net.connection.switch";
-    public static final String OBJECT_IDLE_ATTRIBUTE = "net.idle";
-    private static final String OBJECT_INPUT_HANDLER_ATTRIBUTE = "net.handler.input";
-    private static final String OBJECT_DESTRUCT_LISTENER = "net.connection.listener";
+    private static final String OBJECT_CONNECTION_ATTRIBUTE = SWITCHABLE_ATTRIBUTE_PREFIX + "net.connection";
+    private static final String OBJECT_SWITCH_TO = SWITCHABLE_ATTRIBUTE_PREFIX + "net.connection.switch";
+    private static final String OBJECT_IDLE_ATTRIBUTE = SWITCHABLE_ATTRIBUTE_PREFIX + "net.idle";
+    private static final String OBJECT_INPUT_HANDLER_ATTRIBUTE = SWITCHABLE_ATTRIBUTE_PREFIX + "net.handler.input";
+    private static final String OBJECT_DESTRUCT_LISTENER = SWITCHABLE_ATTRIBUTE_PREFIX + "net.connection.listener";
 
     private static final String PREFIX = ObjectShell.class.getName();
-    private static final String CONNECTION_OBJECT_ATTRIBUTE = PREFIX + ".object";
+    private static final String CONNECTION_OBJECT_ATTRIBUTE = PREFIX + ".net.object";
 
     private static final Object DESTRUCT_LISTENER = new ObjectInstance.DestructListener()
     {
@@ -98,6 +105,7 @@ public class ObjectShell implements Shell
         }
         instance.getAttributes().set(OBJECT_CONNECTION_ATTRIBUTE, connection);
         instance.getAttributes().set(OBJECT_DESTRUCT_LISTENER, DESTRUCT_LISTENER);
+        instance.getAttributes().set(OBJECT_INPUT_HANDLER_ATTRIBUTE, new InputHandlerSet(ProcessInputHandler.INSTANCE));
         connection.getAttributes().setAttribute(CONNECTION_OBJECT_ATTRIBUTE, instance);
 
         LOGON_HANDLER.invoke(instance);
@@ -130,11 +138,28 @@ public class ObjectShell implements Shell
             LOG.info("Object " + toObject.getCanonicalName() + " is already linked to a connection");
             return false;
         }
+
         ObjectInstance oldObject = getConnectionObject(connection);
-        oldObject.getAttributes().set(OBJECT_CONNECTION_ATTRIBUTE, null);
+        AttributeMap fromAttributes = oldObject.getAttributes();
+        AttributeMap toAttributes = toObject.getAttributes();
+
+        Iterable<String> names = fromAttributes.names();
+        for (String name : names)
+        {
+            if (name.startsWith(SWITCHABLE_ATTRIBUTE_PREFIX))
+            {
+                LOG.info("Copying attribute " + name + " from " + oldObject + " to " + toObject);
+                toAttributes.set(name, fromAttributes.get(name));
+            }
+            else
+            {
+                LOG.debug("Not copying attribute " + name + " from " + oldObject);
+            }
+        }
+
+        fromAttributes.remove(OBJECT_CONNECTION_ATTRIBUTE);
+        fromAttributes.set(OBJECT_SWITCH_TO, toObject);
         connection.getAttributes().setAttribute(CONNECTION_OBJECT_ATTRIBUTE, toObject);
-        toObject.getAttributes().set(OBJECT_CONNECTION_ATTRIBUTE, connection);
-        oldObject.getAttributes().set(OBJECT_SWITCH_TO, toObject);
         LOG.info("Switch connection " + connection + " from " + oldObject + " to " + toObject);
         return true;
     }
@@ -179,47 +204,85 @@ public class ObjectShell implements Shell
     public void inputReceived(String input, InputInfo info, Connection connection)
     {
         String[] lines = input.split("[\r\n]");
+        if (lines.length == 0)
+        {
+            lines = EMPTY_INPUT;
+        }
         for (String line : lines)
         {
-            if (line.length() > 0)
-            {
-                ObjectInstance instance = getConnectionObject(connection);
-                RuntimeContext.activate(_context);
-                handleInput(instance, connection, line);
-            }
+            ObjectInstance instance = getConnectionObject(connection);
+            RuntimeContext.activate(_context);
+            handleInput(instance, connection, line);
         }
     }
 
     private void handleInput(ObjectInstance user, Connection connection, String line)
     {
-        if (LOG.isDebugEnabled())
-        {
-            LOG.debug("Handle input for " + user);
-        }
-
-        Object attribute = user.getAttributes().get(OBJECT_INPUT_HANDLER_ATTRIBUTE);
-        if (attribute != null)
-        {
-            InputHandler input = (InputHandler) attribute;
-            String result = input.inputReceived(user, connection, line);
-            LOG.debug("Passed input through " + input + " and received " + result);
-            line = result;
-        }
-        if (line == null || line.length() == 0)
+        if (line == null)
         {
             return;
         }
-        INPUT_HANDLER.invoke(user, new StringValue(line));
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("Handle input for " + user + " [" + user.getDefinition() + "]");
+        }
+
+        InputHandlerSet handlers = getInputHandlers(user);
+        // clone the handlers to avoid concurrent modification exceptions..
+        for (InputHandler handler : new ArrayList<InputHandler>(handlers.handlers()))
+        {
+            try
+            {
+                String result = handler.inputReceived(user, connection, line);
+                LOG.debug("Passed input through " + handler + " and received " + result);
+                if (result == null)
+                {
+                    return;
+                }
+                line = result;
+            }
+            catch (LpcRuntimeException e)
+            {
+                LOG.error("Unhandled exception ", e);
+                PrintWriter writer = connection.getWriter();
+                writer.write("Oh no! Something went wrong ...");
+                writer.flush();
+            }
+        }
     }
 
-    public static void setInputHandler(ObjectInstance user, InputHandler handler)
+    public static InputHandlerSet getInputHandlers(ObjectInstance user)
     {
-        user.getAttributes().set(OBJECT_INPUT_HANDLER_ATTRIBUTE, handler);
-    }
+        if (!isConnectionObject(user))
+        {
+            ObjectInstance switchedObject = getSwitchedObject(user);
+            if (switchedObject == null)
+            {
+                throw new InternalError("Attempt to get input handlers for non-connection " + user);
+            }
+            else
+            {
+                user = switchedObject;
+            }
+        }
+        Object attribute = user.getAttributes().get(OBJECT_INPUT_HANDLER_ATTRIBUTE);
+        if (attribute == null)
+        {
+            throw new InternalError("User attribute " + OBJECT_INPUT_HANDLER_ATTRIBUTE + " is missing from " + user);
+        }
 
-    public static InputHandler getInputHandler(ObjectInstance user)
-    {
-        return (InputHandler) user.getAttributes().get(OBJECT_INPUT_HANDLER_ATTRIBUTE);
+        if (!(attribute instanceof InputHandlerSet))
+        {
+            throw new InternalError("User attribute "
+                    + OBJECT_INPUT_HANDLER_ATTRIBUTE
+                    + " should be "
+                    + InputHandler.class.getSimpleName()
+                    + " but is "
+                    + attribute.getClass());
+        }
+
+        InputHandlerSet handlers = (InputHandlerSet) attribute;
+        return handlers;
     }
 
 }

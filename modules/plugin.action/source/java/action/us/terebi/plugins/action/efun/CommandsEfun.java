@@ -15,7 +15,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun.action;
+package us.terebi.plugins.action.efun;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,28 +26,27 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
-import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 
 /**
  * 
  */
-public class SetLivingNameEfun extends AbstractEfun implements Efun
+public class CommandsEfun extends AbstractEfun implements Efun
 {
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("name", Types.STRING));
+        return Collections.emptyList();
     }
 
     public LpcType getReturnType()
     {
-        return Types.VOID;
+        return Types.MIXED_ARRAY_ARRAY;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         // @TODO Auto-generated method stub
-        return VoidValue.INSTANCE;
+        return new ArrayValue(getReturnType(), 0);
     }
 
 }

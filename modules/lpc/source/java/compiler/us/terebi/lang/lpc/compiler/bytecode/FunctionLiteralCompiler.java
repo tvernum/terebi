@@ -34,6 +34,7 @@ import org.adjective.stout.builder.MethodSpec;
 import org.adjective.stout.builder.ParameterSpec;
 import org.adjective.stout.core.ConstructorSignature;
 import org.adjective.stout.core.ElementModifier;
+import org.adjective.stout.core.MethodDescriptor;
 import org.adjective.stout.core.MethodSignature;
 import org.adjective.stout.core.Parameter;
 import org.adjective.stout.operation.Expression;
@@ -50,6 +51,7 @@ import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolut
 import us.terebi.lang.lpc.compiler.util.FunctionCallSupport;
 import us.terebi.lang.lpc.compiler.util.MethodSupport;
 import us.terebi.lang.lpc.compiler.util.Positional;
+import us.terebi.lang.lpc.parser.LineMapping;
 import us.terebi.lang.lpc.parser.ast.ASTCompoundExpression;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionLiteral;
 import us.terebi.lang.lpc.parser.ast.ASTImmediateExpression;
@@ -277,7 +279,21 @@ public class FunctionLiteralCompiler
         spec.withSuperClass(LpcFunction.class);
         spec.withModifiers(ElementModifier.PUBLIC, ElementModifier.FINAL);
         _context.pushClass(spec);
+        
+        MethodSpec getLocation = getLocationMethod(token);
+        spec.withMethod(getLocation.create());
         return spec;
+    }
+
+    @SuppressWarnings("unchecked")
+    private MethodSpec getLocationMethod(Token token)
+    {
+        LineMapping lines = _context.lineMapping();
+        String location = lines.getFile(token.beginLine) + ':' + lines.getLine(token.beginLine) + ':' + token.beginColumn;
+        MethodSpec getLocation = new MethodSpec("getLocation");
+        getLocation.withReturnType(String.class);
+        getLocation.withBody(VM.Statement.returnObject(VM.Expression.constant(location)));
+        return getLocation;
     }
 
     private Set<VariableResolution> getReferencedVariables(Collection<ASTVariableReference> vars)
@@ -425,7 +441,6 @@ public class FunctionLiteralCompiler
         ASTStatementBlock blockNode = node.getBlockBody();
         Collection<ASTVariableReference> vars = findReferencedVariables(node);
         ClassSpec spec = createClassSpec(node);
-
 
         List<Parameter> parameters = new ArrayList<Parameter>();
         

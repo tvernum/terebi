@@ -48,7 +48,6 @@ import us.terebi.lang.lpc.parser.ast.ASTIdentifier;
 import us.terebi.lang.lpc.parser.ast.ExpressionNode;
 import us.terebi.lang.lpc.parser.ast.Node;
 import us.terebi.lang.lpc.parser.jj.ParserConstants;
-import us.terebi.lang.lpc.parser.util.ASTUtil;
 import us.terebi.lang.lpc.parser.util.BaseASTVisitor;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.ArgumentSemantics;
@@ -399,18 +398,9 @@ public class FunctionCallCompiler extends BaseASTVisitor
     private LpcExpression compileSimpleArg(ASTArgumentExpression node, ArgumentData data)
     {
         LpcType requiredType = data.definition.getType();
-        if (data.function.name.equals("SetId"))
-        {
-            System.out.println("Function is " + data.function);
-            System.out.println("Compiling " + ASTUtil.getCompleteImage(node) + " as simple arg; required type = " + requiredType);
-        }
         if (data.definition.isVarArgs())
         {
             requiredType = Types.elementOf(requiredType);
-            if (data.function.name.equals("SetId"))
-            {
-                System.out.println(data.definition.getName() + " is varargs; required type = " + requiredType);
-            }
         }
         LpcExpression expr = compileExpression(node.jjtGetChild(0));
         TypeSupport.checkType(node, expr.type, requiredType);

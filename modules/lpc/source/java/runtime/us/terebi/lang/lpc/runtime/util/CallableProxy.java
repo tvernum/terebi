@@ -68,7 +68,7 @@ public class CallableProxy implements Callable
     
     public String toString()
     {
-        return getClass().getSimpleName() + ":" + _delegate;
+        return getClass().getSimpleName() + '~' + _delegate;
     }
 
     public CharSequence getName()

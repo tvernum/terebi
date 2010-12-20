@@ -219,7 +219,10 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
 
     void readConnection(TelnetChannelConnection connection)
     {
-        LOG.debug("Processing " + connection);
+        if (LOG.isDebugEnabled())
+        {
+            LOG.debug("Processing " + connection);
+        }
         try
         {
             connection.readInput();
@@ -238,9 +241,9 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         {
             connection.bind(_shell);
         }
-        
+
         _connections.add(connection);
-        
+
         LOG.info("New connection: " + connection);
         try
         {
@@ -271,4 +274,3 @@ public class TelnetChannelConnectionHandler extends AbstractComponent<NoChildren
         return Collections.unmodifiableSet(_connections);
     }
 }
-

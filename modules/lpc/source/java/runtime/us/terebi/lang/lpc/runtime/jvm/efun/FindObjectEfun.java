@@ -55,16 +55,29 @@ public class FindObjectEfun extends AbstractEfun implements FunctionSignature, C
         checkArguments(arguments);
         String name = arguments.get(0).asString();
 
+        ObjectInstance object = find_object(name);
+        if (object == null)
+        {
+            return NilValue.INSTANCE;
+        }
+        else
+        {
+            return object.asValue();
+        }
+    }
+
+    public static ObjectInstance find_object(String name)
+    {
         ThreadContext context = RuntimeContext.obtain();
         ObjectManager manager = context.system().objectManager();
         try
         {
             ObjectInstance object = manager.findObject(new ObjectId(name));
-            return getValue(object);
+            return object;
         }
         catch (NumberFormatException e)
         {
-            return NilValue.INSTANCE;
+            return null;
         }
     }
 

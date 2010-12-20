@@ -84,11 +84,6 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         _support = new LpcRuntimeSupport();
     }
 
-    protected CharSequence getDescription()
-    {
-        return "function";
-    }
-
     public LpcType getActualType()
     {
         return Types.FUNCTION;
@@ -162,9 +157,16 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
         return this.getClass() == other.getClass();
     }
 
+    public abstract String getLocation();
+
+    protected CharSequence getDescription()
+    {
+        return "function:" + getLocation();
+    }
+
     public CharSequence debugInfo()
     {
-        return "function" + getSignature().toString() + " { ... }";
+        return "function@" + getOwner() + '[' + getLocation() + ']' + getSignature().toString() + " { ... }";
     }
 
     public ObjectInstance getOwner()
@@ -241,7 +243,7 @@ public abstract class LpcFunction extends AbstractValue implements LpcValue, Cal
     {
         return _support.simul_efun(name);
     }
-    
+
     public CharSequence getName()
     {
         return null;

@@ -42,7 +42,7 @@ import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isFunction;
-import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInt;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isInteger;
 import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isString;
 
 /**
@@ -83,7 +83,7 @@ public class SortArrayEfun extends AbstractEfun implements FunctionSignature, Ca
 
     private List<LpcValue> sort(List<LpcValue> list, LpcValue arg0, List<LpcValue> args)
     {
-        if (isInt(arg0))
+        if (isInteger(arg0))
         {
             return sort(list, arg0.asLong());
         }

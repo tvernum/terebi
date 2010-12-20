@@ -15,7 +15,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun.action;
+package us.terebi.plugins.action.efun;
 
 import java.util.Collections;
 import java.util.List;

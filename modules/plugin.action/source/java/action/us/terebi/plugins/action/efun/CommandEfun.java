@@ -15,48 +15,39 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun.action;
+package us.terebi.plugins.action.efun;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class AddActionEfun extends AbstractEfun implements Efun
+public class CommandEfun extends AbstractEfun implements Efun
 {
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Arrays.asList( //
-                new ArgumentSpec("fun", Types.MIXED), //
-                new ArgumentSpec("verb", Types.MIXED), //
-                new ArgumentSpec("flag", Types.INT) //
-        );
-    }
-
-    public boolean acceptsLessArguments()
-    {
-        return true;
+        return Collections.singletonList(new ArgumentSpec("str", Types.STRING));
     }
 
     public LpcType getReturnType()
     {
-        return Types.VOID;
+        return Types.INT;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         // @TODO Auto-generated method stub
-        return VoidValue.INSTANCE;
+        return LpcConstants.INT.ZERO;
     }
 
 }

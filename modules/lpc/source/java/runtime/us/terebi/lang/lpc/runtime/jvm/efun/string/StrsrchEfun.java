@@ -72,7 +72,7 @@ public class StrsrchEfun extends AbstractEfun implements FunctionSignature, Call
         {
             return ValueSupport.intValue(search(str, pattern.asString(), flag));
         }
-        if (MiscSupport.isInt(pattern))
+        if (MiscSupport.isInteger(pattern))
         {
             return ValueSupport.intValue(search(str, pattern.asLong(), flag));
         }

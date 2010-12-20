@@ -87,7 +87,7 @@ public class BoundMethod implements Callable
 
     public String toString()
     {
-        return _instance.getCanonicalName() + "->" + _method.toString();
+        return _instance.getCanonicalName() + "::" + _method.toString();
     }
 
     public CharSequence getName()

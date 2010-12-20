@@ -68,7 +68,6 @@ import us.terebi.lang.lpc.runtime.jvm.efun.MappEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.MasterEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.MatchPathEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.MemberArrayEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.MessageEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.NoOpEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.NullpEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.ObjectpEfun;
@@ -98,12 +97,6 @@ import us.terebi.lang.lpc.runtime.jvm.efun.ValuesEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.VariablesEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.VirtualpEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.WriteEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.action.AddActionEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.action.CommandEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.action.CommandsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.action.EnableCommandsEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.action.QueryVerbEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.action.SetLivingNameEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.callout.CallOutEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.callout.CallOutInfoEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.callout.FindCallOutEfun;
@@ -252,7 +245,6 @@ public class StandardEfuns
         public static final Efun living = new LivingEfun();
         public static final Efun livings = new LivingsEfun();
         public static final Efun write = new WriteEfun();
-        public static final Efun message = new MessageEfun();
         public static final Efun flush_messages = new FlushMessagesEfun();
         public static final Efun terminal_colour = new TerminalColourEfun();
         public static final Efun snoop = new SnoopEfun();
@@ -324,16 +316,6 @@ public class StandardEfuns
         public static final Efun get_elapsed_execution_time = new GetElapsedExecTimeEfun();
     }
 
-    public static class ACTION
-    {
-        public static final Efun query_verb = new QueryVerbEfun();
-        public static final Efun add_action = new AddActionEfun();
-        public static final Efun enable_commands = new EnableCommandsEfun();
-        public static final Efun command = new CommandEfun();
-        public static final Efun commands = new CommandsEfun();
-        public static final Efun set_living_name = new SetLivingNameEfun();
-    }
-
     public static class NET
     {
         public static final Efun query_ip_number = new QueryIpNumberEfun();
@@ -372,7 +354,6 @@ public class StandardEfuns
                 populate(_efuns, CALLS.class);
                 populate(_efuns, FILE.class);
                 populate(_efuns, SYSTEM.class);
-                populate(_efuns, ACTION.class);
                 populate(_efuns, NET.class);
             }
         }

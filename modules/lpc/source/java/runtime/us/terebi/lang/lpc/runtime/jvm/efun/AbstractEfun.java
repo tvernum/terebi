@@ -324,4 +324,14 @@ public abstract class AbstractEfun implements Efun, FunctionSignature, Callable
             return LpcConstants.NIL;
         }
     }
+
+    protected int asInt(LpcValue flag)
+    {
+        long l = flag.asLong();
+        if (l > Integer.MAX_VALUE)
+        {
+            throw new LpcRuntimeException("The value " + flag + " is too large");
+        }
+        return (int) l;
+    }
 }

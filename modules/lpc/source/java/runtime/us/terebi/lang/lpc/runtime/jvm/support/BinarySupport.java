@@ -54,7 +54,7 @@ public class BinarySupport
         {
             return NilValue.INSTANCE;
         }
-        if (MiscSupport.isInt(values[0]))
+        if (MiscSupport.isInteger(values[0]))
         {
             long v = 0;
             for (LpcValue value : values)

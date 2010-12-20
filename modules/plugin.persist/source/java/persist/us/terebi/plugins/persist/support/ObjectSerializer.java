@@ -47,6 +47,7 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
 import us.terebi.lang.lpc.runtime.jvm.context.SystemContext;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.parser.LiteralParser;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
@@ -121,7 +122,7 @@ public class ObjectSerializer
         writer.write("\n");
     }
 
-    public boolean restore(ObjectInstance object, boolean zeroNoSave) throws IOException
+    public boolean restore(ObjectInstance object, boolean zeroFirst) throws IOException
     {
         if (_file == null)
         {
@@ -144,7 +145,7 @@ public class ObjectSerializer
         try
         {
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-            restore(object, reader, zeroNoSave);
+            restore(object, reader, zeroFirst);
             return true;
         }
         finally
@@ -220,16 +221,16 @@ public class ObjectSerializer
         return restore(value, parser);
     }
 
-    private void restore(ObjectInstance object, BufferedReader reader, boolean zeroNoSave) throws IOException
+    private void restore(ObjectInstance object, BufferedReader reader, boolean zeroFirst) throws IOException
     {
         if (object == null)
         {
             throw new IllegalArgumentException("Cannot restore null object");
         }
 
-        if (zeroNoSave)
+        if (zeroFirst)
         {
-            zeroNoSave(object);
+            zeroVariables(object);
         }
 
         LiteralParser parser = new LiteralParser(object);
@@ -289,15 +290,15 @@ public class ObjectSerializer
         }
     }
 
-    private void zeroNoSave(ObjectInstance object)
+    private void zeroVariables(ObjectInstance object)
     {
         for (ObjectInstance parent : object.getInheritedObjects().values())
         {
-            zeroNoSave(parent);
+            zeroVariables(parent);
         }
         for (FieldDefinition field : object.getDefinition().getFields().values())
         {
-            if (field.getModifiers().contains(Modifier.NOSAVE))
+            if (!field.getModifiers().contains(Modifier.NOSAVE))
             {
                 field.setValue(object, NilValue.INSTANCE);
             }
@@ -397,8 +398,16 @@ public class ObjectSerializer
             FieldDefinition field = fields.get(name);
             if (field != null)
             {
-                field.setValue(object, value);
-                return true;
+                try
+                {
+                    field.setValue(object, value);
+                    return true;
+                }
+                catch (LpcRuntimeException e)
+                {
+                    LOG.warn("Failed to set field " + field + " to " + value);
+                    return false;
+                }
             }
             else
             {

@@ -1,4 +1,22 @@
+2010-12-20
+    Implement message() efun
+    Avoid concurrent modification exception in input handlers
+    Support zero in binary or
+
+2010-12-01
+    add_action support
+
+2010-11-29
+    Add useful 'toString' on input_to handler
+    Search inheritance tree from applies
+    Support zero length input
+    Don't wrap values as 'mixed' type
+    Add 'getLocation' to function literals
+    Treat void values as 0
+
 2010-11-26
+    Better error reporting if filter function does not return a value
+    Fix interpretation of 2nd arg to restore_object
     Don't allow LPC method to over-ride standard LpcObject/Object methods with the same name
     Require all compiled objects to implement "CompileImplementation" interface.
     Initialise fields after object is fully constructed so certain efuns (like this_object()) work

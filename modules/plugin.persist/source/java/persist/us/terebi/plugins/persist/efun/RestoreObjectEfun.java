@@ -75,7 +75,7 @@ public class RestoreObjectEfun extends AbstractEfun
             {
                 LOG.debug("Restore " + object + " from " + file + " with flag " + flag);
             }
-            boolean restored = new ObjectSerializer(file).restore(object, flag == 1);
+            boolean restored = new ObjectSerializer(file).restore(object, flag != 1);
             return getValue(restored);
         }
         catch (IOException e)

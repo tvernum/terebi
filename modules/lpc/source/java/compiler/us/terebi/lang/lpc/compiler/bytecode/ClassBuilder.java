@@ -70,7 +70,6 @@ import us.terebi.lang.lpc.runtime.jvm.LpcInherited;
 import us.terebi.lang.lpc.runtime.jvm.LpcMember;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.naming.MethodNamer;
-import us.terebi.lang.lpc.runtime.util.SystemLog;
 
 /**
  * 
@@ -426,10 +425,8 @@ public class ClassBuilder extends BaseASTVisitor
 
     private MethodDescriptor getInitMethod()
     {
-        Statement[] statements = new Statement[_initialisers.size() + 2];
-        int i = 1;
-        statements[0] = VM.Statement.callStatic(new ParameterisedClassImpl(SystemLog.class),
-                VM.Method.find((SystemLog.class), "message", String.class), VM.Expression.constant("--INIT--" + this._spec.getInternalName())).create();
+        Statement[] statements = new Statement[_initialisers.size() + 1];
+        int i = 0;
         for (Statement statement : _initialisers)
         {
             statements[i] = statement;

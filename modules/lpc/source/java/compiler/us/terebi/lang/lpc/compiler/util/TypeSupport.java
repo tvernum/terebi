@@ -138,10 +138,9 @@ public class TypeSupport
             return true;
         }
 
-        LpcType type = actual;
         for (LpcType allowed : allowedTypes)
         {
-            if (isCoVariant(allowed, type))
+            if (isCoVariant(allowed, actual))
             {
                 return true;
             }
@@ -149,15 +148,20 @@ public class TypeSupport
             {
                 return true;
             }
-            if (type.getKind() == LpcType.Kind.MIXED && type.getArrayDepth() >= allowed.getArrayDepth())
+            if (actual.getKind() == LpcType.Kind.MIXED && actual.getArrayDepth() >= allowed.getArrayDepth())
             {
                 return true;
             }
-            if (Types.FLOAT.equals(allowed) && Types.INT.equals(type))
+            if (actual.getKind() == LpcType.Kind.ZERO && actual.getArrayDepth() == allowed.getArrayDepth())
+            {
+                return true;
+            }
+            if (Types.FLOAT.equals(allowed) && Types.INT.equals(actual))
             {
                 return true;
             }
         }
+        
         return false;
     }
 
