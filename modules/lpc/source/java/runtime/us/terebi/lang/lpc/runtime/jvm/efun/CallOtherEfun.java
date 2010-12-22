@@ -32,6 +32,7 @@ import us.terebi.lang.lpc.runtime.ObjectInstance;
 import us.terebi.lang.lpc.runtime.jvm.context.CallStack;
 import us.terebi.lang.lpc.runtime.jvm.context.ObjectManager;
 import us.terebi.lang.lpc.runtime.jvm.context.RuntimeContext;
+import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.CallableSupport;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
@@ -88,7 +89,8 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
             }
             return ValueSupport.arrayValue(result);
         }
-        else if (MiscSupport.isString(arg1))
+
+        if (MiscSupport.isString(arg1))
         {
             ObjectManager objectManager = RuntimeContext.obtain().system().objectManager();
             String objectName = arg1.asString();
@@ -98,10 +100,18 @@ public class CallOtherEfun extends AbstractEfun implements FunctionSignature, Ca
                 throw new LpcRuntimeException("No such object " + objectName);
             }
             target = objectDefinition.getMasterInstance();
+            if (target == null)
+            {
+                throw new InternalError("Cannot get master instance for object " + objectDefinition);
+            }
         }
         else if (MiscSupport.isObject(arg1))
         {
             target = arg1.asObject();
+            if (target == null)
+            {
+                throw new LpcRuntimeException("Object " + arg1 + " is nil");
+            }
         }
         else
         {

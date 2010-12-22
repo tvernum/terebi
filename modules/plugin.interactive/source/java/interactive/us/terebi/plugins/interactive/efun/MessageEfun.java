@@ -137,6 +137,7 @@ public class MessageEfun extends AbstractEfun implements FunctionSignature, Call
             {
                 list.add(el.asObject());
             }
+            return list;
         }
         if (MiscSupport.isNothing(value))
         {

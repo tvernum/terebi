@@ -21,6 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.compiler.CompilerObjectManager;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
@@ -36,6 +37,7 @@ import us.terebi.lang.lpc.runtime.util.Attributes;
  */
 public abstract class AbstractObjectDefinition implements CompiledObjectDefinition
 {
+    private final Logger LOG = Logger.getLogger(AbstractObjectDefinition.class);
     private static final Apply CREATE = new Apply("create");
 
     private final CompilerObjectManager _manager;
@@ -68,13 +70,20 @@ public abstract class AbstractObjectDefinition implements CompiledObjectDefiniti
     {
         if (_loadingMaster)
         {
+            LOG.warn("The master object for " + this + " is currently being loaded - it cannot be accessed");
             return null;
         }
         if (_master == null)
         {
-            _loadingMaster = true;
-            _master = newInstance(0, InstanceType.MASTER, null, Collections.<LpcValue> emptyList());
-            _loadingMaster = false;
+            try
+            {
+                _loadingMaster = true;
+                _master = newInstance(0, InstanceType.MASTER, null, Collections.<LpcValue> emptyList());
+            }
+            finally
+            {
+                _loadingMaster = false;
+            }
         }
         return _master;
     }

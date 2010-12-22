@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,51 +26,38 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
-
-import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
 
 /**
  * 
  */
-public class SizeofEfun extends AbstractEfun implements FunctionSignature, Callable
+public class AllocateMappingEfun extends AbstractEfun implements FunctionSignature, Callable
 {
+    private static final int MAPPING_MAX = 0xFFFF;
+
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("collection", Types.MIXED));
+        return Collections.singletonList(new ArgumentSpec("size", Types.INT));
     }
 
     public LpcType getReturnType()
     {
-        return Types.INT;
+        return Types.MAPPING;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
         LpcValue arg = arguments.get(0);
-        int size = getSize(arg);
-        return intValue(size);
-    }
-
-    private int getSize(LpcValue arg)
-    {
-        if (arg.getActualType().getArrayDepth() > 0)
+        long size = arg.asLong();
+        if (size > MAPPING_MAX)
         {
-            return arg.asList().size();
+            throw new LpcRuntimeException("Cannot allocate a mapping of more than " + MAPPING_MAX + " elements");
         }
-        switch (arg.getActualType().getKind())
-        {
-            case STRING:
-                return arg.asString().length();
-            case MAPPING:
-                return arg.asMap().size();
-            case CLASS:
-                return arg.asClass().getDefinition().getFields().size();
-            default:
-                return 0;
-        }
+        return new MappingValue((int) size);
     }
-
 }

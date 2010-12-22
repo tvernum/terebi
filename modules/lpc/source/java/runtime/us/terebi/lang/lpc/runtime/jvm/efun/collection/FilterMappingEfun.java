@@ -16,41 +16,47 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class KeysEfun extends AbstractEfun implements FunctionSignature, Callable
+public class FilterMappingEfun extends AbstractEfun implements FunctionSignature, Callable
 {
+    //    mapping filter(mapping x, string fun, object ob, mixed extra, ...);
+    //    mapping filter(mapping x, function f, mixed extra, ...);
+
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("map", Types.MAPPING));
+        ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
+        list.add(new ArgumentSpec("m", Types.MAPPING));
+        list.add(new ArgumentSpec("func", Types.MIXED));
+        list.add(new ArgumentSpec("args", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
+        return list;
     }
 
     public LpcType getReturnType()
     {
-        return Types.MIXED_ARRAY;
+        return Types.MAPPING;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        LpcValue arg = arguments.get(0);
-        Set<LpcValue> keys = arg.asMap().keySet();
-        return new ArrayValue(Types.MIXED_ARRAY, keys);
+        return StandardEfuns.COLLECTION.filter.execute(arguments);
     }
 }

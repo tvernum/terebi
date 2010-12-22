@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,6 +31,8 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
 import us.terebi.lang.lpc.runtime.jvm.support.MiscSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;

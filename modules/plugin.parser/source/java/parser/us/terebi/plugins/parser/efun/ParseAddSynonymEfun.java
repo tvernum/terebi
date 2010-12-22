@@ -37,12 +37,17 @@ public class ParseAddSynonymEfun extends AbstractEfun implements FunctionSignatu
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Arrays.asList( //
-                new ArgumentSpec("arg1", Types.OBJECT), //
+                new ArgumentSpec("arg1", Types.STRING), //
                 new ArgumentSpec("arg2", Types.STRING), //
-                new ArgumentSpec("arg3", Types.INT) //
+                new ArgumentSpec("arg3", Types.STRING) //
         );
     }
 
+    public boolean acceptsLessArguments()
+    {
+        return true;
+    }
+    
     public LpcType getReturnType()
     {
         return Types.MIXED;
@@ -50,7 +55,6 @@ public class ParseAddSynonymEfun extends AbstractEfun implements FunctionSignatu
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
         return NilValue.INSTANCE;
     }
 

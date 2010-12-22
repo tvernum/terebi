@@ -16,47 +16,44 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
+import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
 /**
  * 
  */
-public class AllocateMappingEfun extends AbstractEfun implements FunctionSignature, Callable
+public class FilterArrayEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    private static final int MAPPING_MAX = 0xFFFF;
-
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("size", Types.INT));
+        ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
+        list.add(new ArgumentSpec("array", Types.MIXED_ARRAY));
+        list.add(new ArgumentSpec("func", Types.MIXED));
+        list.add(new ArgumentSpec("args", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
+        return list;
     }
 
     public LpcType getReturnType()
     {
-        return Types.MAPPING;
+        return Types.MIXED_ARRAY;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        LpcValue arg = arguments.get(0);
-        long size = arg.asLong();
-        if (size > MAPPING_MAX)
-        {
-            throw new LpcRuntimeException("Cannot allocate a mapping of more than " + MAPPING_MAX + " elements");
-        }
-        return new MappingValue((int) size);
+        return StandardEfuns.COLLECTION.filter.execute(arguments);
     }
 }

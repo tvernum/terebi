@@ -15,39 +15,26 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun.file;
+package us.terebi.lang.lpc.runtime.util.cache;
 
-import java.io.IOException;
-
-import us.terebi.lang.lpc.io.Resource;
-import us.terebi.lang.lpc.io.ResourceFinder;
-import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
+import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
 
 /**
  * 
  */
-public abstract class FileEfun extends AbstractEfun implements ResourceFinder
+public class StringCache extends ValueCache<String>
 {
-    private final GameIO _io;
-    private final StringValue _efunName;
+    private static final int CACHE_LENGTH = 128;
 
-    public FileEfun()
+    protected boolean shouldCache(String str, LpcValue value)
     {
-        super();
-        _io = GameIO.INSTANCE;
-        _efunName = new StringValue(getName());
+        return str.length() <= CACHE_LENGTH;
     }
 
-    public Resource getResource(String name) throws IOException
+    protected LpcValue create(String str)
     {
-        return _io.getResource(name, ThisObjectEfun.this_object(), getEfunNameAsLpcValue());
-    }
-
-    private StringValue getEfunNameAsLpcValue()
-    {
-        return _efunName;
+        return new StringValue(str);
     }
 
 }

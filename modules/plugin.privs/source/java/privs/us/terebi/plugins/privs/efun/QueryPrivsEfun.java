@@ -21,6 +21,8 @@ package us.terebi.plugins.privs.efun;
 import java.util.Collections;
 import java.util.List;
 
+import org.apache.log4j.Logger;
+
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
@@ -40,6 +42,8 @@ import us.terebi.plugins.privs.Privs;
  */
 public class QueryPrivsEfun extends AbstractEfun implements FunctionSignature, Callable
 {
+    private final Logger LOG = Logger.getLogger(QueryPrivsEfun.class);
+
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("ob", Types.OBJECT));
@@ -57,12 +61,15 @@ public class QueryPrivsEfun extends AbstractEfun implements FunctionSignature, C
         String privs = Privs.get(obj);
         if (privs == null)
         {
+            LOG.debug("No privs for " + obj);
             return NilValue.INSTANCE;
         }
         if (privs.length() == 0)
         {
+            LOG.debug("Blank privs for " + obj);
             return LpcConstants.STRING.BLANK;
         }
+        LOG.debug("Privs for " + obj + " = " + privs);
         return new StringValue(privs);
     }
 

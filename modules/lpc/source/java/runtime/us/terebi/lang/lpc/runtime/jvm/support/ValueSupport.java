@@ -32,12 +32,16 @@ import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.FloatValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.util.cache.StringCache;
+import us.terebi.lang.lpc.runtime.util.cache.ValueCache;
 
 /**
  * 
  */
 public class ValueSupport
 {
+    private static final ValueCache<String> STRING_CACHE = new StringCache();
+    
     public static IntValue intValue(long value)
     {
         if (value < 10 && value > -10)
@@ -96,5 +100,18 @@ public class ValueSupport
 
         LpcType[] typeArray = types.toArray(new LpcType[types.size()]);
         return new ArrayValue(Types.arrayOf(MiscSupport.commonType(typeArray)), list);
+    }
+
+    public static LpcValue stringValue(String s)
+    {
+        if (s == null)
+        {
+            return LpcConstants.STRING.NIL;
+        }
+        if (s.length() == 0)
+        {
+            return LpcConstants.STRING.BLANK;
+        }
+        return STRING_CACHE.get(s);
     }
 }

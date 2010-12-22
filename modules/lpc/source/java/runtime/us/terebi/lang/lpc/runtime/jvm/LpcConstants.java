@@ -24,8 +24,10 @@ import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.jvm.value.IntValue;
+import us.terebi.lang.lpc.runtime.jvm.value.MappingValue;
 import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
 import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.lang.lpc.runtime.jvm.value.TypedValue;
 import us.terebi.lang.lpc.runtime.jvm.value.ZeroValue;
 
 /**
@@ -53,6 +55,9 @@ public class LpcConstants
 
     public static final class STRING
     {
+        @SuppressWarnings("hiding")
+        public static final LpcValue NIL = TypedValue.type(Types.STRING, NilValue.INSTANCE);
+
         public static final StringValue BLANK = new StringValue("");
     }
 
@@ -60,7 +65,12 @@ public class LpcConstants
     {
         public static final ArrayValue EMPTY = new ArrayValue(Types.MIXED_ARRAY, Collections.<LpcValue> emptyList());
     }
-    
+
+    public static final class MAPPING
+    {
+        public static final MappingValue EMPTY = new MappingValue(Collections.<LpcValue, LpcValue> emptyMap());
+    }
+
     public static final NilValue NIL = NilValue.INSTANCE;
 
 }

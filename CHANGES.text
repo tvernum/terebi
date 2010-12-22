@@ -1,3 +1,16 @@
+2010-12-23
+    Support '%:-9s' as well as '%-:9s' in sprintf
+    Implement query_verb
+
+2010-12-22
+    Add unique_mapping efun
+    Fix prototype of parse_add_synonym
+    Clear the 'loadingMaster' flag even if the create method throws an exception
+    Fix calling message() efun with array as 4th arg
+    Add safeguards against NPE in call_other
+    Wildcarding (e.g. *.c) in get_dir
+    Make file_size efun() return -1 for non readable file
+
 2010-12-20
     Implement message() efun
     Avoid concurrent modification exception in input handlers

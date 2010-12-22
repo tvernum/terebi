@@ -16,46 +16,62 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
-import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.ValueSupport.intValue;
 
 /**
  * 
  */
-public class FilterMappingEfun extends AbstractEfun implements FunctionSignature, Callable
+public class SizeofEfun extends AbstractEfun implements FunctionSignature, Callable
 {
-    //    mapping filter(mapping x, string fun, object ob, mixed extra, ...);
-    //    mapping filter(mapping x, function f, mixed extra, ...);
-
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
-        list.add(new ArgumentSpec("m", Types.MAPPING));
-        list.add(new ArgumentSpec("func", Types.MIXED));
-        list.add(new ArgumentSpec("args", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
-        return list;
+        return Collections.singletonList(new ArgumentSpec("collection", Types.MIXED));
     }
 
     public LpcType getReturnType()
     {
-        return Types.MAPPING;
+        return Types.INT;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        return StandardEfuns.COLLECTION.filter.execute(arguments);
+        LpcValue arg = arguments.get(0);
+        int size = getSize(arg);
+        return intValue(size);
     }
+
+    private int getSize(LpcValue arg)
+    {
+        if (arg.getActualType().getArrayDepth() > 0)
+        {
+            return arg.asList().size();
+        }
+        switch (arg.getActualType().getKind())
+        {
+            case STRING:
+                return arg.asString().length();
+            case MAPPING:
+                return arg.asMap().size();
+            case CLASS:
+                return arg.asClass().getDefinition().getFields().size();
+            default:
+                return 0;
+        }
+    }
+
 }

@@ -48,7 +48,7 @@ import static org.junit.Assert.fail;
 public class MethodTestCase implements Callable<Object>
 {
     private static final Pattern STRING_REGEX = Pattern.compile("str\\d*_(.*)");
-    private static final Pattern EQUAL_REGEX = Pattern.compile("eq\\d*");
+    private static final Pattern EQUAL_REGEX = Pattern.compile("eq(\\d+.*)?");
     private static final Pattern COMPARE_REGEX = Pattern.compile("cmp\\d*_([\\d_]*)");
     private static final Pattern NUMERIC_REGEX = Pattern.compile("\\D+(\\d[\\d_]*)");
 

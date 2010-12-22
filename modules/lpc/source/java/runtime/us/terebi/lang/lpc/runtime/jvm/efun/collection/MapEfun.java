@@ -16,44 +16,60 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
+import us.terebi.lang.lpc.runtime.ArgumentSemantics;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.StandardEfuns;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
-import us.terebi.lang.lpc.runtime.jvm.value.VoidValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
+
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isArray;
+import static us.terebi.lang.lpc.runtime.jvm.support.MiscSupport.isMapping;
 
 /**
  * 
  */
-public class MapDeleteEfun extends AbstractEfun implements FunctionSignature, Callable
+public class MapEfun extends AbstractEfun implements FunctionSignature, Callable
 {
+    //    mixed map( mixed x, string fun, object ob, mixed extra, ... );
+    //    mixed map( mixed x, function f, mixed extra, ... );
+
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         ArrayList<ArgumentDefinition> list = new ArrayList<ArgumentDefinition>();
-        list.add(new ArgumentSpec("m", Types.MAPPING));
-        list.add(new ArgumentSpec("element", Types.MIXED));
+        list.add(new ArgumentSpec("collection", Types.MIXED));
+        list.add(new ArgumentSpec("func", Types.MIXED));
+        list.add(new ArgumentSpec("args", Types.MIXED_ARRAY, true, ArgumentSemantics.BY_VALUE));
         return list;
     }
 
     public LpcType getReturnType()
     {
-        return Types.VOID;
+        return Types.MIXED;
     }
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
         checkArguments(arguments);
-        LpcValue mapping = arguments.get(0);
-        LpcValue element = arguments.get(1);
-        mapping.asMap().remove(element);
-        return VoidValue.INSTANCE;
+        LpcValue collection = arguments.get(0);
+        if (isMapping(collection))
+        {
+            return StandardEfuns.COLLECTION.map_mapping.execute(arguments);
+        }
+        if (isArray(collection))
+        {
+            return StandardEfuns.COLLECTION.map_array.execute(arguments);
+        }
+        throw new UnsupportedOperationException(getName() + "(" + collection.getActualType() + ", ..) - Not implemented");
     }
+
 }

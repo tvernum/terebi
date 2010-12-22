@@ -23,10 +23,12 @@ import java.util.List;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
-import us.terebi.lang.lpc.runtime.jvm.LpcConstants;
 import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.efun.Efun;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
+import us.terebi.lang.lpc.runtime.jvm.value.NilValue;
+import us.terebi.plugins.action.handler.ActionHandler;
 
 /**
  * 
@@ -45,8 +47,12 @@ public class QueryVerbEfun extends AbstractEfun implements Efun
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
-        // @TODO Auto-generated method stub
-        return LpcConstants.STRING.BLANK;
+        String verb = ActionHandler.getVerb();
+        if (verb == null)
+        {
+            return NilValue.INSTANCE;
+        }
+        return ValueSupport.stringValue(verb);
     }
 
 }

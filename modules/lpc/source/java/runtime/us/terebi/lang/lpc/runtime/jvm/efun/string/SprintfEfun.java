@@ -499,6 +499,11 @@ public class SprintfEfun extends AbstractEfun implements FunctionSignature, Call
                     {
                         format.padding = "0";
                     }
+                    if (iterator.current() == '-')
+                    {
+                        format.alignment = Alignment.LEFT;
+                        iterator.next();
+                    }
                     format.precision = readNumber(iterator);
                     format.size = format.precision;
                     break;

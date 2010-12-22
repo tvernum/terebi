@@ -51,25 +51,26 @@ class GameResource implements Resource
 
     private void checkWriteAccess()
     {
-        checkAccess(CHECK_WRITE_ACCESS, "write", _object, _efun);
+        checkAccess(CHECK_WRITE_ACCESS, "write", _object, _efun, true);
     }
 
     private void checkReadAccess()
     {
-        checkAccess(CHECK_READ_ACCESS, "read", _object, _efun);
+        checkAccess(CHECK_READ_ACCESS, "read", _object, _efun, true);
     }
 
-    private void checkAccess(Apply apply, String type, ObjectInstance object, StringValue name)
+    private boolean checkAccess(Apply apply, String type, ObjectInstance object, StringValue name, boolean throwException)
     {
         SystemContext system = RuntimeContext.obtain().system();
         ObjectInstance master = system.objectManager().getMasterObject();
         if (master == null)
         {
             // Only possible while we're still loading the master object;
-            return;
+            return true;
         }
         LpcValue access = apply.invoke(master, new StringValue(_resource.getPath()), object.asValue(), name);
-        if (access.asLong() == 0)
+        boolean hasAccess = access.asLong() != 0;
+        if (!hasAccess && throwException)
         {
             throw new LpcSecurityException("Efun "
                     + name.asString()
@@ -78,13 +79,24 @@ class GameResource implements Resource
                     + " access to "
                     + _resource.getPath()
                     + " from "
-                    + object.getCanonicalName());
+                    + object.getCanonicalName()
+                    + " [ "
+                    + master
+                    + "->"
+                    + apply.getName()
+                    + " = "
+                    + access
+                    + " ]");
         }
+        return hasAccess;
     }
 
     public boolean exists()
     {
-        checkReadAccess();
+        if (!checkAccess(CHECK_READ_ACCESS, "read", _object, _efun, false))
+        {
+            return false;
+        }
         return _resource.exists();
     }
 
@@ -205,7 +217,7 @@ class GameResource implements Resource
         destination.checkWriteAccess();
         _resource.rename(to);
     }
-    
+
     public String toString()
     {
         return getClass().getSimpleName() + "{" + _object + ":-" + _efun + ' ' + _resource + "}";

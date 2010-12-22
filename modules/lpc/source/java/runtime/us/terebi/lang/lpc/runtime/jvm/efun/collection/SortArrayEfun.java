@@ -16,7 +16,7 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -32,6 +32,7 @@ import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
 import us.terebi.lang.lpc.runtime.ObjectInstance;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
 import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.support.CallOtherComparator;
 import us.terebi.lang.lpc.runtime.jvm.support.CallableComparator;

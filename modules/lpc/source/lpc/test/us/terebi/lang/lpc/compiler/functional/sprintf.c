@@ -16,6 +16,14 @@ public string array eq1()
         });
 }
 
+public string array eq1b()
+{
+    return ({
+            "abcde",
+            sprintf( "%:-5s", "abcdefgh")
+        });
+}
+
 public string array eq2()
 {
     return ({

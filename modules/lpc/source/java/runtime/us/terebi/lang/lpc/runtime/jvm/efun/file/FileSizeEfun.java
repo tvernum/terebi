@@ -41,6 +41,7 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 public class FileSizeEfun extends FileEfun implements FunctionSignature, Callable
 {
     private final Logger LOG = Logger.getLogger(FileSizeEfun.class);
+
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
         return Collections.singletonList(new ArgumentSpec("file", Types.STRING));
@@ -72,15 +73,19 @@ public class FileSizeEfun extends FileEfun implements FunctionSignature, Callabl
     {
         if (!resource.exists())
         {
+            LOG.debug("Resource " + resource + " does not exist, or is not readable");
             return -1;
         }
         else if (!resource.isFile())
         {
+            LOG.debug("Resource " + resource + " is not a file : (-2)");
             return -2;
         }
         else
         {
-            return resource.getSizeInBytes();
+            long bytes = resource.getSizeInBytes();
+            LOG.debug("Resource " + resource + " is a file : (" + bytes + ")");
+            return bytes;
         }
     }
 

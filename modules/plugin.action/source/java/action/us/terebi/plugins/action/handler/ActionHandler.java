@@ -45,6 +45,7 @@ public class ActionHandler implements InputHandler
     private static final Logger LOG = Logger.getLogger(ActionHandler.class);
 
     private static final String ATTR_ACTIONS = ObjectShell.SWITCHABLE_ATTRIBUTE_PREFIX + "actions";
+    private static final String ATTR_VERB = "action.verb";
 
     public enum VerbType
     {
@@ -116,6 +117,16 @@ public class ActionHandler implements InputHandler
         }
     }
 
+    public static String getVerb()
+    {
+        AttributeMap attributes;
+        synchronized (RuntimeContext.lock())
+        {
+            attributes = RuntimeContext.obtain().attributes();
+            return (String) attributes.get(ATTR_VERB);
+        }
+    }
+
     public String inputReceived(ObjectInstance user, Connection connection, String input)
     {
         AttributeMap attributes;
@@ -139,15 +150,15 @@ public class ActionHandler implements InputHandler
             }
             if (action.type == VerbType.PREFIX)
             {
-                attributes.set("action.verb", verb.substring(action.verb.length()));
+                attributes.set(ATTR_VERB, verb.substring(action.verb.length()));
             }
             else
             {
-                attributes.set("action.verb", verb);
+                attributes.set(ATTR_VERB, verb);
             }
 
             LpcValue result = new StackCall(action.handler, Origin.DRIVER).execute(new StringValue(rest));
-            attributes.remove("action.verb");
+            attributes.remove(ATTR_VERB);
             if (result.asBoolean())
             {
                 if (LOG.isDebugEnabled())

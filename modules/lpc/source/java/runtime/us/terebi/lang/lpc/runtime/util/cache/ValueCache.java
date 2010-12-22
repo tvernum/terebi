@@ -15,39 +15,44 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun.file;
+package us.terebi.lang.lpc.runtime.util.cache;
 
-import java.io.IOException;
+import java.util.Map;
+import java.util.WeakHashMap;
 
-import us.terebi.lang.lpc.io.Resource;
-import us.terebi.lang.lpc.io.ResourceFinder;
-import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
-import us.terebi.lang.lpc.runtime.jvm.efun.ThisObjectEfun;
-import us.terebi.lang.lpc.runtime.jvm.value.StringValue;
+import us.terebi.lang.lpc.runtime.LpcValue;
 
 /**
  * 
  */
-public abstract class FileEfun extends AbstractEfun implements ResourceFinder
+public abstract class ValueCache<T>
 {
-    private final GameIO _io;
-    private final StringValue _efunName;
+    private Map<T, LpcValue> _cache;
 
-    public FileEfun()
+    public ValueCache()
     {
-        super();
-        _io = GameIO.INSTANCE;
-        _efunName = new StringValue(getName());
+        _cache = new WeakHashMap<T, LpcValue>();
     }
 
-    public Resource getResource(String name) throws IOException
+    public LpcValue get(T val)
     {
-        return _io.getResource(name, ThisObjectEfun.this_object(), getEfunNameAsLpcValue());
+        LpcValue value = _cache.get(val);
+        if (value == null)
+        {
+            value = this.create(val);
+            if (shouldCache(val, value))
+            {
+                _cache.put(val, value);
+            }
+        }
+        return value;
     }
 
-    private StringValue getEfunNameAsLpcValue()
+    @SuppressWarnings("unused")
+    protected boolean shouldCache(T val, LpcValue value)
     {
-        return _efunName;
+        return true;
     }
 
+    protected abstract LpcValue create(T val);
 }

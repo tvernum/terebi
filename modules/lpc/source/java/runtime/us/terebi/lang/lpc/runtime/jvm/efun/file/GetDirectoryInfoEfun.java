@@ -27,6 +27,7 @@ import org.apache.commons.io.IOCase;
 import org.apache.log4j.Logger;
 
 import us.terebi.lang.lpc.io.Resource;
+import us.terebi.lang.lpc.io.ResourceFinder;
 import us.terebi.lang.lpc.runtime.ArgumentDefinition;
 import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
@@ -75,7 +76,19 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
 
         try
         {
-            return ValueSupport.arrayValue(getDirectoryInfo(this, path, flag));
+            List<LpcValue> info = getDirectoryInfo(this, path, flag);
+            if (LOG.isDebugEnabled())
+            {
+                if (info.size() <= 3)
+                {
+                    LOG.debug("get_dir(" + path + ',' + flag + ") = " + info);
+                }
+                else
+                {
+                    LOG.debug("get_dir(" + path + ',' + flag + ") = " + info.get(0) + " ... " + info.get(info.size() - 1));
+                }
+            }
+            return ValueSupport.arrayValue(info);
         }
         catch (IOException e)
         {
@@ -84,12 +97,12 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         }
     }
 
-    public static List<LpcValue> getDirectoryInfo(FileEfun efun, String path, long flag) throws IOException
+    public static List<LpcValue> getDirectoryInfo(ResourceFinder resourceFinder, String path, long flag) throws IOException
     {
         boolean listDirectory = path.endsWith("/");
         boolean longListing = (flag == -1);
 
-        Resource[] files = resolveWildCard(efun, path);
+        Resource[] files = resolveWildCard(resourceFinder, path);
         List<LpcValue> array = new ArrayList<LpcValue>(files.length);
 
         for (Resource resource : files)
@@ -127,20 +140,20 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         }
     }
 
-    private static Resource[] resolveWildCard(FileEfun efun, String path) throws IOException
+    protected static Resource[] resolveWildCard(ResourceFinder resourceFinder, String path) throws IOException
     {
         if (path.indexOf('*') == -1 && path.indexOf('?') == -1)
         {
-            return new Resource[] { efun.getResource(path) };
+            return new Resource[] { resourceFinder.getResource(path) };
         }
 
         List<Resource> match = new ArrayList<Resource>();
 
         int slash = path.lastIndexOf('/', path.length() - 1);
         String parentPath = path.substring(0, slash);
-        String childPath = path.substring(slash);
+        String childPath = path.substring(slash + 1);
 
-        Resource[] parents = resolveWildCard(efun, parentPath);
+        Resource[] parents = resolveWildCard(resourceFinder, parentPath);
         for (Resource parent : parents)
         {
             Resource[] children = parent.getChildren();

@@ -16,9 +16,8 @@
  * ------------------------------------------------------------------------
  */
 
-package us.terebi.lang.lpc.runtime.jvm.efun;
+package us.terebi.lang.lpc.runtime.jvm.efun.collection;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -27,6 +26,8 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.efun.AbstractEfun;
+import us.terebi.lang.lpc.runtime.jvm.exception.LpcRuntimeException;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.ArrayValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
@@ -34,11 +35,13 @@ import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 /**
  * 
  */
-public class ValuesEfun extends AbstractEfun implements FunctionSignature, Callable
+public class AllocateEfun extends AbstractEfun implements FunctionSignature, Callable
 {
+    private static final int ARRAY_MAX = 0xFFFF;
+
     protected List< ? extends ArgumentDefinition> defineArguments()
     {
-        return Collections.singletonList(new ArgumentSpec("map", Types.MAPPING));
+        return Collections.singletonList(new ArgumentSpec("size", Types.INT));
     }
 
     public LpcType getReturnType()
@@ -50,7 +53,11 @@ public class ValuesEfun extends AbstractEfun implements FunctionSignature, Calla
     {
         checkArguments(arguments);
         LpcValue arg = arguments.get(0);
-        Collection<LpcValue> values = arg.asMap().values();
-        return new ArrayValue(Types.MIXED_ARRAY, values);
+        long size = arg.asLong();
+        if (size > ARRAY_MAX)
+        {
+            throw new LpcRuntimeException("Cannot allocate an array of more than " + ARRAY_MAX + " elements");
+        }
+        return new ArrayValue(Types.MIXED_ARRAY, (int) size);
     }
 }
