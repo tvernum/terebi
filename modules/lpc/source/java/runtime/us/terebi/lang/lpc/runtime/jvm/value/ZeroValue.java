@@ -125,7 +125,7 @@ public class ZeroValue extends AbstractValue implements LpcValue
 
     public String asString()
     {
-        return "";
+        return "0";
     }
 
     public CharSequence debugInfo()

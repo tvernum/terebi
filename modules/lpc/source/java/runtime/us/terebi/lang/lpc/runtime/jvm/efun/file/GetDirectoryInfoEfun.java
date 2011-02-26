@@ -74,6 +74,7 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
         String path = arguments.get(0).asString();
         long flag = arguments.get(1).asLong();
 
+        path = path.replace("//", "/");
         try
         {
             List<LpcValue> info = getDirectoryInfo(this, path, flag);
@@ -85,7 +86,7 @@ public class GetDirectoryInfoEfun extends FileEfun implements FunctionSignature,
                 }
                 else
                 {
-                    LOG.debug("get_dir(" + path + ',' + flag + ") = " + info.get(0) + " ... " + info.get(info.size() - 1));
+                    LOG.debug("get_dir(" + path + ',' + flag + ") = " + info.get(0) + " ... " + info.get(info.size() - 1) + "  [*" + info.size() + "]");
                 }
             }
             return ValueSupport.arrayValue(info);

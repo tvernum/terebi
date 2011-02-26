@@ -26,6 +26,7 @@ import us.terebi.lang.lpc.runtime.Callable;
 import us.terebi.lang.lpc.runtime.FunctionSignature;
 import us.terebi.lang.lpc.runtime.LpcType;
 import us.terebi.lang.lpc.runtime.LpcValue;
+import us.terebi.lang.lpc.runtime.jvm.support.ValueSupport;
 import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
@@ -58,9 +59,11 @@ public class TerminalColourEfun extends AbstractEfun implements FunctionSignatur
 
     public LpcValue execute(List< ? extends LpcValue> arguments)
     {
+        /* @TODO : Implement this properly... */
         checkArguments(arguments);
-        /* @TODO : EFUN */
-        return arguments.get(0);
+        String str = getArgument(arguments, 0).asString();
+        str = str.replaceAll("%\\^\\S+%\\^", "");
+        return ValueSupport.stringValue(str);
     }
 
 }

@@ -26,6 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.log4j.Logger;
+
 import org.adjective.stout.builder.AnnotationSpec;
 import org.adjective.stout.builder.ClassSpec;
 import org.adjective.stout.builder.ElementBuilder;
@@ -76,6 +78,8 @@ import us.terebi.lang.lpc.runtime.jvm.naming.MethodNamer;
  */
 public class ClassBuilder extends BaseASTVisitor
 {
+    private final Logger LOG = Logger.getLogger(ClassBuilder.class);
+    
     private static final String INIT_METHOD_NAME = "init";
 
     private final ScopeLookup _scope;
@@ -287,6 +291,8 @@ public class ClassBuilder extends BaseASTVisitor
         {
             FunctionReference reference = support.findInheritedFunction(key.lpcName, key.argumentCount);
 
+            LOG.info("Dispatch of " + this._spec.getInternalName() + "->" + key.lpcName + " = " + reference.toString());
+            
             List< ? extends ArgumentDefinition> arguments = reference.signature.getArguments();
             if (arguments.size() != key.argumentCount)
             {

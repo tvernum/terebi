@@ -17,7 +17,7 @@
 
     <appender name="DEBUG_FILE" class="org.apache.log4j.RollingFileAppender"> 
         <param name="file" value="debug.log"/>
-        <param name="MaxFileSize" value="250KB"/>
+        <param name="MaxFileSize" value="500KB"/>
         <param name="MaxBackupIndex" value="9"/>
         <layout class="org.apache.log4j.PatternLayout"> 
           <param name="ConversionPattern" value="%d [%t] %-5p %c {%x} - %m%n"/> 
