@@ -18,13 +18,9 @@
 
 package us.terebi.lang.lpc.compiler.util;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
 import us.terebi.lang.lpc.compiler.CompileException;
-import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
+import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.parser.ast.ASTFunctionArguments;
 import us.terebi.lang.lpc.parser.ast.ParserVisitor;
 import us.terebi.lang.lpc.parser.ast.TokenNode;
@@ -36,6 +32,10 @@ import us.terebi.lang.lpc.runtime.MemberDefinition.Modifier;
 import us.terebi.lang.lpc.runtime.jvm.exception.InternalError;
 import us.terebi.lang.lpc.runtime.util.FunctionUtil;
 import us.terebi.util.Range;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * 

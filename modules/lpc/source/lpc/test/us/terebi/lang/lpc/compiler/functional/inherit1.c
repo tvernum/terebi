@@ -31,3 +31,5 @@ public int state9()
 protected string callback() { return "inherit"; }
 
 public string str_inherit() { return call_callback() ; }
+
+public string str2_inherit() { return call_callback_as_function(); }

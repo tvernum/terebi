@@ -17,16 +17,6 @@
 
 package us.terebi.lang.lpc.compiler.bytecode;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 import org.adjective.stout.builder.ClassSpec;
 import org.adjective.stout.builder.ElementBuilder;
 import org.adjective.stout.builder.FieldSpec;
@@ -34,19 +24,18 @@ import org.adjective.stout.builder.MethodSpec;
 import org.adjective.stout.builder.ParameterSpec;
 import org.adjective.stout.core.ConstructorSignature;
 import org.adjective.stout.core.ElementModifier;
-import org.adjective.stout.core.MethodDescriptor;
 import org.adjective.stout.core.MethodSignature;
 import org.adjective.stout.core.Parameter;
+import org.adjective.stout.core.SimpleType;
 import org.adjective.stout.operation.Expression;
 import org.adjective.stout.operation.Statement;
 import org.adjective.stout.operation.VM;
-
 import us.terebi.lang.lpc.compiler.CompileException;
 import us.terebi.lang.lpc.compiler.bytecode.context.CompileContext;
+import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
 import us.terebi.lang.lpc.compiler.java.context.LookupException;
 import us.terebi.lang.lpc.compiler.java.context.ScopeLookup;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver;
-import us.terebi.lang.lpc.compiler.java.context.FunctionLookup.FunctionReference;
 import us.terebi.lang.lpc.compiler.java.context.VariableResolver.VariableResolution;
 import us.terebi.lang.lpc.compiler.util.FunctionCallSupport;
 import us.terebi.lang.lpc.compiler.util.MethodSupport;
@@ -76,6 +65,16 @@ import us.terebi.lang.lpc.runtime.jvm.type.Types;
 import us.terebi.lang.lpc.runtime.jvm.value.FunctionValue;
 import us.terebi.lang.lpc.runtime.util.ArgumentSpec;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 /**
  * 
  */
@@ -90,7 +89,8 @@ public class FunctionLiteralCompiler
     {
         _parentScope = parentScope;
         _context = context.enterFunctionLiteral();
-        _scope = new InnerClassScopeLookup(parentScope, context.publicClass());
+        SimpleType enclosingType = ClassBuilder.getInterfaceType(context.publicClass());
+        _scope = new InnerClassScopeLookup(parentScope, enclosingType);
     }
 
     public LpcExpression compile(ASTFunctionLiteral node)

@@ -1,3 +1,12 @@
+2015-03-28
+    Fix calling virtual methods from inside a function literal
+    Fix test suite to run on JRE8
+
+2010-12-26
+    Treat occurences of '//' as '/' in get_dir efun
+    Print 0 as "0" not ""
+    Ignore (strip) pinkfish codes in terminal_color efun
+    
 2010-12-23
     Support '%:-9s' as well as '%-:9s' in sprintf
     Implement query_verb

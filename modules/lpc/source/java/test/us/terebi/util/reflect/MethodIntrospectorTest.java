@@ -17,11 +17,11 @@
 
 package us.terebi.util.reflect;
 
-import java.util.Set;
-
-import org.junit.Test;
-
 import junit.framework.Assert;
+import org.junit.*;
+import us.terebi.util.Range;
+
+import java.util.Set;
 
 /**
  * 
@@ -38,11 +38,11 @@ public class MethodIntrospectorTest
     }
 
     @Test
-    public void testIntrospectStringMethodNames() throws Exception
+    public void testIntrospectSubClassMethodNames() throws Exception
     {
-        MethodIntrospector introspector = new MethodIntrospector(String.class);
-        Assert.assertEquals(38, introspector.getAllDeclaredMethodNames(false).size());
+        MethodIntrospector introspector = new MethodIntrospector(Range.class);
+        Assert.assertEquals(4, introspector.getAllDeclaredMethodNames(false).size());
         Set<String> names = introspector.getAllDeclaredMethodNames(true);
-        Assert.assertEquals(45, names.size());
+        Assert.assertEquals(13, names.size());
     }
 }
