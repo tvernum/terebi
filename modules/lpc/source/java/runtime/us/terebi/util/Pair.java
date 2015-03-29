@@ -42,4 +42,10 @@ public class Pair<T1, T2>
     {
         return _second;
     }
+
+    @Override
+    public String toString()
+    {
+        return getClass().getSimpleName() + '{' + _first + " , " + _second + '}';
+    }
 }

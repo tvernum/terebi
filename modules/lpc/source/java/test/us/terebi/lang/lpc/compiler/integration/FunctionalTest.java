@@ -18,17 +18,8 @@
 
 package us.terebi.lang.lpc.compiler.integration;
 
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.concurrent.Callable;
-
 import org.apache.commons.io.FileUtils;
-import org.junit.runner.RunWith;
-
+import org.junit.runner.*;
 import us.terebi.lang.lpc.compiler.ObjectBuilder;
 import us.terebi.lang.lpc.compiler.ObjectBuilderFactory;
 import us.terebi.lang.lpc.compiler.java.context.CompiledObjectDefinition;
@@ -41,6 +32,15 @@ import us.terebi.lang.lpc.runtime.jvm.support.ExecutionTimeCheck;
 import us.terebi.test.TestSuite;
 import us.terebi.test.TestSuiteRunner;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.concurrent.Callable;
+
 @RunWith(TestSuiteRunner.class)
 public class FunctionalTest
 {
@@ -48,7 +48,11 @@ public class FunctionalTest
     public static List< ? extends Callable<Object>> functionalTests() throws IOException
     {
         List<Callable<Object>> list = new ArrayList<Callable<Object>>();
-        ObjectBuilder builder = createBuilder(new File("source/lpc/test/us/terebi/lang/lpc/compiler/functional/"));
+        final File sourceDir = new File("source/lpc/test/us/terebi/lang/lpc/compiler/functional/");
+        if(!sourceDir.isDirectory()) {
+            throw new FileNotFoundException("No such directory: " + sourceDir.getAbsolutePath());
+        }
+        ObjectBuilder builder = createBuilder(sourceDir);
 
         list.addAll(getTests("expression.c", builder));
         list.addAll(getTests("binary.c", builder));

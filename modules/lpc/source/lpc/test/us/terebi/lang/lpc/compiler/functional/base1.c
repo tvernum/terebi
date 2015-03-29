@@ -27,7 +27,14 @@ protected /* pure_virtual */ string callback();
 
 public string call_callback() { return callback() ; }
 
+protected string call_callback_as_function()
+{
+    function f = (: callback() :);
+    return (*f)();
+}
+
 int multiple_arguments(int a, int b, int c)
 {
     return a+b+c;
 }
+
