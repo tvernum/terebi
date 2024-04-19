@@ -1,7 +1,8 @@
 <!-- vim: set ft=ant ts=2 sts=2 expandtab shiftwidth=2  : -->
 <project name="terebi.lpc"  default="all" basedir="."  xmlns:ivy="antlib:org.apache.ivy.ant" >
 
-  <property name="javacc.home" value="/Users/tim/Development/Libraries/javacc/javacc-4.2/"/>
+<!-- <property name="javacc.home" value="/Users/tim/Development/Libraries/javacc/javacc-4.2/"/> -->
+  <property name="javacc.home" value="/home/tim/development/tools/javacc-javacc-7.0.13"/>
 
   <property name="output"         location="output/ant"         />
   <property name="output.java"    location="output/ant/java"    />
@@ -26,7 +27,7 @@
   </target> 
   <target name="libs.stout.download" unless="libs.stout.available">
     <mkdir dir="${libs.stout.dir}" />
-    <get src="http://bitbucket.org/tvernum/stout/downloads/org.adjective.stout-SNAPSHOT.jar" dest="${libs.stout.jar}" usetimestamp="true" />
+    <get src="https://github.com/tvernum/stout/releases/download/v0.2.2/org.adjective.stout.jar" dest="${libs.stout.jar}" usetimestamp="true" />
   </target> 
 
   <target name="libs" depends="init-ivy,libs.stout" >

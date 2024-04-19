@@ -1,72 +1,108 @@
-<project name="terebi.crypt"  default="all" basedir="." >
+<project name="terebi.crypt" default="all" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
-  <property name="dir.source"                   location="source/"                       />
-  <property name="dir.source.java"              location="${dir.source}/java"            />
-  <property name="dir.source.resource"          location="${dir.source}/resource"        />
-  <property name="dir.source.resource.plugin"   location="${dir.source.resource}/plugin" />
+  <property name="dir.source" location="source/"/>
+  <property name="dir.source.java" location="${dir.source}/java"/>
+  <property name="dir.source.resource" location="${dir.source}/resource"/>
+  <property name="dir.source.resource.plugin" location="${dir.source.resource}/plugin"/>
+  <property name="dir.source.resource.test" location="${dir.source.resource}/test"/>
 
-  <property name="dir.output"         location="output/ant"            />
-  <property name="dir.output.classes" location="${dir.output}/classes" />
-  <property name="dir.output.plugin" location="${dir.output}/plugin" />
+  <property name="dir.output" location="output/ant"/>
+  <property name="dir.output.classes" location="${dir.output}/classes"/>
+  <property name="dir.output.plugin" location="${dir.output}/plugin"/>
+  <property name="dir.output.junit" location="${dir.output}/junit"/>
 
-  <target name="all"   description="Builds Plugin + runs tests" depends="build" />
-  <target name="build" description="Builds Plugin"              depends="compile, jar " />
+  <target name="all" description="Builds Plugin + runs tests" depends="build"/>
+  <target name="build" description="Builds Plugin" depends="compile, jar "/>
 
-  <target name="compile" depends="compile.crypt, compile.plugin" />
+  <target name="compile" depends="libs, compile.crypt, compile.plugin, compile.test"/>
+
+  <import file="source/build/install-ivy.xml"/>
+  <target name="libs" depends="init-ivy">
+    <ivy:resolve file="source/build/ivy.xml" type="jar"/>
+    <ivy:retrieve type="jar" pattern="${ivy.lib.dir}/[conf]/[artifact]-[revision].[ext]"/>
+  </target>
 
   <macrodef name="compile_java">
-       <attribute name="dir" />
-       <attribute name="classpath" />
-       <sequential>
-            <mkdir dir="${dir.output.classes}" />
-            <javac srcdir="${dir.source.java}/@{dir}"
-                   destdir="${dir.output.classes}"
-                   classpathref="@{classpath}"
-                   debug="true"
-                   deprecation="true" 
-                   optimize="true"
-                   listfiles="false"
-                   source="1.5">
-            </javac>
-       </sequential>
+    <attribute name="dir"/>
+    <attribute name="classpath"/>
+    <sequential>
+      <mkdir dir="${dir.output.classes}"/>
+      <javac srcdir="${dir.source.java}/@{dir}"
+             destdir="${dir.output.classes}"
+             classpathref="@{classpath}"
+             debug="true"
+             deprecation="true"
+             optimize="true"
+             listfiles="false"
+             source="1.6">
+      </javac>
+    </sequential>
   </macrodef>
 
-  <path id="build.classpath">
-    <pathelement location="../lpc/output/ant/classes" />
-    <pathelement location="../net/output/ant/classes" />
-    <pathelement location="../engine/output/ant/classes" />
-    <fileset dir="../engine/lib/server" />
-    <fileset dir="./lib/" />
+  <path id="build.classpath.crypt">
+    <pathelement location="../lpc/output/ant/classes"/>
+    <pathelement location="../net/output/ant/classes"/>
+    <pathelement location="../engine/output/ant/classes"/>
+    <fileset dir="../engine/lib/server"/>
+    <!--    <fileset dir="./lib/crypt"/> -->
+  </path>
+
+  <path id="build.classpath.test">
+    <path refid="build.classpath.crypt"/>
+    <fileset dir="lib/test"/>
   </path>
 
   <target name="compile.crypt">
-    <compile_java dir="crypt" classpath="build.classpath" />
+    <compile_java dir="crypt" classpath="build.classpath.crypt"/>
   </target>
-     
+
   <target name="compile.plugin">
-    <compile_java dir="plugin" classpath="build.classpath" />
+    <compile_java dir="plugin" classpath="build.classpath.crypt"/>
   </target>
-     
-  <target name="jar" depends="compile" >
-    <mkdir dir="${dir.output.plugin}" />
-    <jar destfile="${dir.output.plugin}/crypt.jar" >
-        <metainf dir="${dir.source.resource.plugin}" includes="terebi.properties" />
-        <fileset dir="${dir.output.classes}" />
-        <zipfileset src="lib/crypt.jar" includes="**/*.class" />
+
+  <target name="compile.test">
+    <compile_java dir="test" classpath="build.classpath.test"/>
+  </target>
+
+  <target name="jar" depends="compile">
+    <mkdir dir="${dir.output.plugin}"/>
+    <jar destfile="${dir.output.plugin}/crypt.jar">
+      <metainf dir="${dir.source.resource.plugin}" includes="terebi.properties"/>
+      <fileset dir="${dir.output.classes}"/>
     </jar>
   </target>
 
-  <target name="dist.source" >
+  <target name="test">
+    <mkdir dir="${dir.output.junit}"/>
+    <junit fork="yes" forkmode="once" dir="${basedir}" haltonerror="false" failureproperty="junit.failure" errorproperty="junit.error" >
+    <classpath>
+        <path refid="build.classpath.test"/>
+        <pathelement location="${dir.output.classes}"/>
+        <pathelement location="${dir.source.resource.test}"/>
+      </classpath>
+      <batchtest todir="${dir.output.junit}">
+        <fileset dir="${dir.source.java}/test">
+          <include name="**/*Test.java"/>
+        </fileset>
+      </batchtest>
+      <formatter type="xml"/>
+      <formatter type="plain"/>
+    </junit>
+    <fail if="junit.failure" />
+    <fail if="junit.error" />
+  </target>
+
+  <target name="dist.source">
     <zip destfile="${dir.output.plugin}/${ant.project.name}-source.zip">
-      <fileset dir="." includes="source/java/**" />
-      <fileset dir="." includes="source/resource/plugin/*" />
+      <fileset dir="." includes="source/java/**"/>
+      <fileset dir="." includes="source/resource/plugin/*"/>
     </zip>
   </target>
 
-  <target name="dist" depends="jar,dist.source" />
+  <target name="dist" depends="jar,dist.source,test"/>
 
   <target name="clean">
-    <delete dir="${dir.output}" />
+    <delete dir="${dir.output}"/>
   </target>
 
 </project>

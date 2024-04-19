@@ -17,7 +17,7 @@
 
 package us.terebi.plugins.crypt.core;
 
-import org.adjective.useful.security.crypt.Crypt;
+import us.terebi.plugins.crypt.internal.Crypt;
 
 /**
  * @author <a href="http://blog.adjective.org/">Tim Vernum</a>

@@ -19,11 +19,10 @@ public class SimpleNode implements TokenNode
     public SimpleNode(int id)
     {
         _id = id;
-        _pragmas = new ArrayList<List<? extends Token>>(); 
+        _pragmas = new ArrayList<List<? extends Token>>();
     }
 
-    public SimpleNode(@SuppressWarnings("unused")
-    Parser parser, int id)
+    public SimpleNode(@SuppressWarnings("unused") Parser parser, int id)
     {
         this(id);
     }
@@ -53,8 +52,7 @@ public class SimpleNode implements TokenNode
         if (_children == null)
         {
             _children = new Node[i + 1];
-        }
-        else if (i >= _children.length)
+        } else if (i >= _children.length)
         {
             Node c[] = new Node[i + 1];
             System.arraycopy(_children, 0, c, 0, _children.length);
@@ -103,13 +101,17 @@ public class SimpleNode implements TokenNode
         this._lastToken = token;
     }
 
-    /** Accept the visitor. **/
+    /**
+     * Accept the visitor.
+     **/
     public Object jjtAccept(ParserVisitor visitor, Object data)
     {
         return visitor.visit(this, data);
     }
 
-    /** Accept the visitor. **/
+    /**
+     * Accept the visitor.
+     **/
     public Object childrenAccept(ParserVisitor visitor, Object data)
     {
         if (_children != null)
@@ -122,11 +124,11 @@ public class SimpleNode implements TokenNode
         return data;
     }
 
-    /* You can override these two methods in subclasses of SimpleNode to
-       customize the way the node appears when the tree is dumped.  If
-       your output uses more than one line you should override
-       toString(String), otherwise overriding toString() is probably all
-       you need to do. */
+  /* You can override these two methods in subclasses of SimpleNode to
+     customize the way the node appears when the tree is dumped.  If
+     your output uses more than one line you should override
+     toString(String), otherwise overriding toString() is probably all
+     you need to do. */
 
     public String toString()
     {
@@ -138,8 +140,8 @@ public class SimpleNode implements TokenNode
         return prefix + toString();
     }
 
-    /* Override this method if you want to customize how the node dumps
-       out its children. */
+  /* Override this method if you want to customize how the node dumps
+     out its children. */
 
     public void dump(String prefix)
     {
@@ -155,6 +157,11 @@ public class SimpleNode implements TokenNode
                 }
             }
         }
+    }
+
+    public int getId()
+    {
+        return _id;
     }
 
     public void addPragma(List<? extends Token> tokens)

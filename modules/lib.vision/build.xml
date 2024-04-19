@@ -2,12 +2,21 @@
 <project name="terebi.lib.vision"  default="dist" basedir="." >
 
   <target name="dist" depends="">
-    <exec executable="hg" outputproperty="hg.version" >
-      <arg value="id" />
-      <arg value="-i" />
+    <exec executable="git" outputproperty="git.revision" >
+      <arg value="rev-parse" />
+      <arg value="--short" />
+      <arg value="HEAD" />
     </exec>
+    <exec executable="git" outputproperty="git.status" >
+      <arg value="status" />
+      <arg value="--porcelain" />
+    </exec>
+    <condition property="git.suffix" value="" else="-dirty"> 
+       <length string="${git.status}" trim="true" length="0"/>
+    </condition>
+    <property name="git.id" value="${git.revision}${git.suffix}" />
     <mkdir dir="dist" />
-    <zip destfile="dist/terebi-vision-${hg.version}.zip" duplicate="preserve">
+    <zip destfile="dist/terebi-vision-${git.id}.zip" duplicate="preserve">
       <zipfileset prefix="terebi" dir=".">
         <include name="mudlib/**" />
         <exclude name="mudlib/save/users/*.dat" />

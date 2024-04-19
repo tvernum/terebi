@@ -36,7 +36,7 @@
                    deprecation="false" 
                    optimize="true"
                    listfiles="false"
-                   source="1.5">
+                   source="1.6">
             </javac>
        </sequential>
   </macrodef>
@@ -59,7 +59,7 @@
      
   <target name="test">
     <mkdir dir="${dir.output.junit}" />
-    <junit fork="yes" forkmode="once"  dir="${basedir}" >
+    <junit fork="yes" forkmode="once" dir="${basedir}" haltonerror="false" failureproperty="junit.failure" errorproperty="junit.error" >      
       <classpath>
         <path refid="build.classpath.test" />
         <pathelement location="${dir.output.classes}" />
@@ -74,6 +74,8 @@
       <formatter type="xml" />
       <formatter type="plain" />
     </junit>
+    <fail if="junit.failure" />
+    <fail if="junit.error" />
   </target>
 
   <target name="dist.jar" depends="compile">

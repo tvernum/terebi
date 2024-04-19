@@ -26,7 +26,7 @@
                    deprecation="true" 
                    optimize="true"
                    listfiles="false"
-                   source="1.5">
+                   source="1.6">
             </javac>
        </sequential>
   </macrodef>
